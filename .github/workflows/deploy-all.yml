@@ -28,8 +28,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: "npm"
-          cache-dependency-path: "**/package-lock.json"
 
       - name: Install Container Dependencies
         run: cd container && npm ci
@@ -50,13 +48,13 @@ jobs:
         run: cd portfolio && npm run build
 
       - name: Install Expense Tracker Dependencies
-        run: cd expense-tracker && npm ci
+        run: cd expense-tracker && npm install --no-package-lock
 
       - name: Build Expense Tracker
         run: cd expense-tracker && npm run build
 
       - name: Install Pxel Dependencies
-        run: cd pxel && npm ci
+        run: cd pxel && npm install --no-package-lock
 
       - name: Build Pxel
         run: cd pxel && npm run build
