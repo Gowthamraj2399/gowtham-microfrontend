@@ -1,0 +1,34 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Noto+Sans:wght@400;500;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #137fec;
+  --color-background-light: #f6f7f8;
+  --color-background-dark: #101922;
+  --color-background-dark-alt: #111418;
+  --color-surface-dark: #1c2632;
+  --color-surface-dark-alt: #1c252e;
+  --color-surface-dark-alt2: #1c2127;
+  --color-surface-highlight: #283039;
+  --color-border-dark: #3b4754;
+  --color-text-secondary: #9dabb9;
+  --color-text-secondary-light: #64748b;
+  --color-card-light: #ffffff;
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #101922;
+}
+::-webkit-scrollbar-thumb {
+  background: #283039;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3b4754;
+}
