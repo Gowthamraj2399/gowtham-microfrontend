@@ -29,34 +29,34 @@ jobs:
         with:
           node-version: 18
           cache: "npm"
-          cache-dependency-path: "container/package-lock.json"
+          cache-dependency-path: "**/package-lock.json"
 
       - name: Install Container Dependencies
-        run: cd container && npm install
+        run: cd container && npm ci
 
       - name: Build Container
         run: cd container && npm run build
 
       - name: Install Auth Dependencies
-        run: cd auth && npm install
+        run: cd auth && npm ci
 
       - name: Build Auth
         run: cd auth && npm run build
 
       - name: Install Portfolio Dependencies
-        run: cd portfolio && npm install
+        run: cd portfolio && npm ci
 
       - name: Build Portfolio
         run: cd portfolio && npm run build
 
       - name: Install Expense Tracker Dependencies
-        run: cd expense-tracker && npm install
+        run: cd expense-tracker && npm ci
 
       - name: Build Expense Tracker
         run: cd expense-tracker && npm run build
 
       - name: Install Pxel Dependencies
-        run: cd pxel && npm install
+        run: cd pxel && npm ci
 
       - name: Build Pxel
         run: cd pxel && npm run build
