@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     env:
       PRODUCTION_DOMAIN: https://gowthamraj2399.github.io/gowtham-microfrontend
       VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
@@ -31,48 +31,53 @@ jobs:
           cache: "npm"
           cache-dependency-path: "**/package-lock.json"
 
-      - name: Install Container Dependencies
-        run: cd container && npm ci
-
       - name: Build Container
-        run: cd container && npm run build
-
-      - name: Install Auth Dependencies
-        run: cd auth && npm ci
+        run: |
+          cd container
+          npm install
+          npm run build
 
       - name: Build Auth
-        run: cd auth && npm run build
-
-      - name: Install Portfolio Dependencies
-        run: cd portfolio && npm ci
+        run: |
+          cd auth
+          npm install
+          npm run build
 
       - name: Build Portfolio
-        run: cd portfolio && npm run build
-
-      - name: Install Expense Tracker Dependencies
-        run: cd expense-tracker && npm ci
+        run: |
+          cd portfolio
+          npm install
+          npm run build
 
       - name: Build Expense Tracker
-        run: cd expense-tracker && npm run build
-
-      - name: Install Pxel Dependencies
-        run: cd pxel && npm ci
+        run: |
+          cd expense-tracker
+          npm install
+          npm run build
 
       - name: Build Pxel
-        run: cd pxel && npm run build
+        run: |
+          cd pxel
+          npm install
+          npm run build
 
       - name: Assemble Microfrontends
+        shell: pwsh
         run: |
-          mkdir -p dist
-          cp -r container/dist/* dist/
-          mkdir -p dist/auth/latest
-          cp -r auth/dist/* dist/auth/latest/
-          mkdir -p dist/portfolio/latest
-          cp -r portfolio/dist/* dist/portfolio/latest/
-          mkdir -p dist/expensetracker/latest
-          cp -r expense-tracker/dist/* dist/expensetracker/latest/
-          mkdir -p dist/pxel/latest
-          cp -r pxel/dist/* dist/pxel/latest/
+          New-Item -ItemType Directory -Force -Path dist
+          Copy-Item -Path container/dist/* -Destination dist/ -Recurse -Force
+          
+          New-Item -ItemType Directory -Force -Path dist/auth/latest
+          Copy-Item -Path auth/dist/* -Destination dist/auth/latest/ -Recurse -Force
+          
+          New-Item -ItemType Directory -Force -Path dist/portfolio/latest
+          Copy-Item -Path portfolio/dist/* -Destination dist/portfolio/latest/ -Recurse -Force
+          
+          New-Item -ItemType Directory -Force -Path dist/expensetracker/latest
+          Copy-Item -Path expense-tracker/dist/* -Destination dist/expensetracker/latest/ -Recurse -Force
+          
+          New-Item -ItemType Directory -Force -Path dist/pxel/latest
+          Copy-Item -Path pxel/dist/* -Destination dist/pxel/latest/ -Recurse -Force
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
