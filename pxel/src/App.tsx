@@ -28,7 +28,6 @@ import {
 } from "./views/Submissions";
 import ProjectSettings from "./views/ProjectSettings";
 import ChooseRole from "./views/ChooseRole";
-import SignIn from "./views/SignIn";
 
 interface AppProps {
   history: any;
@@ -52,7 +51,6 @@ const App: React.FC<AppProps> = ({ history }) => {
       <AuthSync />
       <div className="flex flex-col min-h-screen">
         <Routes>
-          <Route path="/signin" element={<SignIn />} />
           <Route path="/*" element={<ProtectedRoutes />} />
         </Routes>
       </div>
@@ -96,7 +94,8 @@ const ProtectedRoutes: React.FC = () => {
   }
 
   if (!session) {
-    return <Navigate to="/signin" state={{ from: location }} replace />;
+    window.location.href = "/auth/signin?returnTo=pxel";
+    return null;
   }
 
   if (roleLoading) {

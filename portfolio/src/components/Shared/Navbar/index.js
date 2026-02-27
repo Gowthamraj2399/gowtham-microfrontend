@@ -8,8 +8,8 @@ import {
 import MobileToggleSwitch from "../../MobileToggleSwitch";
 
 const MY_APPS = [
-  { name: "Expense Tracker", path: "/auth/signin" },
-  { name: "Pxel", path: "/pxel/signin" },
+  { name: "Expense Tracker", path: "/expense-tracker" },
+  { name: "Pxel", path: "/pxel" },
 ];
 
 const Navbar = (props) => {

@@ -2,9 +2,10 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { createMemoryHistory, createBrowserHistory } from 'history';
 import App from './App';
+import './index.css';
 
 // Mount function to start up the app
-const mount = (el, { onSignIn, onNavigate, defaultHistory, initialPath }) => {
+const mount = (el, { onNavigate, defaultHistory, initialPath }) => {
   const history =
     defaultHistory ||
     createMemoryHistory({
@@ -18,7 +19,7 @@ const mount = (el, { onSignIn, onNavigate, defaultHistory, initialPath }) => {
   }
 
   const root = createRoot(el);
-  root.render(<App onSignIn={onSignIn} history={history} />);
+  root.render(<App history={history} />);
 
   return {
     onParentNavigate({ pathname: nextPathname }) {

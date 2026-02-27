@@ -2,7 +2,7 @@ import { mount } from "auth/AuthApp";
 import React, { useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
-export default ({ onSignIn }) => {
+export default () => {
   const ref = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
@@ -11,11 +11,10 @@ export default ({ onSignIn }) => {
   // Mount the microfrontend once
   useEffect(() => {
     const { onParentNavigate } = mount(ref.current, {
-      initialPath: location.pathname,
+      initialPath: location.pathname + (location.search || ''),
       onNavigate: ({ pathname: nextPathname }) => {
         navigate(nextPathname);
       },
-      onSignIn,
     });
 
     onParentNavigateRef.current = onParentNavigate;

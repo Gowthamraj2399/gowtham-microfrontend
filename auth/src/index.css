@@ -1,0 +1,24 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-primary: #1754cf;
+  --color-primary-hover: #1449b5;
+  --color-background-light: #f6f6f8;
+  --color-background-dark: #111621;
+}
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}

@@ -1,32 +1,41 @@
 import React, { useState, useEffect } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Routes, Route, Router } from 'react-router-dom';
 import { StyledEngineProvider } from '@mui/material/styles';
-
-import Signin from './components/Signin';
+import { subscribeAuthToQueryClient } from './lib/auth-query';
+import SignIn from './views/SignIn';
 import Signup from './components/Signup';
 
-export default ({ history, onSignIn }) => {
+const queryClient = new QueryClient();
+
+function AuthSync() {
+  useEffect(() => {
+    return subscribeAuthToQueryClient(queryClient);
+  }, []);
+  return null;
+}
+
+export default ({ history }) => {
   const [location, setLocation] = useState(history.location);
 
   useEffect(() => {
-    // Listen to history changes and update location state
     const unlisten = history.listen((update) => {
       setLocation(update.location);
     });
-
-    return unlisten; // Clean up the listener on unmount
+    return unlisten;
   }, [history]);
 
   return (
-    <div>
+    <QueryClientProvider client={queryClient}>
       <StyledEngineProvider injectFirst>
+        <AuthSync />
         <Router location={location} navigator={history}>
           <Routes>
-            <Route path="/auth/signin" element={<Signin onSignIn={onSignIn} />} />
-            <Route path="/auth/signup" element={<Signup onSignIn={onSignIn} />} />
+            <Route path="/auth/signin" element={<SignIn history={history} />} />
+            <Route path="/auth/signup" element={<Signup onSignIn={() => {}} />} />
           </Routes>
         </Router>
       </StyledEngineProvider>
-    </div>
+    </QueryClientProvider>
   );
 };
