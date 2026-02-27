@@ -26,11 +26,13 @@ const devConfig = {
         ...packageJson.dependencies,
         react: {
           singleton: true,
-          requiredVersion: packageJson.dependencies.react,
+          requiredVersion: "19.0.0",
+          strictVersion: true,
         },
         "react-dom": {
           singleton: true,
-          requiredVersion: packageJson.dependencies["react-dom"],
+          requiredVersion: "19.0.0",
+          strictVersion: true,
         },
         "react-router-dom": {
           singleton: true,

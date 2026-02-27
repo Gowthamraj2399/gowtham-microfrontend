@@ -1,0 +1,8 @@
+{
+  "name": "web-ingest-mf",
+  "private": true,
+  "scripts": {
+    "build:firebase": "node scripts/build-firebase.js",
+    "install:all": "npm install --prefix container && npm install --prefix portfolio && npm install --prefix auth && npm install --prefix expense-tracker && npm install --prefix pxel"
+  }
+}

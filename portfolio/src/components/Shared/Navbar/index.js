@@ -1,19 +1,21 @@
 import React, { useRef, useState } from "react";
 import { CgMenuLeft, CgClose } from "react-icons/cg";
-import {
-  FaLinkedin,
-  FaTwitter,
-  FaGithub,
-} from "react-icons/fa";
+import { FaLinkedin, FaTwitter, FaGithub } from "react-icons/fa";
 import {
   blueShadowColor,
   whiteShadowColor,
 } from "../../../constants/constants";
 import MobileToggleSwitch from "../../MobileToggleSwitch";
 
+const MY_APPS = [
+  { name: "Expense Tracker", path: "/auth/signin" },
+  { name: "Pxel", path: "/pxel/signin" },
+];
+
 const Navbar = (props) => {
   const listRef = useRef(null);
   const [hidden, setHidden] = useState(false);
+  const [appsOpen, setAppsOpen] = useState(false);
 
   const Menu = (event) => {
     let list = listRef.current;
@@ -79,7 +81,7 @@ const Navbar = (props) => {
             </div>
           </div>
           <ul
-            class="md:flex md:items-center z-[-1] md:z-auto md:static absolute bg-white dark:bg-dark-black dark:text-dark-text w-full left-0 md:w-auto md:py-0 py-4 md:pl-0 pl-7 md:opacity-100 opacity-0 top-[-400px] transition-all ease-in duration-100 shadow-md md:shadow-none dark:shadow-dark-shadow"
+            className="md:flex md:items-center z-[-1] md:z-auto md:static absolute bg-white dark:bg-dark-black dark:text-dark-text w-full left-0 md:w-auto md:py-0 py-4 md:pl-0 pl-7 md:opacity-100 opacity-0 top-[-400px] transition-all ease-in duration-100 shadow-md md:shadow-none dark:shadow-dark-shadow"
             ref={listRef}
           >
             <li
@@ -127,9 +129,43 @@ const Navbar = (props) => {
             >
               Projects
             </li>
+            <li className="mx-4 p-1 my-4 md:my-0 relative group">
+              <button
+                type="button"
+                className="cursor-pointer uppercase text-left flex items-center font-bold"
+                onClick={() => setAppsOpen(!appsOpen)}
+                onMouseEnter={() => setAppsOpen(true)}
+              >
+                My Apps
+              </button>
+              {appsOpen && (
+                <div
+                  className="absolute left-0 mt-1 py-2 min-w-[180px] bg-white dark:bg-dark-black rounded-md shadow-lg dark:shadow-dark-shadow border border-gray-200 dark:border-gray-700 z-50"
+                  onMouseLeave={() => setAppsOpen(false)}
+                >
+                  <div className="px-3 py-2 text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                    My Apps
+                  </div>
+                  {MY_APPS.map((app) => (
+                    <a
+                      key={app.path}
+                      href={app.path}
+                      className="block px-3 py-2 text-xs hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer no-underline"
+                      onClick={() => {
+                        document.documentElement.classList.remove("dark");
+                        Close();
+                        setAppsOpen(false);
+                      }}
+                    >
+                      {app.name}
+                    </a>
+                  ))}
+                </div>
+              )}
+            </li>
             <li className="cursor-pointer mx-4 p-1 my-4 md:my-0">
               <button
-                className='className=" text-white uppercase text-xs font-bold px-2 py-2 rounded-lg bg-gradient-to-r from-green-400 dark:from-dark-primary to-blue-500 hover:from-pink-500 hover:to-yellow-500 cursor-pointer"'
+                className="text-white uppercase text-xs font-bold px-2 py-2 rounded-lg bg-gradient-to-r from-green-400 dark:from-dark-primary to-blue-500 hover:from-pink-500 hover:to-yellow-500 cursor-pointer"
                 onClick={() => {
                   props.onContactClick();
                   Close();
@@ -158,7 +194,7 @@ const Navbar = (props) => {
                   onClick={(event) =>
                     onLinkOpen(
                       event,
-                      "https://www.linkedin.com/in/gowthamraj-dev/"
+                      "https://www.linkedin.com/in/gowthamraj-dev/",
                     )
                   }
                 >
