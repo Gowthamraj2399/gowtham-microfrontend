@@ -119,32 +119,32 @@ export const UploadPhotosView: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto pb-24 relative">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6 mb-6 sm:mb-10">
         <div>
-          <h1 className="text-4xl font-black tracking-tight mb-2">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight mb-1 sm:mb-2">
             Upload Client Photos
           </h1>
-          <p className="text-slate-500 font-medium">
+          <p className="text-slate-500 text-sm sm:text-base font-medium">
             Client:{" "}
             <span className="text-primary font-bold">
               {project?.client ?? project?.title ?? "—"}
             </span>
           </p>
         </div>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-2 sm:gap-3">
           <Link
             to={`/project/${projectId}/settings`}
-            className="h-10 px-4 bg-slate-100 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-slate-200 dark:hover:bg-gray-700 transition-colors"
+            className="h-9 sm:h-10 px-3 sm:px-4 bg-slate-100 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg text-xs sm:text-sm font-bold flex items-center gap-1.5 sm:gap-2 hover:bg-slate-200 dark:hover:bg-gray-700 transition-colors"
           >
-            <span className="material-symbols-outlined text-lg">settings</span>
+            <span className="material-symbols-outlined text-base sm:text-lg">settings</span>
             Settings
           </Link>
           <button
             type="button"
             onClick={handleShareEventLink}
-            className="h-10 px-4 bg-slate-100 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-slate-200 dark:hover:bg-gray-700 transition-colors"
+            className="h-9 sm:h-10 px-3 sm:px-4 bg-slate-100 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg text-xs sm:text-sm font-bold flex items-center gap-1.5 sm:gap-2 hover:bg-slate-200 dark:hover:bg-gray-700 transition-colors"
           >
-            <span className="material-symbols-outlined text-lg">link</span>
+            <span className="material-symbols-outlined text-base sm:text-lg">link</span>
             {shareLinkCopied ? "Link copied!" : "Share event link"}
           </button>
         </div>
@@ -286,10 +286,10 @@ export const UploadPhotosView: React.FC = () => {
 
       {deletingMessage && <DeletingToast message={deletingMessage} />}
 
-      <footer className="fixed bottom-0 left-0 lg:left-64 right-0 bg-white dark:bg-gray-900 border-t border-slate-200 dark:border-gray-800 p-6 z-40">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-6 w-full md:w-auto">
-            <span className="hidden sm:block text-xs font-bold text-slate-400 uppercase tracking-widest">
+      <footer className="fixed bottom-0 left-0 lg:left-64 right-0 bg-white dark:bg-gray-900 border-t border-slate-200 dark:border-gray-800 p-4 sm:p-6 z-40">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6">
+          <div className="flex items-center gap-4 sm:gap-6 w-full md:w-auto">
+            <span className="hidden sm:block text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest">
               {photos.length} image{photos.length !== 1 ? "s" : ""}
             </span>
           </div>

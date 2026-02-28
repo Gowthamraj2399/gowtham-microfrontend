@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { PhotoImage } from "../../UploadPhotos/components/PhotoImage";
+import { LazyPhotoImage } from "../../UploadPhotos/components/LazyPhotoImage";
 import type { Cloudinary } from "@cloudinary/url-gen";
 import type { Photo } from "../../../types";
 
@@ -27,7 +27,7 @@ const EventPhotoCardInner: React.FC<EventPhotoCardProps> = ({
   onPreview,
 }) => (
   <div className="relative aspect-square rounded-2xl overflow-hidden group bg-slate-100 dark:bg-gray-800 border-2 border-slate-100 dark:border-gray-800 hover:border-primary/50 transition-colors contain-[layout_paint]">
-    <PhotoImage
+    <LazyPhotoImage
       photo={photo}
       cld={cld}
       thumbSize={400}

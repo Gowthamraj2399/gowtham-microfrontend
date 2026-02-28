@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { PhotoImage } from "./PhotoImage";
+import { LazyPhotoImage } from "./LazyPhotoImage";
 import type { Cloudinary } from "@cloudinary/url-gen";
 import type { DisplayPhoto } from "../types";
 
@@ -25,19 +25,19 @@ const PhotoCardInner: React.FC<PhotoCardProps> = ({
   onDelete,
 }) => (
   <div
-    className={`relative aspect-square rounded-2xl overflow-hidden group bg-slate-100 dark:bg-gray-800 border-2 transition-colors contain-[layout_paint] ${
+    className={`relative aspect-square rounded-xl sm:rounded-2xl overflow-hidden group bg-slate-100 dark:bg-gray-800 border-2 transition-colors contain-[layout_paint] ${
       isSelected
         ? "border-primary ring-2 ring-primary/30"
         : "border-slate-100 dark:border-gray-800"
     }`}
   >
     {photo.status !== "uploading" && (
-      <label className="absolute top-3 left-3 z-10 flex items-center justify-center size-6 rounded-md bg-white/90 dark:bg-gray-800/90 shadow cursor-pointer">
+      <label className="absolute top-2 left-2 sm:top-3 sm:left-3 z-10 flex items-center justify-center size-5 sm:size-6 rounded-md bg-white/90 dark:bg-gray-800/90 shadow cursor-pointer">
         <input
           type="checkbox"
           checked={isSelected}
           onChange={() => onToggleSelect(photo.id)}
-          className="size-4 rounded text-primary focus:ring-primary border-slate-300"
+          className="size-3.5 sm:size-4 rounded text-primary focus:ring-primary border-slate-300"
         />
       </label>
     )}
@@ -63,7 +63,7 @@ const PhotoCardInner: React.FC<PhotoCardProps> = ({
       </>
     ) : (
       <>
-        <PhotoImage
+        <LazyPhotoImage
           photo={photo}
           cld={cld}
           thumbSize={400}

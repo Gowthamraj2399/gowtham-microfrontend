@@ -4,6 +4,7 @@ export { FailedUploadsCard } from "./FailedUploadsCard";
 export { GridHeader } from "./GridHeader";
 export { SelectionBar } from "./SelectionBar";
 export { PhotoImage } from "./PhotoImage";
+export { LazyPhotoImage } from "./LazyPhotoImage";
 export { PhotoCard } from "./PhotoCard";
 export { PhotoListItem } from "./PhotoListItem";
 export { VirtualPhotoGrid } from "./VirtualPhotoGrid";

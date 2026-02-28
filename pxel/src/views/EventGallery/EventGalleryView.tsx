@@ -46,8 +46,8 @@ export const EventGalleryView: React.FC = () => {
 
   if (eventLoading) {
     return (
-      <div className="max-w-6xl mx-auto py-16 flex items-center justify-center gap-2 text-slate-500">
-        <span className="material-symbols-outlined animate-spin text-4xl">
+      <div className="max-w-6xl mx-auto py-12 sm:py-16 flex items-center justify-center gap-2 text-slate-500 text-sm sm:text-base">
+        <span className="material-symbols-outlined animate-spin text-2xl sm:text-4xl">
           progress_activity
         </span>
         <span>Loading event…</span>
@@ -76,22 +76,22 @@ export const EventGalleryView: React.FC = () => {
   const albumPhotoCount = album?.status === "submitted" ? 0 : albumPhotoIds.length;
 
   return (
-    <div className="max-w-6xl mx-auto pb-24 relative">
-      <div className="mb-10">
-        <h1 className="text-4xl font-black tracking-tight mb-2">
+    <div className="max-w-6xl mx-auto pb-24 relative px-3 sm:px-0">
+      <div className="mb-4 sm:mb-6 md:mb-10">
+        <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black tracking-tight mb-1 sm:mb-2">
           {project.project_name ?? "Event photos"}
         </h1>
-        <p className="text-slate-500 font-medium">
+        <p className="text-slate-500 text-xs sm:text-sm md:text-base font-medium">
           {project.client_name ?? "—"} · Add photos to your album and submit when ready.
         </p>
       </div>
 
       {photos.length === 0 ? (
-        <div className="text-center py-20 text-slate-500">
-          <span className="material-symbols-outlined text-5xl mb-4 block">
+        <div className="text-center py-12 sm:py-20 text-slate-500">
+          <span className="material-symbols-outlined text-4xl sm:text-5xl mb-3 sm:mb-4 block">
             photo_library
           </span>
-          <p className="font-medium">No photos in this event yet.</p>
+          <p className="text-sm sm:text-base font-medium">No photos in this event yet.</p>
         </div>
       ) : (
         <VirtualEventPhotoGrid

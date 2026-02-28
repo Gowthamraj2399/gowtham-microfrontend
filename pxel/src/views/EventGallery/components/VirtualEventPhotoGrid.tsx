@@ -1,13 +1,8 @@
-import React, { useRef } from "react";
-import { useVirtualizer } from "@tanstack/react-virtual";
+import React, { useCallback } from "react";
+import { VirtuosoGrid } from "react-virtuoso";
 import { EventPhotoCard } from "./EventPhotoCard";
 import type { Cloudinary } from "@cloudinary/url-gen";
 import type { Photo } from "../../../types";
-
-const ROW_HEIGHT = 220;
-const GAP = 24;
-const OVERSCAN = 8;
-const COLUMNS = 6;
 
 interface VirtualEventPhotoGridProps {
   photos: Photo[];
@@ -32,61 +27,48 @@ export const VirtualEventPhotoGrid: React.FC<VirtualEventPhotoGridProps> = ({
   onToggleAlbum,
   onPreview,
 }) => {
-  const parentRef = useRef<HTMLDivElement>(null);
-  const rowCount = Math.ceil(photos.length / COLUMNS);
+  const itemContent = useCallback(
+    (_index: number, photo: Photo) => (
+      <EventPhotoCard
+        photo={photo}
+        cld={cld}
+        isInAlbum={isInAlbum(photo.id)}
+        isToggling={isTogglingPhoto(photo.id)}
+        isSubmitting={isSubmitting}
+        isAlbumLocked={isAlbumLocked}
+        isAlbumFull={isAlbumFull}
+        onToggleAlbum={onToggleAlbum}
+        onPreview={onPreview}
+      />
+    ),
+    [
+      cld,
+      isInAlbum,
+      isTogglingPhoto,
+      isSubmitting,
+      isAlbumLocked,
+      isAlbumFull,
+      onToggleAlbum,
+      onPreview,
+    ]
+  );
 
-  const virtualizer = useVirtualizer({
-    count: rowCount,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => ROW_HEIGHT + GAP,
-    overscan: OVERSCAN,
-  });
-
-  const virtualRows = virtualizer.getVirtualItems();
+  if (photos.length === 0) return null;
 
   return (
     <div
-      ref={parentRef}
-      className="overflow-auto h-[calc(100vh-18rem)] min-h-[400px] rounded-2xl -mx-1 px-1"
-      style={{ contain: "strict" }}
+      className="rounded-2xl -mx-1 px-3 sm:px-2 md:px-1"
+      style={{ height: "calc(100vh - 18rem)", minHeight: 400 }}
     >
-      <div
-        className="relative w-full"
-        style={{
-          height: `${virtualizer.getTotalSize()}px`,
-        }}
-      >
-        {virtualRows.map((virtualRow) => {
-          const start = virtualRow.index * COLUMNS;
-          const rowPhotos = photos.slice(start, start + COLUMNS);
-          return (
-            <div
-              key={virtualRow.key}
-              className="absolute left-0 w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"
-              style={{
-                top: 0,
-                transform: `translateY(${virtualRow.start}px)`,
-                height: `${virtualRow.size}px`,
-              }}
-            >
-              {rowPhotos.map((photo) => (
-                <EventPhotoCard
-                  key={photo.id}
-                  photo={photo}
-                  cld={cld}
-                  isInAlbum={isInAlbum(photo.id)}
-                  isToggling={isTogglingPhoto(photo.id)}
-                  isSubmitting={isSubmitting}
-                  isAlbumLocked={isAlbumLocked}
-                  isAlbumFull={isAlbumFull}
-                  onToggleAlbum={onToggleAlbum}
-                  onPreview={onPreview}
-                />
-              ))}
-            </div>
-          );
-        })}
-      </div>
+      <VirtuosoGrid
+        style={{ height: "100%" }}
+        totalCount={photos.length}
+        data={photos}
+        itemContent={itemContent}
+        listClassName="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 sm:gap-5 md:gap-6 w-full"
+        itemClassName="min-w-0 aspect-square"
+        overscan={300}
+      />
     </div>
   );
 };

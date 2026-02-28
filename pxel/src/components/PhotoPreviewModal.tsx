@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useEffect } from "react";
+import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import { AdvancedImage } from "@cloudinary/react";
 import { PhotoImage } from "../views/UploadPhotos/components/PhotoImage";
 import type { Cloudinary } from "@cloudinary/url-gen";
@@ -22,6 +22,10 @@ export interface PhotoPreviewModalProps {
   onToggleBookmark: (photo: Photo) => void;
 }
 
+const MIN_ZOOM = 1;
+const MAX_ZOOM = 4;
+const ZOOM_STEP = 0.5;
+
 const PhotoPreviewModalInner: React.FC<PhotoPreviewModalProps> = ({
   photo,
   photos,
@@ -41,19 +45,104 @@ const PhotoPreviewModalInner: React.FC<PhotoPreviewModalProps> = ({
   const hasPrev = currentIndex > 0;
   const hasNext = currentIndex >= 0 && currentIndex < photos.length - 1;
 
+  const [scale, setScale] = useState(1);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStart = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
+
+  useEffect(() => {
+    setScale(1);
+    setPosition({ x: 0, y: 0 });
+  }, [photo.id]);
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        if (scale > 1) {
+          setScale(1);
+          setPosition({ x: 0, y: 0 });
+        } else onClose();
+        return;
+      }
       if (e.key === "ArrowLeft") hasPrev && onPrev();
       if (e.key === "ArrowRight") hasNext && onNext();
     },
-    [onClose, onPrev, onNext, hasPrev, hasNext]
+    [onClose, onPrev, onNext, hasPrev, hasNext, scale]
   );
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
+
+  const zoomIn = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setScale((s) => Math.min(MAX_ZOOM, s + ZOOM_STEP));
+  }, []);
+
+  const zoomOut = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setScale((s) => {
+      const next = Math.max(MIN_ZOOM, s - ZOOM_STEP);
+      if (next === 1) setPosition({ x: 0, y: 0 });
+      return next;
+    });
+  }, []);
+
+  const resetZoom = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setScale(1);
+    setPosition({ x: 0, y: 0 });
+  }, []);
+
+  const onWheel = useCallback(
+    (e: React.WheelEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const delta = e.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP;
+      setScale((s) => {
+        const next = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, s + delta));
+        if (next === 1) setPosition({ x: 0, y: 0 });
+        return next;
+      });
+    },
+    []
+  );
+
+  const onMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      if (scale <= 1) return;
+      e.preventDefault();
+      setIsDragging(true);
+      dragStart.current = { x: e.clientX, y: e.clientY, posX: position.x, posY: position.y };
+    },
+    [scale, position]
+  );
+
+  const onMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (!isDragging) return;
+      setPosition({
+        x: dragStart.current.posX + e.clientX - dragStart.current.x,
+        y: dragStart.current.posY + e.clientY - dragStart.current.y,
+      });
+    },
+    [isDragging]
+  );
+
+  const onMouseUp = useCallback(() => setIsDragging(false), []);
+
+  useEffect(() => {
+    if (!isDragging) return;
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+  }, [isDragging, onMouseMove, onMouseUp]);
+
+  const isZoomed = scale > 1;
 
   return (
     <div
@@ -100,6 +189,40 @@ const PhotoPreviewModalInner: React.FC<PhotoPreviewModalProps> = ({
         </button>
       </div>
 
+      {/* Zoom controls */}
+      <div
+        className="absolute top-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1 rounded-full bg-white/10 px-2 py-1"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          type="button"
+          className="size-9 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-colors disabled:opacity-40"
+          onClick={zoomOut}
+          disabled={scale <= MIN_ZOOM}
+          aria-label="Zoom out"
+        >
+          <span className="material-symbols-outlined text-xl">remove</span>
+        </button>
+        <button
+          type="button"
+          className="min-w-12 px-2 text-white text-sm font-medium tabular-nums"
+          onClick={resetZoom}
+          aria-label="Reset zoom"
+          title="Reset zoom"
+        >
+          {Math.round(scale * 100)}%
+        </button>
+        <button
+          type="button"
+          className="size-9 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-colors disabled:opacity-40"
+          onClick={zoomIn}
+          disabled={scale >= MAX_ZOOM}
+          aria-label="Zoom in"
+        >
+          <span className="material-symbols-outlined text-xl">add</span>
+        </button>
+      </div>
+
       {hasPrev && (
         <button
           type="button"
@@ -129,23 +252,39 @@ const PhotoPreviewModalInner: React.FC<PhotoPreviewModalProps> = ({
       )}
 
       <div
-        className="relative max-w-[90vw] max-h-[90vh] flex items-center justify-center"
+        className="relative max-w-[90vw] max-h-[90vh] flex items-center justify-center overflow-hidden"
         onClick={(e) => e.stopPropagation()}
+        onWheel={onWheel}
+        onMouseDown={onMouseDown}
+        style={{ cursor: isZoomed ? (isDragging ? "grabbing" : "grab") : "default" }}
       >
-        {photo.url ? (
-          <img
-            src={photo.url}
-            alt={photo.filename}
-            className="max-w-full max-h-[90vh] w-auto h-auto object-contain rounded-lg"
-          />
-        ) : cld && photo.public_id ? (
-          <AdvancedImage
-            cldImg={cld.image(photo.public_id)}
-            className="max-w-full max-h-[90vh] w-auto h-auto object-contain rounded-lg"
-          />
-        ) : (
-          <PhotoImage photo={photo} cld={cld} className="max-w-full max-h-[90vh]" />
-        )}
+        <div
+          className="flex items-center justify-center transition-transform duration-100"
+          style={{
+            transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
+            transformOrigin: "center center",
+          }}
+        >
+          {photo.url ? (
+            <img
+              src={photo.url}
+              alt={photo.filename}
+              className="max-w-full max-h-[90vh] w-auto h-auto object-contain rounded-lg select-none pointer-events-none"
+              draggable={false}
+            />
+          ) : cld && photo.public_id ? (
+            <AdvancedImage
+              cldImg={cld.image(photo.public_id)}
+              className="max-w-full max-h-[90vh] w-auto h-auto object-contain rounded-lg select-none pointer-events-none"
+            />
+          ) : (
+            <PhotoImage
+              photo={photo}
+              cld={cld}
+              className="max-w-full max-h-[90vh] select-none pointer-events-none"
+            />
+          )}
+        </div>
       </div>
 
       <p className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/80 text-sm font-medium truncate max-w-[90vw]">

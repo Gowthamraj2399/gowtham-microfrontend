@@ -16,19 +16,19 @@ const GridHeaderInner: React.FC<GridHeaderProps> = ({
   onLayoutChange,
   onSelectAll,
 }) => (
-  <div className="flex items-center justify-between mb-8">
-    <h2 className="text-2xl font-black flex items-center gap-3">
+  <div className="flex flex-wrap items-center justify-between gap-3 mb-4 sm:mb-8">
+    <h2 className="text-lg sm:text-xl md:text-2xl font-black flex items-center gap-2 sm:gap-3">
       Recent Uploads
-      <span className="bg-slate-100 dark:bg-gray-800 text-slate-900 dark:text-white px-2.5 py-1 rounded-lg text-sm font-bold">
+      <span className="bg-slate-100 dark:bg-gray-800 text-slate-900 dark:text-white px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg text-xs sm:text-sm font-bold">
         {totalCount}
       </span>
     </h2>
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-1.5 sm:gap-2">
       {hasSelectablePhotos && (
         <button
           type="button"
           onClick={onSelectAll}
-          className="p-2 rounded-lg border border-slate-200 dark:border-gray-800 hover:bg-slate-50 dark:hover:bg-gray-800 text-sm font-bold"
+          className="p-1.5 sm:p-2 rounded-lg border border-slate-200 dark:border-gray-800 hover:bg-slate-50 dark:hover:bg-gray-800 text-xs sm:text-sm font-bold"
         >
           Select all
         </button>
@@ -36,7 +36,7 @@ const GridHeaderInner: React.FC<GridHeaderProps> = ({
       <button
         type="button"
         onClick={() => onLayoutChange("grid")}
-        className={`p-2 rounded-lg border transition-colors ${
+        className={`p-1.5 sm:p-2 rounded-lg border transition-colors ${
           layout === "grid"
             ? "bg-primary text-white border-primary"
             : "border-slate-200 dark:border-gray-800 hover:bg-slate-50 dark:hover:bg-gray-800"
@@ -48,7 +48,7 @@ const GridHeaderInner: React.FC<GridHeaderProps> = ({
       <button
         type="button"
         onClick={() => onLayoutChange("list")}
-        className={`p-2 rounded-lg border transition-colors ${
+        className={`p-1.5 sm:p-2 rounded-lg border transition-colors ${
           layout === "list"
             ? "bg-primary text-white border-primary"
             : "border-slate-200 dark:border-gray-800 hover:bg-slate-50 dark:hover:bg-gray-800"

@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { PhotoImage } from "./PhotoImage";
+import { LazyPhotoImage } from "./LazyPhotoImage";
 import type { Cloudinary } from "@cloudinary/url-gen";
 import type { DisplayPhoto } from "../types";
 
@@ -64,7 +64,7 @@ const PhotoListItemInner: React.FC<PhotoListItemProps> = ({
           </div>
         </>
       ) : (
-        <PhotoImage
+        <LazyPhotoImage
           photo={photo}
           cld={cld}
           thumbSize={80}

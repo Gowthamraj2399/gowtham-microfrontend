@@ -8,7 +8,15 @@ import type { UserRole } from "../types";
 const isSubmissionsPath = (pathname: string) =>
   pathname === "/submissions" || pathname.startsWith("/project/");
 
-const Sidebar: React.FC<{ role: UserRole }> = ({ role }) => {
+interface SidebarProps {
+  role: UserRole;
+  /** When "drawer", sidebar is visible (no hidden lg:flex). Used inside SidebarDrawer. */
+  variant?: "default" | "drawer";
+  /** Called when user navigates (e.g. nav link click). Used to close drawer. */
+  onNavigate?: () => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ role, variant = "default", onNavigate }) => {
   const navigate = useNavigate();
   const { signOut } = useAuth();
 
@@ -33,8 +41,11 @@ const Sidebar: React.FC<{ role: UserRole }> = ({ role }) => {
           { name: "My favorites", icon: "favorite", path: "/user/bookmarks" },
         ];
 
+  const isDrawer = variant === "drawer";
   return (
-    <aside className="w-64 bg-white dark:bg-gray-900 border-r border-slate-200 dark:border-gray-800 flex flex-col hidden lg:flex">
+    <aside
+      className={`w-64 bg-white dark:bg-gray-900 border-r border-slate-200 dark:border-gray-800 flex flex-col ${isDrawer ? "flex" : "hidden lg:flex"}`}
+    >
       <div className="p-6 border-b border-slate-200 dark:border-gray-800 flex items-center gap-3">
         <div className="size-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
           <span className="material-symbols-outlined">photo_camera</span>
@@ -70,6 +81,7 @@ const Sidebar: React.FC<{ role: UserRole }> = ({ role }) => {
                   : "text-slate-600 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-gray-800 hover:text-primary"
               }`
             }
+            onClick={isDrawer ? onNavigate : undefined}
           >
             <span className="material-symbols-outlined">{item.icon}</span>
             {item.name}

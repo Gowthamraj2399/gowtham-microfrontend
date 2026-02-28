@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import { VirtuosoGrid } from "react-virtuoso";
 import { getCloudinaryInstanceOrNull } from "../../lib/cloudinary";
 import { getMyBookmarkedSections, myBookmarksQueryKey } from "../../lib/bookmarks";
 import {
@@ -9,10 +10,60 @@ import {
   userAlbumQueryKey,
   albumPhotoIdsQueryKey,
 } from "../../lib/user-albums";
-import { PhotoImage } from "../UploadPhotos/components/PhotoImage";
+import { LazyPhotoImage } from "../UploadPhotos/components/LazyPhotoImage";
 import { PhotoPreviewModal } from "../../components/PhotoPreviewModal";
 import type { Photo } from "../../types";
 import type { BookmarkedSection } from "../../lib/bookmarks";
+
+interface VirtualSectionPhotoGridProps {
+  photos: Photo[];
+  section: BookmarkedSection;
+  cld: ReturnType<typeof getCloudinaryInstanceOrNull>;
+  onPreview: (photo: Photo, section: BookmarkedSection) => void;
+}
+
+function VirtualSectionPhotoGrid({
+  photos,
+  section,
+  cld,
+  onPreview,
+}: VirtualSectionPhotoGridProps) {
+  if (photos.length === 0) return null;
+  return (
+    <div
+      className="rounded-xl border border-slate-200 dark:border-gray-700 overflow-hidden"
+      style={{ height: "min(60vh, 500px)" }}
+    >
+      <VirtuosoGrid
+        style={{ height: "100%" }}
+        totalCount={photos.length}
+        data={photos}
+        itemContent={(_index, photo) => (
+          <button
+            type="button"
+            onClick={() => onPreview(photo, section)}
+            className="relative aspect-square rounded-xl overflow-hidden bg-slate-100 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 hover:ring-2 hover:ring-primary transition-all text-left w-full"
+          >
+            <LazyPhotoImage
+              photo={photo}
+              cld={cld}
+              thumbSize={400}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/70 to-transparent">
+              <p className="text-white text-xs font-medium truncate">
+                {photo.filename}
+              </p>
+            </div>
+          </button>
+        )}
+        listClassName="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full"
+        itemClassName="min-w-0 aspect-square"
+        overscan={300}
+      />
+    </div>
+  );
+}
 
 function SectionPhotos({
   section,
@@ -68,28 +119,12 @@ function SectionPhotos({
           </button>
         </div>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-        {section.photos.map((photo) => (
-          <button
-            key={photo.id}
-            type="button"
-            onClick={() => onPreview(photo, section)}
-            className="relative aspect-square rounded-xl overflow-hidden bg-slate-100 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 hover:ring-2 hover:ring-primary transition-all text-left"
-          >
-            <PhotoImage
-              photo={photo}
-              cld={cld}
-              thumbSize={400}
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/70 to-transparent">
-              <p className="text-white text-xs font-medium truncate">
-                {photo.filename}
-              </p>
-            </div>
-          </button>
-        ))}
-      </div>
+      <VirtualSectionPhotoGrid
+        photos={section.photos}
+        section={section}
+        cld={cld}
+        onPreview={onPreview}
+      />
     </section>
   );
 }

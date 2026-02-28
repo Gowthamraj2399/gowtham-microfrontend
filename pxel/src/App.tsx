@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Routes, Route, Navigate, useLocation, Router } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -15,6 +15,7 @@ import {
 } from "./lib/user-roles";
 import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
+import SidebarDrawer from "./components/SidebarDrawer";
 import Dashboard from "./views/Dashboard";
 import CreateProject from "./views/CreateProject";
 import UploadPhotos from "./views/UploadPhotos";
@@ -28,6 +29,7 @@ import {
 } from "./views/Submissions";
 import ProjectSettings from "./views/ProjectSettings";
 import ChooseRole from "./views/ChooseRole";
+import { NotFound } from "./components/NotFound";
 
 interface AppProps {
   history: any;
@@ -49,7 +51,7 @@ const App: React.FC<AppProps> = ({ history }) => {
       basename="/pxel"
     >
       <AuthSync />
-      <div className="flex flex-col min-h-screen">
+      <div className="flex flex-col flex-1 min-w-0 min-h-screen overflow-hidden">
         <Routes>
           <Route path="/*" element={<ProtectedRoutes />} />
         </Routes>
@@ -126,6 +128,7 @@ const AuthenticatedLayout: React.FC<{ role: "creator" | "client" }> = ({
 }) => {
   const location = useLocation();
   const pathname = location.pathname || "/";
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const isCreator = role === "creator";
   const isClient = role === "client";
@@ -153,8 +156,18 @@ const AuthenticatedLayout: React.FC<{ role: "creator" | "client" }> = ({
   return (
     <div className="flex h-screen overflow-hidden">
       <Sidebar role={role} />
-      <div className="flex flex-col flex-1 overflow-hidden">
-        <Header role={role} />
+      <SidebarDrawer
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        role={role}
+      />
+      <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
+        <Header
+          role={role}
+          onOpenSidebar={() => setSidebarOpen(true)}
+          sidebarOpen={sidebarOpen}
+          onCloseSidebar={() => setSidebarOpen(false)}
+        />
         <main className="flex-1 overflow-y-auto no-scrollbar bg-background-light dark:bg-background-dark p-4 md:p-8">
           <Routes>
             <Route path="/" element={<Dashboard />} />
@@ -176,7 +189,7 @@ const AuthenticatedLayout: React.FC<{ role: "creator" | "client" }> = ({
             <Route path="/event/:token" element={<EventGallery />} />
             <Route path="/user/events" element={<MyEvents />} />
             <Route path="/user/bookmarks" element={<MyBookmarks />} />
-            <Route path="*" element={<Navigate to={defaultPath} replace />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
       </div>

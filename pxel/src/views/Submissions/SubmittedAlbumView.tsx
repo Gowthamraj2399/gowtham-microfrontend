@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useMemo } from "react";
 import { Link, useParams, useNavigate, Navigate } from "react-router-dom";
+import { VirtuosoGrid } from "react-virtuoso";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getCloudinaryInstanceOrNull } from "../../lib/cloudinary";
 import {
@@ -8,7 +9,7 @@ import {
   creatorSubmissionsQueryKey,
   reopenSubmittedAlbum,
 } from "../../lib/creator-submissions";
-import { PhotoImage } from "../UploadPhotos/components/PhotoImage";
+import { LazyPhotoImage } from "../UploadPhotos/components/LazyPhotoImage";
 import { downloadPhoto } from "../UploadPhotos/utils";
 import { PhotoPreviewModal } from "../../components/PhotoPreviewModal";
 import { DownloadOptionsModal } from "./DownloadOptionsModal";
@@ -44,7 +45,7 @@ const ReadOnlyPhotoCard: React.FC<ReadOnlyPhotoCardProps> = ({
     className="relative aspect-square rounded-2xl overflow-hidden group bg-slate-100 dark:bg-gray-800 border-2 border-slate-100 dark:border-gray-800 hover:border-primary/50 transition-colors text-left w-full"
     onClick={() => onPreview(photo)}
   >
-    <PhotoImage
+    <LazyPhotoImage
       photo={photo}
       cld={cld}
       thumbSize={400}
@@ -56,6 +57,35 @@ const ReadOnlyPhotoCard: React.FC<ReadOnlyPhotoCardProps> = ({
       </span>
     </div>
   </button>
+);
+
+interface VirtualSubmittedAlbumGridProps {
+  photos: Photo[];
+  cld: Cloudinary | null;
+  onPreview: (photo: Photo) => void;
+}
+
+const VirtualSubmittedAlbumGrid: React.FC<VirtualSubmittedAlbumGridProps> = ({
+  photos,
+  cld,
+  onPreview,
+}) => (
+  <div
+    className="rounded-2xl border border-slate-200 dark:border-gray-700 overflow-hidden"
+    style={{ height: "min(70vh, 600px)" }}
+  >
+    <VirtuosoGrid
+      style={{ height: "100%" }}
+      totalCount={photos.length}
+      data={photos}
+      itemContent={(_index, photo) => (
+        <ReadOnlyPhotoCard photo={photo} cld={cld} onPreview={onPreview} />
+      )}
+      listClassName="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6 w-full"
+      itemClassName="min-w-0 aspect-square"
+      overscan={300}
+    />
+  </div>
 );
 
 const DOWNLOAD_DELAY_MS = 300;
@@ -256,16 +286,11 @@ const SubmittedAlbumView: React.FC = () => {
           <p className="font-medium">No photos in this submission.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-          {photos.map((photo) => (
-            <ReadOnlyPhotoCard
-              key={photo.id}
-              photo={photo}
-              cld={cld}
-              onPreview={setPreviewPhoto}
-            />
-          ))}
-        </div>
+        <VirtualSubmittedAlbumGrid
+          photos={photos}
+          cld={cld}
+          onPreview={setPreviewPhoto}
+        />
       )}
 
       {showDownloadModal && (

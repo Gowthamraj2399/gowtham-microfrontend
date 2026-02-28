@@ -15,7 +15,19 @@ import { NotificationDropdown } from "./NotificationDropdown";
 import { useAuth } from "../hooks/useAuth";
 import type { UserRole } from "../types";
 
-const Header: React.FC<{ role: UserRole }> = ({ role }) => {
+interface HeaderProps {
+  role: UserRole;
+  onOpenSidebar?: () => void;
+  sidebarOpen?: boolean;
+  onCloseSidebar?: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({
+  role,
+  onOpenSidebar,
+  sidebarOpen,
+  onCloseSidebar,
+}) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut } = useAuth();
@@ -49,9 +61,21 @@ const Header: React.FC<{ role: UserRole }> = ({ role }) => {
   return (
     <header className="h-16 bg-white dark:bg-gray-900 border-b border-slate-200 dark:border-gray-800 px-6 flex items-center justify-between sticky top-0 z-30">
       <div className="flex items-center gap-4">
-        <div className="lg:hidden text-primary">
-          <span className="material-symbols-outlined">photo_camera</span>
-        </div>
+        {onOpenSidebar && (
+          <div className="lg:hidden">
+            <button
+              type="button"
+              onClick={sidebarOpen ? onCloseSidebar : onOpenSidebar}
+              className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-gray-800 transition-colors"
+              aria-label={sidebarOpen ? "Close menu" : "Open menu"}
+              aria-expanded={sidebarOpen}
+            >
+              <span className="material-symbols-outlined" aria-hidden="true">
+                {sidebarOpen ? "close" : "menu"}
+              </span>
+            </button>
+          </div>
+        )}
 
         <nav className="hidden md:flex items-center text-sm gap-2 text-slate-400">
           <Link

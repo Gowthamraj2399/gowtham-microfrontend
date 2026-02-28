@@ -18,26 +18,26 @@ const UploadProgressCardInner: React.FC<UploadProgressCardProps> = ({
   const total = totalBatchSize || uploading.length;
   const completed = total - uploading.length;
   return (
-    <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl border border-slate-100 dark:border-gray-800 shadow-sm mb-10">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-4">
-          <span className="material-symbols-outlined text-primary animate-spin">
+    <div className="bg-white dark:bg-gray-900 p-4 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl border border-slate-100 dark:border-gray-800 shadow-sm mb-6 sm:mb-10">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <span className="material-symbols-outlined text-primary animate-spin text-xl sm:text-2xl">
             sync
           </span>
-          <p className="text-lg font-bold">
+          <p className="text-sm sm:text-base md:text-lg font-bold">
             Uploading {total} photo{total !== 1 ? "s" : ""}…{" "}
             {total > 1 && (
-              <span className="text-slate-500 font-normal text-base">
+              <span className="text-slate-500 font-normal text-xs sm:text-sm md:text-base">
                 ({completed} of {total} complete)
               </span>
             )}
           </p>
         </div>
-        <div className="text-primary font-black uppercase tracking-widest text-sm">
+        <div className="text-primary font-black uppercase tracking-widest text-xs sm:text-sm">
           {Math.round(overallPercent)}% Complete
         </div>
       </div>
-      <div className="h-2.5 w-full bg-slate-100 dark:bg-gray-800 rounded-full overflow-hidden">
+      <div className="h-2 sm:h-2.5 w-full bg-slate-100 dark:bg-gray-800 rounded-full overflow-hidden">
         <div
           className="h-full bg-primary transition-all duration-500 rounded-full"
           style={{ width: `${Math.min(100, overallPercent)}%` }}
