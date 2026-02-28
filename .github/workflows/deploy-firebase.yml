@@ -30,6 +30,11 @@ jobs:
       - name: Install dependencies
         run: npm run install:all
 
+      - name: Install lightningcss Linux binding (Tailwind v4)
+        run: |
+          cd expense-tracker && npm install lightningcss-linux-x64-gnu --no-save && cd ..
+          cd auth && npm install lightningcss-linux-x64-gnu --no-save && cd ..
+
       - name: Build for Firebase
         run: npm run build:firebase
         env:

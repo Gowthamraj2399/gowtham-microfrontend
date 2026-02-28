@@ -52,7 +52,7 @@ const Home = () => {
 
   return (
     <>
-      <div className="bg-white dark:bg-dark-black text-black dark:text-dark-text">
+      <div className="bg-white dark:bg-dark-black text-black dark:text-dark-text overflow-x-hidden min-w-0">
         <ToggleSwitch onThemeToggleClick={toggleTheme} />
         <ScrollToTopComponent />
         <Navbar

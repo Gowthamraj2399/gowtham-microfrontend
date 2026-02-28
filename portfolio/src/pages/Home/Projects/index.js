@@ -25,6 +25,7 @@ const Projects = React.forwardRef((props, ref) => {
               <img
                 src={require("../../../assets/images/Ayevee.png")}
                 alt="project ayeevee"
+                className="w-full max-w-full h-auto object-contain"
               />
             </SimpleTransition>
           </div>
@@ -78,6 +79,7 @@ const Projects = React.forwardRef((props, ref) => {
               <img
                 src={require("../../../assets/images/IMS.png")}
                 alt="project interpreter"
+                className="w-full max-w-full h-auto object-contain"
               />
             </SimpleTransition>
           </div>
@@ -124,6 +126,7 @@ const Projects = React.forwardRef((props, ref) => {
               <img
                 src={require("../../../assets/images/SCT.png")}
                 alt="project SCT Home"
+                className="w-full max-w-full h-auto object-contain"
               />
             </SimpleTransition>
           </div>

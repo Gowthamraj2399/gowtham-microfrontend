@@ -80,7 +80,7 @@ const Hero = React.forwardRef((props, ref) => {
               <img
                 src={props.theme === "light" ? DevLight : DevDark}
                 alt="Some illustration"
-                className="h-[500px] w-[500px] object-contain"
+                className="w-full max-w-[500px] h-auto object-contain mx-auto"
               />
             </Reveal>
           </div>

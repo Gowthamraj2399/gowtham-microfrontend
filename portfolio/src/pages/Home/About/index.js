@@ -14,12 +14,13 @@ const About = React.forwardRef((props, ref) => {
           color="red"
         />
       </div>
-      <div className="lg:flex flex-1 justify-centermt-8">
-        <div className="flex-1 ">
+      <div className="lg:flex flex-1 justify-center mt-8 gap-8">
+        <div className="flex-1 max-w-md mx-auto lg:mx-0">
           <SimpleTransition>
             <img
               src={require("../../../assets/images/gritty3.png")}
               alt="Gowtham Raj"
+              className="w-full h-auto object-contain"
             />
           </SimpleTransition>
         </div>
