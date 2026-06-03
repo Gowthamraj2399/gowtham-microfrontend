@@ -1,3 +1,4 @@
+const path = require("path");
 const { merge } = require("webpack-merge");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ModuleFederationPlugin = require("webpack/lib/container/ModuleFederationPlugin");
@@ -14,6 +15,9 @@ const devConfig = {
     historyApiFallback: {
       historyApiFallback: true,
     },
+    // Serve manifest.json, service-worker.js and icons as static files from /
+    contentBase: path.join(__dirname, "../public"),
+    contentBasePublicPath: "/",
   },
   plugins: [
     new ModuleFederationPlugin({

@@ -1,1 +1,0 @@
-export { useEventGallery } from "./useEventGallery";

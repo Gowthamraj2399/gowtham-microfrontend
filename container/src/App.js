@@ -11,9 +11,7 @@ import Progress from "./components/Progress";
 import NotFound from "./components/NotFound";
 
 const PortfolioLazy = lazy(() => import("./components/PortfolioApp"));
-const AuthLazy = lazy(() => import("./components/AuthApp"));
 const ExpenseTrackerLazy = lazy(() => import("./components/ExpenseTrackerApp"));
-const PxelLazy = lazy(() => import("./components/PxelApp"));
 
 const App = () => {
   return (
@@ -21,13 +19,11 @@ const App = () => {
       <div>
         <Suspense fallback={<Progress />}>
           <Routes>
-            <Route path="/auth/*" element={<AuthLazy />} />
             <Route
               path="/expense-tracker"
               element={<Navigate to="/expense-tracker/dashboard" replace />}
             />
             <Route path="/expense-tracker/*" element={<ExpenseTrackerLazy />} />
-            <Route path="/pxel/*" element={<PxelLazy />} />
             <Route path="/" element={<PortfolioLazy />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

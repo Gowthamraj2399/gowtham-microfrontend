@@ -19,9 +19,7 @@ const devConfig = {
       name: "container",
       remotes: {
         portfolio: "portfolio@http://localhost:8081/remoteEntry.js",
-        auth: "auth@http://localhost:8082/remoteEntry.js",
         expensetracker: "expensetracker@http://localhost:8083/remoteEntry.js",
-        pxel: "pxel@http://localhost:8084/remoteEntry.js",
       },
       shared: {
         ...packageJson.dependencies,

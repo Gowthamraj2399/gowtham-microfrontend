@@ -1,10 +1,12 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { sidebarConfig } from "../config/sidebarConfig";
+import { useAuth } from "../lib/AuthContext";
 
 const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { session, signOut } = useAuth();
 
   const activeItem =
     sidebarConfig.menuItems.find((item) => item.path === location.pathname)
@@ -73,17 +75,22 @@ const Sidebar = () => {
       {/* User Profile */}
       <div className="mt-auto p-6">
         <div className="flex items-center gap-3 px-2 py-3 border-t border-surface-highlight">
-          <div
-            className="bg-center bg-no-repeat bg-cover rounded-full w-10 h-10 border border-surface-highlight"
-            style={{
-              backgroundImage:
-                'url("https://lh3.googleusercontent.com/aida-public/AB6AXuBmOXAiAvvFr9NvEDhUdcuP2G0qnpoE5DB62CbQXeFFqPgD2TYTErKzyUbqasYkcscWCweHauEtKcBHAYcOza_poOiLOIGSvu_ZzRNmH224lFAtZUhVBTem5Yp8hKJ8_M2v8uRTb9gJawyAiClUTdQ6Sq81ufQdf28Ykq6RAh0M1x7B6dpETNTMpYF3AZFFBVCMls6Pq6xvFJiGimnEZUhKwug6OmhGFgyKQTJCYyrN9lUpOrQ0GQbQtdThecjNewK1toWAal88ilnJ")',
-            }}
-          ></div>
-          <div className="flex flex-col">
-            <p className="text-sm font-bold text-white">Alex Morgan</p>
-            <p className="text-xs text-text-secondary">Pro Member</p>
+          <div className="bg-primary/20 rounded-full w-10 h-10 flex items-center justify-center shrink-0">
+            <span className="material-symbols-outlined text-primary text-xl">person</span>
           </div>
+          <div className="flex flex-col flex-1 min-w-0">
+            <p className="text-sm font-bold text-white truncate">
+              {session?.user?.email ?? "Account"}
+            </p>
+            <p className="text-xs text-text-secondary">Signed in</p>
+          </div>
+          <button
+            onClick={signOut}
+            title="Sign out"
+            className="text-text-secondary hover:text-red-400 transition-colors"
+          >
+            <span className="material-symbols-outlined text-xl">logout</span>
+          </button>
         </div>
       </div>
     </aside>

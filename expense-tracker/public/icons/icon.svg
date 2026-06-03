@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Background -->
+  <rect width="512" height="512" rx="96" fill="#0f172a"/>
+  <!-- Wallet body -->
+  <rect x="72" y="168" width="368" height="256" rx="28" fill="#1e293b" stroke="#3b82f6" stroke-width="6"/>
+  <!-- Wallet flap/top strip -->
+  <rect x="72" y="168" width="368" height="52" rx="0" fill="#1e3a5f"/>
+  <rect x="72" y="168" width="368" height="52" rx="28" fill="#1e3a5f"/>
+  <rect x="72" y="192" width="368" height="28" fill="#1e3a5f"/>
+  <!-- Card slot on right side -->
+  <rect x="296" y="248" width="120" height="88" rx="14" fill="#0f172a" stroke="#3b82f6" stroke-width="4"/>
+  <!-- Coin on card slot -->
+  <circle cx="356" cy="292" r="20" fill="#3b82f6" opacity="0.9"/>
+  <text x="356" y="299" text-anchor="middle" font-family="sans-serif" font-size="22" font-weight="bold" fill="#fff">$</text>
+  <!-- Bill lines on left side -->
+  <rect x="100" y="264" width="168" height="12" rx="6" fill="#3b82f6" opacity="0.45"/>
+  <rect x="100" y="292" width="128" height="12" rx="6" fill="#3b82f6" opacity="0.3"/>
+  <rect x="100" y="320" width="148" height="12" rx="6" fill="#3b82f6" opacity="0.2"/>
+  <!-- Small upward trend line in bottom right -->
+  <polyline points="320,390 350,365 380,375 410,345" fill="none" stroke="#3b82f6" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/>
+  <circle cx="410" cy="345" r="5" fill="#3b82f6" opacity="0.8"/>
+</svg>
