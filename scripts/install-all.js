@@ -2,7 +2,7 @@ const path = require("path");
 const { spawnSync } = require("child_process");
 
 const rootDir = path.resolve(__dirname, "..");
-const apps = ["container", "portfolio", "auth", "expense-tracker", "pxel"];
+const apps = ["container", "portfolio", "expense-tracker"];
 
 for (const app of apps) {
   console.log(`Installing dependencies in ${app}...`);

@@ -12,9 +12,7 @@ if (fs.existsSync(firebasePublic)) {
 
 const apps = [
   "portfolio",
-  "auth",
   "expense-tracker",
-  "pxel",
   "container",
 ];
 

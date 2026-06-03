@@ -23,9 +23,7 @@ const prodConfig = {
       name: "container",
       remotes: {
         portfolio: `portfolio@${domain}/portfolio/latest/remoteEntry.js`,
-        auth: `auth@${domain}/auth/latest/remoteEntry.js`,
         expensetracker: `expensetracker@${domain}/expensetracker/latest/remoteEntry.js`,
-        pxel: `pxel@${domain}/pxel/latest/remoteEntry.js`,
       },
       shared: {
         ...packageJson.dependencies,

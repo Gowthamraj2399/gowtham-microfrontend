@@ -2,10 +2,8 @@
 # Required GitHub secrets:
 #   FIREBASE_TOKEN              - from: npx firebase login:ci
 #   PRODUCTION_DOMAIN           - e.g. https://gowthamraj-portfolio.web.app
-#   VITE_SUPABASE_URL           - Supabase project URL (auth + expense-tracker build)
-#   VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY - Supabase anon key (auth + expense-tracker build)
-#   VITE_CLOUDINARY_CLOUD_NAME  - Cloudinary cloud name (pxel build; photo uploads)
-#   VITE_CLOUDINARY_UPLOAD_PRESET - Cloudinary unsigned upload preset (pxel build)
+#   VITE_SUPABASE_URL           - Supabase project URL (expense-tracker build)
+#   VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY - Supabase anon key (expense-tracker build)
 
 name: Deploy to Firebase
 
@@ -33,7 +31,6 @@ jobs:
       - name: Install lightningcss Linux binding (Tailwind v4)
         run: |
           cd expense-tracker && npm install lightningcss-linux-x64-gnu --no-save && cd ..
-          cd auth && npm install lightningcss-linux-x64-gnu --no-save && cd ..
 
       - name: Build for Firebase
         run: npm run build:firebase
@@ -42,8 +39,6 @@ jobs:
           PRODUCTION_DOMAIN: ${{ secrets.PRODUCTION_DOMAIN }}
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY }}
-          VITE_CLOUDINARY_CLOUD_NAME: ${{ secrets.VITE_CLOUDINARY_CLOUD_NAME }}
-          VITE_CLOUDINARY_UPLOAD_PRESET: ${{ secrets.VITE_CLOUDINARY_UPLOAD_PRESET }}
 
       - name: Deploy to Firebase Hosting
         run: npx firebase-tools deploy --only hosting --non-interactive --token "$FIREBASE_TOKEN"
