@@ -106,9 +106,9 @@ export function useDashboard() {
     ];
 
     // ── Daily spending trend (this month vs last month) ──────────────────
-    const daysInThisMonth = new Date(thisYear, thisMonth, 0).getDate();
+    const todayDay = now.getDate(); // current day of month (e.g. 4)
     const daysInLastMonth = new Date(lastMonthYear, lastMonth, 0).getDate();
-    const maxDays = Math.max(daysInThisMonth, daysInLastMonth);
+    const maxDays = Math.max(todayDay, daysInLastMonth);
 
     const thisByDay = buildDayMap(thisTxns);
     const lastByDay = buildDayMap(lastTxns);
@@ -117,7 +117,7 @@ export function useDashboard() {
       const day = i + 1;
       return {
         day: String(day),
-        thisMonth: day <= daysInThisMonth ? (thisByDay[day] || 0) : null,
+        thisMonth: day <= todayDay ? (thisByDay[day] || 0) : null,
         lastMonth: day <= daysInLastMonth ? (lastByDay[day] || 0) : null,
       };
     }).filter((d) => d.thisMonth !== null || d.lastMonth !== null);

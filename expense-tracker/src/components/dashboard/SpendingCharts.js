@@ -65,7 +65,7 @@ export const SpendingTrendChart = ({ title, subtitle, data }) => {
           </div>
         </div>
       </div>
-      <div className="flex-1" style={{ minHeight: "200px" }}>
+      <div style={{ height: "220px" }}>
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
             <defs>
@@ -143,7 +143,7 @@ export const MonthlyComparisonChart = ({ title, subtitle, data, previousAvg }) =
           <span className="text-xs font-bold" style={{ color: "#F59E0B" }}>₹{previousAvg.toLocaleString("en-IN")}</span>
         </div>
       </div>
-      <div className="flex-1" style={{ minHeight: "180px" }}>
+      <div style={{ height: "200px" }}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 10, right: 4, left: -15, bottom: 0 }} barCategoryGap="25%">
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />

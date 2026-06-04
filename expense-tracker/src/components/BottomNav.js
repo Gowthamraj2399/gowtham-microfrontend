@@ -6,7 +6,7 @@ import { useRecurringPayments } from "../lib/recurring-query";
 import { useEmis } from "../lib/emi-query";
 
 // Show only top 5 nav items in bottom bar
-const BOTTOM_NAV_IDS = ["dashboard", "transactions", "recurring-payments", "notifications", "settings"];
+const BOTTOM_NAV_IDS = ["dashboard", "transactions", "emi", "recurring-payments", "notifications"];
 
 const BottomNav = () => {
   const navigate = useNavigate();

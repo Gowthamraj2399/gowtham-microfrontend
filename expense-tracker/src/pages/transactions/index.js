@@ -8,14 +8,31 @@ import { useCategories } from "../../lib/categories-query";
 import { filterOptions } from "../../config/transactionsConfig";
 
 const now = new Date();
-const MONTH = now.getMonth() + 1;
-const YEAR  = now.getFullYear();
+const CURRENT_MONTH = now.getMonth() + 1;
+const CURRENT_YEAR  = now.getFullYear();
+
+// Build last 12 months (newest first)
+function buildMonthOptions() {
+  const opts = [];
+  for (let i = 0; i < 12; i++) {
+    const d = new Date(CURRENT_YEAR, now.getMonth() - i, 1);
+    opts.push({
+      month: d.getMonth() + 1,
+      year: d.getFullYear(),
+      label: d.toLocaleDateString("en-IN", { month: "short", year: "numeric" }),
+      shortLabel: d.toLocaleDateString("en-IN", { month: "short" }),
+    });
+  }
+  return opts;
+}
+const MONTH_OPTIONS = buildMonthOptions();
 
 const TransactionsPage = () => {
   const [modalOpen, setModalOpen]       = useState(false);
   const [editTarget, setEditTarget]     = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
-  const { data: transactions = [], isLoading, error } = useTransactions({ year: YEAR, month: MONTH });
+  const [selectedMonth, setSelectedMonth] = useState({ month: CURRENT_MONTH, year: CURRENT_YEAR });
+  const { data: transactions = [], isLoading, error } = useTransactions({ year: selectedMonth.year, month: selectedMonth.month });
   const { data: categories = [] } = useCategories();
   const deleteTransaction = useDeleteTransaction();
 
@@ -34,6 +51,7 @@ const TransactionsPage = () => {
 
   // Derive stats from real data
   const { total, avgDaily, largest } = computeStats(transactions);
+  const selectedLabel = MONTH_OPTIONS.find(o => o.month === selectedMonth.month && o.year === selectedMonth.year)?.label ?? "";
   const liveStats = [
     {
       id: 1,
@@ -42,7 +60,7 @@ const TransactionsPage = () => {
       icon: "payments",
       iconBg: "bg-orange-500/10",
       iconColor: "text-orange-400",
-      trend: { value: "", label: "This month", color: "text-text-secondary" },
+      trend: { value: "", label: selectedLabel, color: "text-text-secondary" },
     },
     {
       id: 2,
@@ -82,7 +100,7 @@ const TransactionsPage = () => {
             Transactions
           </h1>
           <p className="text-text-secondary text-sm mt-1">
-            Track every rupee you spend this month.
+            {MONTH_OPTIONS.find(o => o.month === selectedMonth.month && o.year === selectedMonth.year)?.label ?? ""}
           </p>
         </motion.div>
         <motion.button
@@ -99,6 +117,31 @@ const TransactionsPage = () => {
           <span className="material-symbols-rounded" style={{ fontSize: "18px" }}>add</span>
           Add Expense
         </motion.button>
+      </div>
+
+      {/* Month picker */}
+      <div className="flex gap-2 overflow-x-auto pb-1 mb-5 scrollbar-none" style={{ scrollbarWidth: "none" }}>
+        {MONTH_OPTIONS.map((opt) => {
+          const active = opt.month === selectedMonth.month && opt.year === selectedMonth.year;
+          return (
+            <button
+              key={`${opt.year}-${opt.month}`}
+              onClick={() => setSelectedMonth({ month: opt.month, year: opt.year })}
+              className="shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all"
+              style={active ? {
+                background: "linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)",
+                color: "#fff",
+                boxShadow: "0 2px 10px rgba(139,92,246,0.4)",
+              } : {
+                background: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(255,255,255,0.08)",
+                color: "#7B8FA8",
+              }}
+            >
+              {opt.label}
+            </button>
+          );
+        })}
       </div>
 
       {/* Stats — desktop: 3-col grid of cards | mobile: compact inline bar */}
