@@ -68,13 +68,14 @@ const SettingsPage = () => {
   };
 
   return (
-    <div className="max-w-[1200px] w-full mx-auto px-4 py-6 pb-20">
+    <div className="max-w-[1200px] w-full mx-auto px-4 sm:px-6 py-6 pb-8">
       {/* Page Header */}
       <div className="mb-8">
-        <h1 className="text-3xl md:text-4xl font-black leading-tight tracking-[-0.033em] text-slate-900 dark:text-white">
+        <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: "#A78BFA" }}>Account</p>
+        <h1 className="text-2xl sm:text-3xl font-black leading-tight text-white">
           Settings
         </h1>
-        <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
+        <p className="text-text-secondary text-sm mt-1">
           Manage your account preferences and application settings
         </p>
       </div>

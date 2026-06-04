@@ -3,12 +3,20 @@ import EMIItem from "./EMIItem";
 
 const EMIList = ({ emis }) => {
   return (
-    <div className="rounded-xl bg-white dark:bg-surface-dark border border-[#e5e7eb] dark:border-surface-highlight p-0 shadow-sm overflow-hidden flex flex-col">
-      <div className="p-4 border-b border-[#e5e7eb] dark:border-surface-highlight flex justify-between items-center">
-        <h3 className="text-base font-bold text-slate-900 dark:text-white">
-          Upcoming EMIs
-        </h3>
-        <button className="text-xs font-medium text-primary hover:text-blue-400">
+    <div
+      className="rounded-2xl overflow-hidden flex flex-col"
+      style={{
+        background: "rgba(255,255,255,0.04)",
+        backdropFilter: "blur(20px)",
+        border: "1px solid rgba(255,255,255,0.07)",
+      }}
+    >
+      <div
+        className="px-4 py-3 flex justify-between items-center"
+        style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+      >
+        <h3 className="text-sm font-bold text-white">Upcoming EMIs</h3>
+        <button className="text-xs font-semibold" style={{ color: "#A78BFA" }}>
           View All
         </button>
       </div>

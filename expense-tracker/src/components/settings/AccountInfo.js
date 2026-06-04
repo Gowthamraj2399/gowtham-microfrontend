@@ -1,5 +1,24 @@
 import React from "react";
 
+const inputStyle = {
+  background: "rgba(255,255,255,0.05)",
+  border: "1px solid rgba(255,255,255,0.08)",
+  color: "white",
+  width: "100%",
+  padding: "0.625rem 1rem",
+  borderRadius: "0.5rem",
+  fontSize: "0.875rem",
+  outline: "none",
+};
+
+const handleFocus = (e) => {
+  e.target.style.borderColor = "rgba(139,92,246,0.5)";
+};
+
+const handleBlur = (e) => {
+  e.target.style.borderColor = "rgba(255,255,255,0.08)";
+};
+
 const AccountInfo = ({ accountData, onSave }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -13,47 +32,63 @@ const AccountInfo = ({ accountData, onSave }) => {
   };
 
   return (
-    <div className="rounded-xl bg-white dark:bg-surface-dark border border-[#e5e7eb] dark:border-surface-highlight shadow-sm p-6">
-      <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4">
-        Account Information
-      </h2>
+    <div
+      style={{
+        background: "rgba(255,255,255,0.04)",
+        backdropFilter: "blur(20px)",
+        border: "1px solid rgba(255,255,255,0.07)",
+        borderRadius: "1rem",
+        padding: "1.5rem",
+      }}
+    >
+      <h2 className="text-white font-bold text-lg mb-4">Account Information</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+          <label className="block text-sm font-medium mb-2" style={{ color: "#7B8FA8" }}>
             Full Name
           </label>
           <input
             type="text"
             name="fullName"
             defaultValue={accountData.fullName}
-            className="w-full px-4 py-2.5 rounded-lg border border-[#e5e7eb] dark:border-surface-highlight bg-white dark:bg-surface-dark text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            style={inputStyle}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+          <label className="block text-sm font-medium mb-2" style={{ color: "#7B8FA8" }}>
             Email Address
           </label>
           <input
             type="email"
             name="email"
             defaultValue={accountData.email}
-            className="w-full px-4 py-2.5 rounded-lg border border-[#e5e7eb] dark:border-surface-highlight bg-white dark:bg-surface-dark text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            style={inputStyle}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+          <label className="block text-sm font-medium mb-2" style={{ color: "#7B8FA8" }}>
             Phone Number
           </label>
           <input
             type="tel"
             name="phone"
             defaultValue={accountData.phone}
-            className="w-full px-4 py-2.5 rounded-lg border border-[#e5e7eb] dark:border-surface-highlight bg-white dark:bg-surface-dark text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            style={inputStyle}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
           />
         </div>
         <button
           type="submit"
-          className="px-6 py-2.5 bg-primary hover:bg-blue-600 text-white text-sm font-bold rounded-lg transition-colors shadow-lg shadow-primary/20"
+          className="px-6 py-2.5 text-white text-sm font-bold rounded-lg transition-all"
+          style={{
+            background: "linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)",
+            boxShadow: "0 4px 15px rgba(139,92,246,0.35)",
+          }}
         >
           Save Changes
         </button>

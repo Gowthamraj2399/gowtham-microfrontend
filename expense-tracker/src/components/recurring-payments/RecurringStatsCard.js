@@ -5,7 +5,6 @@ const RecurringStatsCard = ({ stat }) => {
     title,
     value,
     icon,
-    iconColor,
     trend,
     subLabel,
     subLabelColor,
@@ -14,28 +13,48 @@ const RecurringStatsCard = ({ stat }) => {
 
   return (
     <div
-      className={`flex flex-col gap-3 rounded-xl p-6 bg-white dark:bg-surface-dark border shadow-sm ${
-        isAlert
-          ? "border-red-500/30 dark:border-red-500/30"
-          : "border-[#e5e7eb] dark:border-surface-highlight"
-      }`}
+      className="flex flex-col gap-3 rounded-2xl p-6"
+      style={{
+        background: "rgba(255,255,255,0.04)",
+        backdropFilter: "blur(20px)",
+        border: isAlert
+          ? "1px solid rgba(239,68,68,0.3)"
+          : "1px solid rgba(255,255,255,0.07)",
+      }}
     >
       <div className="flex items-center gap-2">
-        <span className={`material-symbols-outlined ${iconColor}`}>{icon}</span>
+        <div
+          className="p-1.5 rounded-full"
+          style={{
+            background: isAlert
+              ? "rgba(239,68,68,0.12)"
+              : "rgba(139,92,246,0.12)",
+          }}
+        >
+          <span
+            className="material-symbols-rounded text-lg"
+            style={{
+              color: isAlert ? "#F87171" : "#A78BFA",
+              fontVariationSettings: "'FILL' 1",
+            }}
+          >
+            {icon}
+          </span>
+        </div>
         <p
-          className={`${isAlert ? "text-red-500 dark:text-red-400" : "text-slate-500 dark:text-slate-400"} text-sm font-medium uppercase tracking-wider`}
+          className="text-xs font-semibold uppercase tracking-widest"
+          style={{ color: isAlert ? "#F87171" : "#A78BFA" }}
         >
           {title}
         </p>
       </div>
-      <p className="text-slate-900 dark:text-white text-3xl font-bold leading-tight">
-        {value}
-      </p>
+      <p className="text-white text-3xl font-bold leading-tight">{value}</p>
       {trend && (
-        <p
-          className={`${trend.color} text-sm font-medium flex items-center gap-1`}
-        >
-          <span className="material-symbols-outlined text-sm">
+        <p className={`${trend.color} text-sm font-medium flex items-center gap-1`}>
+          <span
+            className="material-symbols-rounded text-sm"
+            style={{ fontVariationSettings: "'FILL' 1" }}
+          >
             {trend.type === "down" ? "trending_down" : "trending_up"}
           </span>
           {trend.value}
@@ -43,7 +62,8 @@ const RecurringStatsCard = ({ stat }) => {
       )}
       {subLabel && (
         <p
-          className={`${subLabelColor || "text-slate-500 dark:text-slate-400"} text-sm font-normal`}
+          className={`text-sm font-normal ${subLabelColor || ""}`}
+          style={!subLabelColor ? { color: "#7B8FA8" } : undefined}
         >
           {subLabel}
         </p>

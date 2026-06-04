@@ -20,54 +20,60 @@ const GoalCard = ({ goal }) => {
   };
 
   return (
-    <div className="group flex flex-col sm:flex-row items-stretch rounded-xl bg-[#1c2127] border border-white/5 overflow-hidden hover:border-primary/50 transition-all duration-300 shadow-sm hover:shadow-md">
+    <div
+      className="group flex flex-col sm:flex-row items-stretch rounded-2xl overflow-hidden transition-all duration-300"
+      style={{
+        background: "rgba(255,255,255,0.04)",
+        backdropFilter: "blur(20px)",
+        border: "1px solid rgba(255,255,255,0.07)",
+      }}
+    >
       <div
-        className="w-full sm:w-48 h-40 sm:h-auto bg-center bg-no-repeat bg-cover shrink-0 relative"
+        className="w-full sm:w-44 h-40 sm:h-auto bg-center bg-no-repeat bg-cover shrink-0 relative"
         style={{ backgroundImage: `url("${image}")` }}
         role="img"
         aria-label={imageAlt}
       >
-        <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-all"></div>
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to right, transparent, rgba(8,11,20,0.4))" }} />
       </div>
       <div className="flex flex-col flex-grow p-5 gap-3">
         <div className="flex justify-between items-start">
           <div>
-            <h3 className="text-lg font-bold text-white leading-tight">
-              {title}
-            </h3>
-            <p className="text-[#9dabb9] text-sm">Target: {targetDate}</p>
+            <h3 className="text-base font-bold text-white leading-tight">{title}</h3>
+            <p className="text-text-secondary text-xs mt-0.5">Target: {targetDate}</p>
           </div>
           <div className="text-right">
-            <p className="text-lg font-bold text-white">
+            <p className="text-base font-bold text-white">
               {formatCurrency(saved)}{" "}
-              <span className="text-[#9dabb9] text-sm font-normal">
-                / {formatCurrency(target)}
-              </span>
+              <span className="text-text-secondary text-xs font-normal">/ {formatCurrency(target)}</span>
             </p>
             {monthlyContribution && (
-              <p className="text-xs text-green-400 font-medium">
-                + {formatCurrency(monthlyContribution)} this month
+              <p className="text-xs font-semibold mt-0.5" style={{ color: "#34D399" }}>
+                +{formatCurrency(monthlyContribution)} this month
               </p>
             )}
           </div>
         </div>
-        <div className="flex flex-col gap-1 mt-1">
-          <div className="flex justify-between text-xs font-medium text-[#9dabb9]">
+        <div className="flex flex-col gap-1.5">
+          <div className="flex justify-between text-xs text-text-secondary">
             <span>{percentage}% Saved</span>
             <span>{statusMessage || `${monthsLeft} months left`}</span>
           </div>
-          <div className="h-2 w-full bg-[#283039] rounded-full overflow-hidden">
+          <div className="h-1.5 w-full rounded-full" style={{ background: "rgba(255,255,255,0.08)" }}>
             <div
-              className={`h-full ${progressColor} rounded-full`}
-              style={{ width: `${percentage}%` }}
-            ></div>
+              className="h-1.5 rounded-full transition-all duration-700"
+              style={{ width: `${percentage}%`, background: "linear-gradient(90deg, #8B5CF6, #06B6D4)" }}
+            />
           </div>
         </div>
-        <div className="flex items-center justify-end gap-3 mt-auto pt-2">
-          <button className="text-sm font-medium text-[#9dabb9] hover:text-white transition-colors">
+        <div className="flex items-center justify-end gap-2 mt-auto pt-1">
+          <button className="text-xs font-semibold text-text-secondary hover:text-white transition-colors">
             Details
           </button>
-          <button className="flex items-center justify-center rounded-lg h-8 px-4 bg-primary/10 hover:bg-primary text-primary hover:text-white text-sm font-bold transition-all">
+          <button
+            className="flex items-center justify-center rounded-xl h-8 px-4 text-xs font-bold text-white transition-all active:scale-95"
+            style={{ background: "linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)" }}
+          >
             Add Funds
           </button>
         </div>

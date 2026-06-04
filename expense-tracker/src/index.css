@@ -1,34 +1,164 @@
-@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Noto+Sans:wght@400;500;700&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap");
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #137fec;
-  --color-background-light: #f6f7f8;
-  --color-background-dark: #101922;
-  --color-background-dark-alt: #111418;
-  --color-surface-dark: #1c2632;
-  --color-surface-dark-alt: #1c252e;
-  --color-surface-dark-alt2: #1c2127;
-  --color-surface-highlight: #283039;
-  --color-border-dark: #3b4754;
-  --color-text-secondary: #9dabb9;
+  /* Brand Colors */
+  --color-primary: #8B5CF6;
+  --color-primary-light: #A78BFA;
+  --color-primary-dark: #6D28D9;
+  --color-secondary: #06B6D4;
+  --color-accent: #10B981;
+  --color-accent-amber: #F59E0B;
+  --color-danger: #EF4444;
+
+  /* Dark Mode Backgrounds */
+  --color-background-dark: #080B14;
+  --color-background-dark-alt: #0D1117;
+  --color-surface-dark: rgba(255,255,255,0.04);
+  --color-surface-dark-alt: rgba(255,255,255,0.06);
+  --color-surface-dark-alt2: rgba(255,255,255,0.08);
+  --color-surface-highlight: rgba(255,255,255,0.1);
+  --color-border-dark: rgba(255,255,255,0.08);
+  --color-glass: rgba(255,255,255,0.04);
+  --color-glass-border: rgba(255,255,255,0.08);
+
+  /* Light Mode */
+  --color-background-light: #F0F2FF;
+  --color-card-light: rgba(255,255,255,0.8);
+  --color-border-light: rgba(139,92,246,0.12);
+
+  /* Text */
+  --color-text-secondary: #7B8FA8;
   --color-text-secondary-light: #64748b;
-  --color-card-light: #ffffff;
+  --color-text-muted: #4A5568;
 }
 
-/* Custom scrollbar for webkit browsers */
+/* ─── Base ─────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #080B14;
+  color: #F1F5F9;
+}
+
+/* ─── Scrollbar ─────────────────────────────────────────── */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #101922;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #283039;
-  border-radius: 4px;
+  background: rgba(139,92,246,0.3);
+  border-radius: 99px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #3b4754;
+  background: rgba(139,92,246,0.6);
+}
+
+/* ─── Glass Card Utility ────────────────────────────────── */
+.glass-card {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 1rem;
+}
+
+.glass-card-hover {
+  transition: background 0.2s, border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+.glass-card-hover:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(139, 92, 246, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(139, 92, 246, 0.15);
+}
+
+/* ─── Gradient Text ─────────────────────────────────────── */
+.gradient-text {
+  background: linear-gradient(135deg, #A78BFA 0%, #06B6D4 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── Ambient Glow ──────────────────────────────────────── */
+.glow-primary {
+  box-shadow: 0 0 30px rgba(139, 92, 246, 0.3), 0 4px 20px rgba(139, 92, 246, 0.15);
+}
+.glow-accent {
+  box-shadow: 0 0 30px rgba(16, 185, 129, 0.3), 0 4px 20px rgba(16, 185, 129, 0.15);
+}
+.glow-secondary {
+  box-shadow: 0 0 30px rgba(6, 182, 212, 0.3), 0 4px 20px rgba(6, 182, 212, 0.15);
+}
+
+/* ─── Gradient Button ───────────────────────────────────── */
+.btn-gradient {
+  background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%);
+  transition: all 0.2s;
+}
+.btn-gradient:hover {
+  background: linear-gradient(135deg, #A78BFA 0%, #8B5CF6 100%);
+  box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+  transform: translateY(-1px);
+}
+
+/* ─── Page Transition ───────────────────────────────────── */
+.page-enter {
+  opacity: 0;
+  transform: translateY(12px);
+}
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 250ms, transform 250ms;
+}
+
+/* ─── Bottom Nav Blur ───────────────────────────────────── */
+.bottom-nav {
+  background: rgba(8, 11, 20, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+
+/* ─── Material Symbols Rounded ──────────────────────────── */
+.material-symbols-rounded {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  font-family: 'Material Symbols Rounded';
+  font-size: 22px;
+  line-height: 1;
+  user-select: none;
+}
+.material-symbols-rounded.filled {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* ─── Sidebar Active Glow ───────────────────────────────── */
+.sidebar-active {
+  background: linear-gradient(135deg, rgba(139,92,246,0.2) 0%, rgba(6,182,212,0.1) 100%);
+  border-left: 3px solid #8B5CF6;
+}
+
+/* ─── Input Styles ──────────────────────────────────────── */
+.input-glass {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 0.75rem;
+  color: #F1F5F9;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.input-glass:focus {
+  outline: none;
+  border-color: rgba(139,92,246,0.5);
+  box-shadow: 0 0 0 3px rgba(139,92,246,0.1);
 }

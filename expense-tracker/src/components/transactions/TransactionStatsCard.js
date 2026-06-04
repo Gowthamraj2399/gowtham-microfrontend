@@ -1,29 +1,41 @@
 import React from "react";
 
 const TransactionStatsCard = ({ stat }) => {
-  const { title, value, icon, iconBg, iconColor, trend } = stat;
+  const { title, value, icon, trend } = stat;
+
+  const isPositive = trend?.value?.startsWith("+") || trend?.color?.includes("green");
 
   return (
-    <div className="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-surface-dark border border-[#e5e7eb] dark:border-surface-highlight shadow-sm">
+    <div
+      className="flex flex-col gap-3 rounded-2xl p-5"
+      style={{
+        background: "rgba(255,255,255,0.04)",
+        backdropFilter: "blur(20px)",
+        border: "1px solid rgba(255,255,255,0.07)",
+      }}
+    >
       <div className="flex items-center justify-between">
-        <p className="text-slate-500 dark:text-slate-400 text-sm font-medium uppercase tracking-wider">
-          {title}
-        </p>
+        <p className="text-text-secondary text-xs font-semibold uppercase tracking-wider">{title}</p>
         <span
-          className={`material-symbols-outlined ${iconColor} ${iconBg} p-1.5 rounded-lg`}
+          className="material-symbols-rounded p-2 rounded-xl"
+          style={{
+            fontSize: "18px",
+            color: "#A78BFA",
+            fontVariationSettings: "'FILL' 1",
+            background: "rgba(139,92,246,0.12)",
+          }}
         >
           {icon}
         </span>
       </div>
-      <p className="text-slate-900 dark:text-white text-3xl font-bold leading-tight">
-        {value}
-      </p>
+      <p className="text-white text-2xl font-bold leading-tight">{value}</p>
       {trend && (
-        <p className={`${trend.color} text-sm font-medium`}>
+        <p
+          className="text-sm font-medium flex items-center gap-1"
+          style={{ color: isPositive ? "#34D399" : "#F87171" }}
+        >
           {trend.value}{" "}
-          <span className="text-slate-500 dark:text-slate-400 font-normal">
-            {trend.label}
-          </span>
+          <span style={{ color: "#7B8FA8", fontWeight: 400 }}>{trend.label}</span>
         </p>
       )}
     </div>

@@ -1,4 +1,5 @@
 import React from "react";
+import { motion } from "framer-motion";
 import GoalStatsCard from "../../components/goals/GoalStatsCard";
 import GoalCard from "../../components/goals/GoalCard";
 import RecentActivity from "../../components/goals/RecentActivity";
@@ -12,28 +13,36 @@ import {
 
 const GoalsPage = () => {
   return (
-    <div className="max-w-[1200px] w-full mx-auto px-4 py-6 pb-20">
+    <div className="max-w-[1200px] w-full mx-auto px-4 sm:px-6 py-6 pb-8">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
-        <div>
-          <h1 className="text-3xl md:text-4xl font-black leading-tight tracking-[-0.033em] text-slate-900 dark:text-white">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: "#A78BFA" }}>Goals</p>
+          <h1 className="text-2xl sm:text-3xl font-black leading-tight text-white">
             My Financial Goals
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-            Track your savings for trips, gadgets, and life events. Visualize
-            your progress and reach your targets faster.
+          <p className="text-text-secondary text-sm mt-1">
+            Track savings for trips, gadgets, and life events.
           </p>
-        </div>
-        <button className="flex min-w-21 cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-5 bg-primary hover:bg-blue-600 transition-colors text-white gap-2 text-sm font-bold leading-normal tracking-[0.015em] shadow-lg shadow-blue-500/20">
-          <span className="material-symbols-outlined text-[20px]">add</span>
-          <span className="truncate">Create New Goal</span>
+        </motion.div>
+        <button
+          className="flex items-center justify-center gap-2 rounded-xl h-10 px-5 text-white text-sm font-bold transition-all active:scale-95 shrink-0"
+          style={{
+            background: "linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)",
+            boxShadow: "0 4px 15px rgba(139,92,246,0.35)",
+          }}
+        >
+          <span className="material-symbols-rounded" style={{ fontSize: "18px" }}>add</span>
+          Create New Goal
         </button>
       </div>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-        {goalStats.map((stat) => (
-          <GoalStatsCard key={stat.id} stat={stat} />
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+        {goalStats.map((stat, i) => (
+          <motion.div key={stat.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: i * 0.07 }}>
+            <GoalStatsCard stat={stat} />
+          </motion.div>
         ))}
       </div>
 
@@ -42,10 +51,8 @@ const GoalsPage = () => {
         {/* Goals Column */}
         <div className="xl:col-span-2 flex flex-col gap-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-white">Active Goals</h2>
-            <button className="text-sm text-primary font-medium hover:text-white transition-colors">
-              View All
-            </button>
+            <h2 className="text-base font-bold text-white">Active Goals</h2>
+            <button className="text-xs font-semibold" style={{ color: "#A78BFA" }}>View All</button>
           </div>
           {goals.map((goal) => (
             <GoalCard key={goal.id} goal={goal} />

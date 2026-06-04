@@ -1,47 +1,101 @@
 import React from "react";
+import { motion } from "framer-motion";
+
+const colorMap = {
+  blue: {
+    icon: "rgba(139,92,246,0.15)",
+    iconText: "#A78BFA",
+    glow: "rgba(139,92,246,0.2)",
+    gradient: "linear-gradient(135deg, rgba(139,92,246,0.12) 0%, rgba(6,182,212,0.06) 100%)",
+  },
+  emerald: {
+    icon: "rgba(16,185,129,0.15)",
+    iconText: "#34D399",
+    glow: "rgba(16,185,129,0.2)",
+    gradient: "linear-gradient(135deg, rgba(16,185,129,0.1) 0%, rgba(6,182,212,0.05) 100%)",
+  },
+  orange: {
+    icon: "rgba(245,158,11,0.15)",
+    iconText: "#FBBF24",
+    glow: "rgba(245,158,11,0.2)",
+    gradient: "linear-gradient(135deg, rgba(245,158,11,0.1) 0%, rgba(239,68,68,0.05) 100%)",
+  },
+  purple: {
+    icon: "rgba(139,92,246,0.15)",
+    iconText: "#C084FC",
+    glow: "rgba(168,85,247,0.2)",
+    gradient: "linear-gradient(135deg, rgba(168,85,247,0.12) 0%, rgba(139,92,246,0.06) 100%)",
+  },
+};
 
 const StatsCard = ({ title, value, change, changeType, icon, color }) => {
-  const colorClasses = {
-    blue: "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400",
-    emerald:
-      "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400",
-    orange:
-      "bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400",
-    purple:
-      "bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400",
-  };
-
-  const changeColorClasses = {
-    positive: "text-[#0bda5b] bg-[#0bda5b]/10",
-    negative: "text-orange-500 bg-orange-500/10",
-  };
+  const colors = colorMap[color] || colorMap.blue;
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl p-6 bg-white dark:bg-surface-dark border border-[#e5e7eb] dark:border-surface-highlight shadow-sm">
-      <div className="flex justify-between items-start">
-        <div className={`p-2 rounded-lg ${colorClasses[color]}`}>
-          <span className="material-symbols-outlined text-sm">{icon}</span>
+    <motion.div
+      whileHover={{ y: -3, scale: 1.01 }}
+      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+      className="relative flex flex-col gap-4 rounded-2xl p-5 overflow-hidden"
+      style={{
+        background: "rgba(255,255,255,0.04)",
+        backdropFilter: "blur(20px)",
+        border: "1px solid rgba(255,255,255,0.07)",
+        boxShadow: `0 4px 24px ${colors.glow}`,
+      }}
+    >
+      {/* Background gradient accent */}
+      <div
+        className="absolute inset-0 opacity-60 pointer-events-none"
+        style={{ background: colors.gradient }}
+      />
+
+      <div className="relative flex justify-between items-start">
+        <div
+          className="p-2.5 rounded-xl"
+          style={{ background: colors.icon }}
+        >
+          <span
+            className="material-symbols-rounded"
+            style={{
+              fontSize: "20px",
+              color: colors.iconText,
+              fontVariationSettings: "'FILL' 1",
+            }}
+          >
+            {icon}
+          </span>
         </div>
         {change && (
           <span
-            className={`px-1.5 py-0.5 rounded text-xs font-medium flex items-center ${changeColorClasses[changeType]}`}
+            className="px-2 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-0.5"
+            style={{
+              background:
+                changeType === "positive"
+                  ? "rgba(16,185,129,0.12)"
+                  : "rgba(239,68,68,0.12)",
+              color: changeType === "positive" ? "#34D399" : "#F87171",
+            }}
           >
-            <span className="material-symbols-outlined text-[12px] mr-0.5">
+            <span
+              className="material-symbols-rounded"
+              style={{ fontSize: "12px", fontVariationSettings: "'FILL' 1" }}
+            >
               {changeType === "positive" ? "arrow_upward" : "arrow_downward"}
             </span>
             {change}
           </span>
         )}
       </div>
-      <div>
-        <p className="text-slate-500 dark:text-slate-400 text-sm font-medium uppercase tracking-wider">
+
+      <div className="relative">
+        <p className="text-text-secondary text-xs font-semibold uppercase tracking-wider mb-1">
           {title}
         </p>
-        <p className="text-slate-900 dark:text-white text-3xl font-bold leading-tight mt-1">
+        <p className="text-white text-2xl font-bold tracking-tight leading-tight">
           {value}
         </p>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

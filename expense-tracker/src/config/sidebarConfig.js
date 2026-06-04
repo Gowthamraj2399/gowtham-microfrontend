@@ -1,8 +1,8 @@
 export const sidebarConfig = {
   logo: {
     icon: "account_balance_wallet",
-    title: "FinanceTracker",
-    subtitle: "Personal Finance",
+    title: "SpendTracker",
+    subtitle: "Spending Insights",
   },
   menuItems: [
     {
@@ -12,34 +12,34 @@ export const sidebarConfig = {
       path: "/dashboard",
     },
     {
+      id: "transactions",
+      label: "Transactions",
+      icon: "receipt_long",
+      path: "/transactions",
+    },
+    {
+      id: "categories",
+      label: "Categories",
+      icon: "category",
+      path: "/categories",
+    },
+    {
+      id: "payment-methods",
+      label: "Accounts & Cards",
+      icon: "account_balance_wallet",
+      path: "/payment-methods",
+    },
+    {
       id: "emi",
       label: "EMIs",
       icon: "credit_card",
       path: "/emi",
     },
     {
-      id: "mutual-funds",
-      label: "Mutual Funds",
-      icon: "trending_up",
-      path: "/mutual-funds",
-    },
-    {
-      id: "goals",
-      label: "Goals",
-      icon: "track_changes",
-      path: "/goals",
-    },
-    {
       id: "recurring-payments",
-      label: "Recurring Payments",
+      label: "Recurring",
       icon: "replay",
       path: "/recurring-payments",
-    },
-    {
-      id: "transactions",
-      label: "Transactions",
-      icon: "receipt_long",
-      path: "/transactions",
     },
     {
       id: "settings",

@@ -1,35 +1,47 @@
 import React from "react";
 
 const PortfolioStatsCard = ({ stat }) => {
-  const { title, value, icon, iconBgColor, iconColor, trend, subLabel } = stat;
+  const { title, value, icon, trend, subLabel } = stat;
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl p-6 bg-white dark:bg-surface-dark shadow-sm border border-[#e5e7eb] dark:border-surface-highlight">
+    <div
+      className="flex flex-col gap-3 rounded-2xl p-6"
+      style={{
+        background: "rgba(255,255,255,0.04)",
+        backdropFilter: "blur(20px)",
+        border: "1px solid rgba(255,255,255,0.07)",
+      }}
+    >
       <div className="flex justify-between items-start">
-        <p className="text-slate-500 dark:text-slate-400 text-sm font-medium uppercase tracking-wider">
+        <p
+          className="text-xs font-semibold uppercase tracking-widest"
+          style={{ color: "#A78BFA" }}
+        >
           {title}
         </p>
-        <div className={`p-1.5 ${iconBgColor} rounded-full`}>
-          <span className={`material-symbols-outlined ${iconColor} text-lg`}>
+        <div
+          className="p-1.5 rounded-full"
+          style={{ background: "rgba(139,92,246,0.12)" }}
+        >
+          <span
+            className="material-symbols-rounded text-lg"
+            style={{ color: "#A78BFA", fontVariationSettings: "'FILL' 1" }}
+          >
             {icon}
           </span>
         </div>
       </div>
-      <p className="text-slate-900 dark:text-white text-3xl font-bold leading-tight">
-        {value}
-      </p>
+      <p className="text-white text-3xl font-bold leading-tight">{value}</p>
       {trend && (
-        <p
-          className={`${trend.color} text-sm font-medium flex items-center gap-1`}
-        >
+        <p className={`${trend.color} text-sm font-medium flex items-center gap-1`}>
           <span>{trend.value}</span>
-          <span className="text-slate-500 dark:text-slate-400 font-normal">
+          <span className="text-sm font-normal" style={{ color: "#7B8FA8" }}>
             {trend.label}
           </span>
         </p>
       )}
       {subLabel && (
-        <p className="text-slate-500 dark:text-slate-400 text-sm font-normal">
+        <p className="text-sm font-normal" style={{ color: "#7B8FA8" }}>
           {subLabel}
         </p>
       )}

@@ -1,4 +1,5 @@
 import React from "react";
+import { motion } from "framer-motion";
 import EMIStatsCard from "../../components/emi/EMIStatsCard";
 import EMIPaymentCard from "../../components/emi/EMIPaymentCard";
 import ActiveLoansTable from "../../components/emi/ActiveLoansTable";
@@ -10,48 +11,68 @@ import {
 
 const EmiPage = () => {
   return (
-    <div className="max-w-[1200px] w-full mx-auto px-4 py-6 pb-20">
+    <div className="max-w-[1200px] w-full mx-auto px-4 sm:px-6 py-6 pb-8">
       {/* Page Heading */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
-        <div>
-          <h1 className="text-3xl md:text-4xl font-black leading-tight tracking-[-0.033em] text-slate-900 dark:text-white">
+      <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: "#A78BFA" }}>
+            Loans
+          </p>
+          <h1 className="text-2xl sm:text-3xl font-black leading-tight text-white">
             EMI Management
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
+          <p className="text-text-secondary text-sm mt-1">
             Track payments, manage loans, and visualize your debt-free journey.
           </p>
-        </div>
-        <div className="flex gap-3">
-          <button className="flex items-center justify-center gap-2 rounded-lg h-10 px-4 bg-white dark:bg-surface-highlight border border-gray-200 dark:border-transparent text-slate-700 dark:text-white text-sm font-bold shadow-sm hover:bg-gray-50 dark:hover:bg-surface-highlight transition-colors">
-            <span className="material-symbols-outlined text-[20px]">
-              calendar_month
-            </span>
-            <span className="truncate">Calendar View</span>
+        </motion.div>
+        <div className="flex gap-2">
+          <button
+            className="flex items-center justify-center gap-2 rounded-xl h-10 px-4 text-sm font-semibold text-text-secondary transition-all active:scale-95"
+            style={{
+              background: "rgba(255,255,255,0.06)",
+              border: "1px solid rgba(255,255,255,0.08)",
+            }}
+          >
+            <span className="material-symbols-rounded" style={{ fontSize: "18px" }}>calendar_month</span>
+            <span className="hidden sm:inline">Calendar</span>
           </button>
-          <button className="flex items-center justify-center gap-2 rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold shadow-lg shadow-primary/20 hover:bg-blue-600 transition-colors">
-            <span className="material-symbols-outlined text-[20px]">add</span>
-            <span className="truncate">Add Loan</span>
+          <button
+            className="flex items-center justify-center gap-2 rounded-xl h-10 px-4 text-sm font-bold text-white transition-all active:scale-95"
+            style={{
+              background: "linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)",
+              boxShadow: "0 4px 15px rgba(139,92,246,0.35)",
+            }}
+          >
+            <span className="material-symbols-rounded" style={{ fontSize: "18px" }}>add</span>
+            Add Loan
           </button>
         </div>
       </div>
 
       {/* Stats Row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        {emiStats.map((stat) => (
-          <EMIStatsCard key={stat.id} stat={stat} />
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+        {emiStats.map((stat, i) => (
+          <motion.div
+            key={stat.id}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: i * 0.07 }}
+          >
+            <EMIStatsCard stat={stat} />
+          </motion.div>
         ))}
       </div>
 
       {/* Upcoming Payments Section */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4 px-1">
-          <h2 className="text-slate-900 dark:text-white text-xl font-bold">
-            Upcoming Payments
-          </h2>
-          <a
-            className="text-primary text-sm font-bold hover:underline"
-            href="#"
-          >
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.22 }}
+        className="mb-6"
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-white text-lg font-bold">Upcoming Payments</h2>
+          <a className="text-xs font-semibold hover:underline" style={{ color: "#A78BFA" }} href="#">
             View All
           </a>
         </div>
@@ -60,10 +81,16 @@ const EmiPage = () => {
             <EMIPaymentCard key={payment.id} payment={payment} />
           ))}
         </div>
-      </div>
+      </motion.div>
 
       {/* Active Loans Table */}
-      <ActiveLoansTable loans={activeLoans} />
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.3 }}
+      >
+        <ActiveLoansTable loans={activeLoans} />
+      </motion.div>
     </div>
   );
 };

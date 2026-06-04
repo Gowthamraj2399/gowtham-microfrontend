@@ -17,8 +17,8 @@ const AuthPage = () => {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background-dark">
-        <span className="material-symbols-outlined animate-spin text-primary text-4xl">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#080B14" }}>
+        <span className="material-symbols-rounded animate-spin text-4xl" style={{ color: "#8B5CF6" }}>
           progress_activity
         </span>
       </div>
@@ -81,12 +81,26 @@ const AuthPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background-dark px-4">
+    <div
+      className="min-h-screen flex items-center justify-center px-4"
+      style={{
+        background: "radial-gradient(ellipse at 50% 0%, rgba(139,92,246,0.15) 0%, #080B14 60%)",
+      }}
+    >
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <div className="bg-primary/20 rounded-full size-14 flex items-center justify-center mb-4">
-            <span className="material-symbols-outlined text-primary text-3xl">
+          <div
+            className="rounded-2xl size-16 flex items-center justify-center mb-4"
+            style={{
+              background: "linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%)",
+              boxShadow: "0 8px 32px rgba(139,92,246,0.4)",
+            }}
+          >
+            <span
+              className="material-symbols-rounded text-white"
+              style={{ fontSize: "32px", fontVariationSettings: "'FILL' 1" }}
+            >
               account_balance_wallet
             </span>
           </div>
@@ -95,17 +109,31 @@ const AuthPage = () => {
         </div>
 
         {/* Card */}
-        <div className="bg-background-dark-alt border border-surface-highlight rounded-xl p-8">
-          <h2 className="text-white text-lg font-semibold mb-6">{titles[mode]}</h2>
+        <div
+          className="rounded-2xl p-8"
+          style={{
+            background: "rgba(255,255,255,0.04)",
+            backdropFilter: "blur(24px)",
+            border: "1px solid rgba(255,255,255,0.08)",
+            boxShadow: "0 24px 64px rgba(0,0,0,0.4)",
+          }}
+        >
+          <h2 className="text-white text-lg font-bold mb-6">{titles[mode]}</h2>
 
           {/* Error / Success messages */}
           {error && (
-            <div className="mb-4 px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+            <div
+              className="mb-4 px-4 py-3 rounded-xl text-sm"
+              style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)", color: "#F87171" }}
+            >
               {error}
             </div>
           )}
           {message && (
-            <div className="mb-4 px-4 py-3 rounded-lg bg-green-500/10 border border-green-500/30 text-green-400 text-sm">
+            <div
+              className="mb-4 px-4 py-3 rounded-xl text-sm"
+              style={{ background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.25)", color: "#34D399" }}
+            >
               {message}
             </div>
           )}
@@ -113,7 +141,7 @@ const AuthPage = () => {
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             {/* Email */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-text-secondary text-sm font-medium">Email</label>
+              <label className="text-text-secondary text-xs font-semibold uppercase tracking-wider">Email</label>
               <input
                 type="email"
                 required
@@ -121,14 +149,27 @@ const AuthPage = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full rounded-lg bg-surface-dark-alt2 border border-surface-highlight text-white text-sm px-4 py-2.5 placeholder-text-secondary/50 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+                className="w-full rounded-xl text-white text-sm px-4 py-3 placeholder-text-secondary/40 transition-all"
+                style={{
+                  background: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  outline: "none",
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = "rgba(139,92,246,0.5)";
+                  e.target.style.boxShadow = "0 0 0 3px rgba(139,92,246,0.1)";
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = "rgba(255,255,255,0.08)";
+                  e.target.style.boxShadow = "none";
+                }}
               />
             </div>
 
             {/* Password */}
             {mode !== "forgot" && (
               <div className="flex flex-col gap-1.5">
-                <label className="text-text-secondary text-sm font-medium">Password</label>
+                <label className="text-text-secondary text-xs font-semibold uppercase tracking-wider">Password</label>
                 <input
                   type="password"
                   required
@@ -136,7 +177,20 @@ const AuthPage = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full rounded-lg bg-surface-dark-alt2 border border-surface-highlight text-white text-sm px-4 py-2.5 placeholder-text-secondary/50 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+                  className="w-full rounded-xl text-white text-sm px-4 py-3 placeholder-text-secondary/40 transition-all"
+                  style={{
+                    background: "rgba(255,255,255,0.05)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    outline: "none",
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = "rgba(139,92,246,0.5)";
+                    e.target.style.boxShadow = "0 0 0 3px rgba(139,92,246,0.1)";
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = "rgba(255,255,255,0.08)";
+                    e.target.style.boxShadow = "none";
+                  }}
                 />
               </div>
             )}
@@ -144,7 +198,7 @@ const AuthPage = () => {
             {/* Confirm Password */}
             {mode === "signup" && (
               <div className="flex flex-col gap-1.5">
-                <label className="text-text-secondary text-sm font-medium">Confirm Password</label>
+                <label className="text-text-secondary text-xs font-semibold uppercase tracking-wider">Confirm Password</label>
                 <input
                   type="password"
                   required
@@ -152,7 +206,20 @@ const AuthPage = () => {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full rounded-lg bg-surface-dark-alt2 border border-surface-highlight text-white text-sm px-4 py-2.5 placeholder-text-secondary/50 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+                  className="w-full rounded-xl text-white text-sm px-4 py-3 placeholder-text-secondary/40 transition-all"
+                  style={{
+                    background: "rgba(255,255,255,0.05)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    outline: "none",
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = "rgba(139,92,246,0.5)";
+                    e.target.style.boxShadow = "0 0 0 3px rgba(139,92,246,0.1)";
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = "rgba(255,255,255,0.08)";
+                    e.target.style.boxShadow = "none";
+                  }}
                 />
               </div>
             )}
@@ -163,7 +230,8 @@ const AuthPage = () => {
                 <button
                   type="button"
                   onClick={() => switchMode("forgot")}
-                  className="text-primary text-xs hover:underline"
+                  className="text-xs font-semibold hover:underline"
+                  style={{ color: "#A78BFA" }}
                 >
                   Forgot password?
                 </button>
@@ -174,10 +242,14 @@ const AuthPage = () => {
             <button
               type="submit"
               disabled={submitting}
-              className="mt-2 flex items-center justify-center rounded-lg h-11 px-6 bg-primary text-white text-sm font-semibold hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/20"
+              className="mt-2 flex items-center justify-center rounded-xl h-12 px-6 text-white text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-98"
+              style={{
+                background: "linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)",
+                boxShadow: "0 4px 20px rgba(139,92,246,0.4)",
+              }}
             >
               {submitting ? (
-                <span className="material-symbols-outlined animate-spin text-lg">progress_activity</span>
+                <span className="material-symbols-rounded animate-spin" style={{ fontSize: "20px" }}>progress_activity</span>
               ) : mode === "login" ? (
                 "Sign in"
               ) : mode === "signup" ? (
@@ -195,7 +267,8 @@ const AuthPage = () => {
                 Don&apos;t have an account?{" "}
                 <button
                   onClick={() => switchMode("signup")}
-                  className="text-primary hover:underline font-medium"
+                  className="font-semibold hover:underline"
+                  style={{ color: "#A78BFA" }}
                 >
                   Sign up
                 </button>
@@ -205,7 +278,8 @@ const AuthPage = () => {
                 Already have an account?{" "}
                 <button
                   onClick={() => switchMode("login")}
-                  className="text-primary hover:underline font-medium"
+                  className="font-semibold hover:underline"
+                  style={{ color: "#A78BFA" }}
                 >
                   Sign in
                 </button>

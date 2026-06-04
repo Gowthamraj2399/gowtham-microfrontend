@@ -12,29 +12,35 @@ import {
 
 const MutualFundsPage = () => {
   return (
-    <div className="max-w-[1200px] w-full mx-auto px-4 py-6 pb-20">
+    <div className="max-w-[1200px] w-full mx-auto px-4 sm:px-6 py-6 pb-8">
       {/* Page Heading & Actions */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-8">
         <div>
-          <h1 className="text-3xl md:text-4xl font-black leading-tight tracking-[-0.033em] text-slate-900 dark:text-white">
+          <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: "#A78BFA" }}>Investments</p>
+          <h1 className="text-2xl sm:text-3xl font-black leading-tight text-white">
             My Portfolio
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
+          <p className="text-text-secondary text-sm mt-1">
             Track your mutual fund performance and holdings
           </p>
         </div>
-        <div className="flex gap-3">
-          <button className="flex items-center justify-center rounded-lg h-10 px-4 bg-transparent border border-gray-300 dark:border-[#3e4856] text-gray-700 dark:text-white text-sm font-bold hover:bg-gray-100 dark:hover:bg-[#3e4856] transition-colors">
-            <span className="material-symbols-outlined mr-2 text-[20px]">
-              download
-            </span>
+        <div className="flex gap-2">
+          <button
+            className="flex items-center justify-center gap-2 rounded-xl h-10 px-4 text-sm font-semibold text-text-secondary transition-all active:scale-95"
+            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}
+          >
+            <span className="material-symbols-rounded" style={{ fontSize: "18px" }}>download</span>
             <span>Report</span>
           </button>
-          <button className="flex items-center justify-center rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold hover:bg-blue-600 transition-colors shadow-lg shadow-primary/20">
-            <span className="material-symbols-outlined mr-2 text-[20px]">
-              add
-            </span>
-            <span>Invest More</span>
+          <button
+            className="flex items-center justify-center gap-2 rounded-xl h-10 px-5 text-sm font-bold text-white transition-all active:scale-95"
+            style={{
+              background: "linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)",
+              boxShadow: "0 4px 15px rgba(139,92,246,0.35)",
+            }}
+          >
+            <span className="material-symbols-rounded" style={{ fontSize: "18px", fontVariationSettings: "'FILL' 1" }}>add</span>
+            Invest More
           </button>
         </div>
       </div>

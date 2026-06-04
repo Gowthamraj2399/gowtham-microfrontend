@@ -1,30 +1,36 @@
 import React from "react";
 
 const GoalStatsCard = ({ stat }) => {
-  const { title, value, icon, iconColor, progress, subLabel } = stat;
+  const { title, value, icon, progress, subLabel } = stat;
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl p-6 bg-white dark:bg-surface-dark border border-[#e5e7eb] dark:border-surface-highlight shadow-sm">
+    <div
+      className="flex flex-col gap-3 rounded-2xl p-5"
+      style={{
+        background: "rgba(255,255,255,0.04)",
+        backdropFilter: "blur(20px)",
+        border: "1px solid rgba(255,255,255,0.07)",
+      }}
+    >
       <div className="flex items-center gap-2">
-        <span className={`material-symbols-outlined ${iconColor}`}>{icon}</span>
-        <p className="text-slate-500 dark:text-slate-400 text-sm font-medium uppercase tracking-wider">
-          {title}
-        </p>
+        <span
+          className="material-symbols-rounded"
+          style={{ fontSize: "20px", color: "#A78BFA", fontVariationSettings: "'FILL' 1" }}
+        >
+          {icon}
+        </span>
+        <p className="text-text-secondary text-xs font-semibold uppercase tracking-wider">{title}</p>
       </div>
-      <p className="text-slate-900 dark:text-white text-3xl font-bold leading-tight">
-        {value}
-      </p>
+      <p className="text-white text-2xl font-bold leading-tight">{value}</p>
       {progress !== undefined && (
-        <div className="h-1 w-full bg-slate-200 dark:bg-slate-700 rounded-full">
+        <div className="h-1.5 w-full rounded-full" style={{ background: "rgba(255,255,255,0.08)" }}>
           <div
-            className="h-1 bg-primary rounded-full"
-            style={{ width: `${progress}%` }}
-          ></div>
+            className="h-1.5 rounded-full transition-all duration-700"
+            style={{ width: `${progress}%`, background: "linear-gradient(90deg, #8B5CF6, #06B6D4)" }}
+          />
         </div>
       )}
-      {subLabel && (
-        <p className="text-xs text-slate-500 dark:text-slate-400">{subLabel}</p>
-      )}
+      {subLabel && <p className="text-xs text-text-secondary">{subLabel}</p>}
     </div>
   );
 };

@@ -1,93 +1,100 @@
+// Monthly spending data — all amounts in USD
 export const dashboardConfig = {
+  // Top-level stats cards
   stats: [
     {
-      id: "total-balance",
-      title: "Total Balance",
-      value: "$124,500",
-      change: "+12%",
-      changeType: "positive",
-      icon: "account_balance",
-      color: "blue",
-    },
-    {
-      id: "monthly-income",
-      title: "Monthly Income",
-      value: "$8,200",
-      change: "+5%",
-      changeType: "positive",
-      icon: "payments",
-      color: "emerald",
-    },
-    {
-      id: "monthly-outflow",
-      title: "Monthly Outflow",
-      value: "$3,500",
-      change: "-2%",
+      id: "this-month",
+      title: "This Month",
+      value: "$3,248",
+      change: "+8.4%",
       changeType: "negative",
-      icon: "shopping_cart",
+      icon: "calendar_month",
       color: "orange",
     },
     {
-      id: "net-savings",
-      title: "Net Savings",
-      value: "$4,700",
-      change: "+8%",
+      id: "last-month",
+      title: "Last Month",
+      value: "$2,997",
+      change: "-3.1% vs Apr",
       changeType: "positive",
-      icon: "savings",
+      icon: "history",
+      color: "blue",
+    },
+    {
+      id: "emis-due",
+      title: "EMIs Due",
+      value: "$1,650",
+      change: "This month",
+      changeType: "neutral",
+      icon: "credit_card",
       color: "purple",
     },
+    {
+      id: "recurring-total",
+      title: "Recurring",
+      value: "$118",
+      change: "Monthly auto",
+      changeType: "neutral",
+      icon: "replay",
+      color: "emerald",
+    },
   ],
-  incomeExpenseChart: {
-    title: "Income vs Expenses",
-    subtitle: "Last 6 Months",
+
+  // Daily spending trend — current month vs previous month
+  spendingTrend: {
+    title: "Daily Spending",
+    subtitle: "Jun vs May 2026",
     data: [
-      { month: "May", income: 60, expense: 40 },
-      { month: "Jun", income: 75, expense: 45 },
-      { month: "Jul", income: 65, expense: 30 },
-      { month: "Aug", income: 85, expense: 50 },
-      { month: "Sep", income: 90, expense: 55 },
-      { month: "Oct", income: 80, expense: 35 },
+      { day: "1",  thisMonth: 45,  lastMonth: 30 },
+      { day: "2",  thisMonth: 0,   lastMonth: 120 },
+      { day: "3",  thisMonth: 89,  lastMonth: 55 },
+      { day: "4",  thisMonth: 200, lastMonth: 80 },
+      { day: "5",  thisMonth: 35,  lastMonth: 200 },
+      { day: "6",  thisMonth: 150, lastMonth: 45 },
+      { day: "7",  thisMonth: 60,  lastMonth: 90 },
+      { day: "8",  thisMonth: 0,   lastMonth: 60 },
+      { day: "9",  thisMonth: 95,  lastMonth: 75 },
+      { day: "10", thisMonth: 180, lastMonth: 110 },
+      { day: "11", thisMonth: 40,  lastMonth: 30 },
+      { day: "12", thisMonth: 220, lastMonth: 145 },
+      { day: "13", thisMonth: 75,  lastMonth: 65 },
+      { day: "14", thisMonth: 130, lastMonth: 90 },
     ],
   },
-  portfolio: {
-    title: "Portfolio",
-    total: "$45,000",
-    change: "+15.4%",
-    changeType: "positive",
-    allocations: [
-      {
-        name: "Stocks",
-        value: "$27,000",
-        percentage: 60,
-        color: "primary",
-      },
-      {
-        name: "Mutual Funds",
-        value: "$11,250",
-        percentage: 25,
-        color: "purple-500",
-      },
-      {
-        name: "Crypto",
-        value: "$4,500",
-        percentage: 10,
-        color: "orange-500",
-      },
-      {
-        name: "Cash",
-        value: "$2,250",
-        percentage: 5,
-        color: "emerald-500",
-      },
+
+  // Spending by category — this month
+  categoryBreakdown: [
+    { name: "Food & Dining",  amount: 820, budget: 900,  icon: "restaurant",       color: "#F59E0B" },
+    { name: "Transport",      amount: 340, budget: 400,  icon: "directions_car",   color: "#3B82F6" },
+    { name: "Shopping",       amount: 615, budget: 600,  icon: "shopping_bag",     color: "#EC4899" },
+    { name: "Entertainment",  amount: 198, budget: 250,  icon: "movie",            color: "#8B5CF6" },
+    { name: "Utilities",      amount: 275, budget: 300,  icon: "bolt",             color: "#06B6D4" },
+    { name: "Health",         amount: 140, budget: 200,  icon: "health_and_safety",color: "#10B981" },
+  ],
+
+  // Month-over-month comparison (last 6 months)
+  monthlyComparison: {
+    title: "Monthly Spend",
+    subtitle: "Last 6 months",
+    data: [
+      { month: "Jan", amount: 2850 },
+      { month: "Feb", amount: 3100 },
+      { month: "Mar", amount: 2700 },
+      { month: "Apr", amount: 3320 },
+      { month: "May", amount: 2997 },
+      { month: "Jun", amount: 3248 },
     ],
+    previousAvg: 3000,
   },
+
+  // Upcoming EMIs
   upcomingEmis: [
     {
       id: 1,
       title: "Home Loan",
       bank: "HDFC Bank",
       amount: "$1,200",
-      dueDate: "Oct 25",
+      dueDate: "Jun 25",
       status: "due-soon",
     },
     {
@@ -95,46 +102,22 @@ export const dashboardConfig = {
       title: "Car Loan",
       bank: "Toyota Finance",
       amount: "$450",
-      dueDate: "Nov 02",
+      dueDate: "Jul 02",
       status: "upcoming",
     },
   ],
-  savingsGoals: [
-    {
-      id: 1,
-      title: "Trip to Japan",
-      icon: "flight",
-      current: 3200,
-      target: 5000,
-      color: "emerald",
-    },
-    {
-      id: 2,
-      title: "Emergency Fund",
-      icon: "shield",
-      current: 8500,
-      target: 10000,
-      color: "blue",
-    },
-    {
-      id: 3,
-      title: "New MacBook",
-      icon: "laptop_mac",
-      current: 600,
-      target: 2500,
-      color: "purple",
-    },
-  ],
+
+  // Upcoming recurring payments
   recurringPayments: {
     title: "Recurring",
-    total: "$128/mo",
+    total: "$118/mo",
     items: [
       {
         id: 1,
         name: "Netflix",
         icon: "movie",
         frequency: "Monthly",
-        nextDate: "Oct 28",
+        nextDate: "Jun 28",
         amount: "-$15.99",
         color: "red",
       },
@@ -143,7 +126,7 @@ export const dashboardConfig = {
         name: "Spotify",
         icon: "music_note",
         frequency: "Family Plan",
-        nextDate: "Nov 01",
+        nextDate: "Jul 01",
         amount: "-$12.99",
         color: "green",
       },
@@ -152,10 +135,20 @@ export const dashboardConfig = {
         name: "Internet",
         icon: "wifi",
         frequency: "AT&T Fiber",
-        nextDate: "Nov 05",
+        nextDate: "Jul 05",
         amount: "-$89.00",
         color: "blue",
       },
     ],
   },
+
+  // Recent transactions (expenses only)
+  recentTransactions: [
+    { id: 1, title: "Starbucks",        category: "Food & Dining", date: "Today, 9:14am", amount: -8.5,   icon: "local_cafe" },
+    { id: 2, title: "Uber",             category: "Transport",     date: "Today, 8:02am", amount: -14.2,  icon: "directions_car" },
+    { id: 3, title: "Amazon",           category: "Shopping",      date: "Yesterday",     amount: -67.99, icon: "shopping_bag" },
+    { id: 4, title: "Electricity Bill", category: "Utilities",     date: "Jun 02",        amount: -89.0,  icon: "bolt" },
+    { id: 5, title: "Zomato",           category: "Food & Dining", date: "Jun 01",        amount: -32.5,  icon: "restaurant" },
+  ],
 };
+

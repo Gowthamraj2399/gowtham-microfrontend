@@ -2,40 +2,49 @@ import React from "react";
 
 const AccountStatus = ({ status }) => {
   return (
-    <div className="rounded-xl bg-white dark:bg-surface-dark border border-[#e5e7eb] dark:border-surface-highlight shadow-sm p-6">
-      <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-4 uppercase tracking-wider">
+    <div
+      style={{
+        background: "rgba(255,255,255,0.04)",
+        backdropFilter: "blur(20px)",
+        border: "1px solid rgba(255,255,255,0.07)",
+        borderRadius: "1rem",
+        padding: "1.5rem",
+      }}
+    >
+      <h3
+        className="text-xs font-semibold uppercase tracking-widest mb-4"
+        style={{ color: "#A78BFA" }}
+      >
         Account Status
       </h3>
       <div className="space-y-3">
         <div className="flex justify-between items-center">
-          <span className="text-sm text-slate-500 dark:text-slate-400">
-            Member Since
-          </span>
-          <span className="text-sm font-medium text-slate-900 dark:text-white">
-            {status.memberSince}
-          </span>
+          <span className="text-sm" style={{ color: "#7B8FA8" }}>Member Since</span>
+          <span className="text-sm font-medium text-white">{status.memberSince}</span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-sm text-slate-500 dark:text-slate-400">
-            Account Type
-          </span>
-          <span className="text-sm font-medium text-primary">
+          <span className="text-sm" style={{ color: "#7B8FA8" }}>Account Type</span>
+          <span className="text-sm font-medium" style={{ color: "#A78BFA" }}>
             {status.accountType}
           </span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-sm text-slate-500 dark:text-slate-400">
-            Storage Used
-          </span>
-          <span className="text-sm font-medium text-slate-900 dark:text-white">
+          <span className="text-sm" style={{ color: "#7B8FA8" }}>Storage Used</span>
+          <span className="text-sm font-medium text-white">
             {status.storageUsed} / {status.storageTotal}
           </span>
         </div>
       </div>
-      <div className="mt-4 h-2 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+      <div
+        className="mt-4 h-2 w-full rounded-full overflow-hidden"
+        style={{ background: "rgba(255,255,255,0.08)" }}
+      >
         <div
-          className="h-full bg-primary rounded-full"
-          style={{ width: `${status.storagePercentage}%` }}
+          className="h-full rounded-full"
+          style={{
+            width: `${status.storagePercentage}%`,
+            background: "linear-gradient(90deg, #8B5CF6, #06B6D4)",
+          }}
         ></div>
       </div>
     </div>

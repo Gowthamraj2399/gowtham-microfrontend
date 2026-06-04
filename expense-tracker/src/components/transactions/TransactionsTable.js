@@ -1,227 +1,358 @@
 import React, { useState } from "react";
-import { statusColors } from "../../config/transactionsConfig";
 
-const TransactionsTable = ({ transactions, filterOptions }) => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All Categories");
-  const [selectedDateRange, setSelectedDateRange] = useState("Last 30 Days");
+const glassStyle = {
+  background: "rgba(255,255,255,0.04)",
+  backdropFilter: "blur(20px)",
+  border: "1px solid rgba(255,255,255,0.07)",
+};
 
-  const formatCurrency = (amount) => {
-    const absAmount = Math.abs(amount);
-    return `${amount >= 0 ? "+" : "-"}$${absAmount.toFixed(2)}`;
+const inputStyle = {
+  background: "rgba(255,255,255,0.05)",
+  border: "1px solid rgba(255,255,255,0.08)",
+  borderRadius: "0.75rem",
+  color: "#F1F5F9",
+  outline: "none",
+};
+
+// Normalise both static-config rows and real Supabase rows into one shape
+function normalise(tx) {
+  const cat = tx.category && typeof tx.category === "object" ? tx.category : null;
+  const pm  = tx.payment_method && typeof tx.payment_method === "object" ? tx.payment_method : null;
+  const amt = Math.abs(Number(tx.amount));
+  // Date: ISO YYYY-MM-DD → friendly string
+  const dateStr = tx.date
+    ? new Date(tx.date + "T00:00:00").toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })
+    : tx.date;
+  return {
+    ...tx,
+    _amt:       amt,
+    _dateStr:   dateStr,
+    _catName:   cat?.name  ?? (typeof tx.category === "string" ? tx.category : "Uncategorised"),
+    _catColor:  cat?.color ?? "#8B5CF6",
+    _catIcon:   cat?.icon  ?? tx.icon ?? "payments",
+    _notes:     tx.notes || tx.description || "",
+    _pmName:    pm?.name  ?? null,
+    _pmColor:   pm?.color ?? "#7B8FA8",
+    _pmIcon:    pm?.icon  ?? null,
+    _pmLast4:   pm?.last4 ?? null,
   };
+}
 
-  const getAmountColor = (amount) => {
-    if (amount >= 0) return "text-green-600 dark:text-green-400";
-    return "text-slate-900 dark:text-white";
-  };
+// ── Mobile transaction card ────────────────────────────────────────────────
+const MobileTransactionCard = ({ transaction, onEdit, onDelete, isLast }) => (
+  <div
+    className="px-4 py-3.5 flex items-start gap-3"
+    style={!isLast ? { borderBottom: "1px solid rgba(255,255,255,0.05)" } : {}}
+  >
+    {/* Icon */}
+    <div
+      className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
+      style={{ background: `${transaction._catColor}18` }}
+    >
+      <span
+        className="material-symbols-rounded"
+        style={{ fontSize: "19px", color: transaction._catColor, fontVariationSettings: "'FILL' 1" }}
+      >
+        {transaction._catIcon}
+      </span>
+    </div>
 
-  const filteredTransactions = transactions.filter((transaction) => {
-    const matchesSearch =
-      transaction.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      transaction.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory =
-      selectedCategory === "All Categories" ||
-      transaction.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+    {/* Content */}
+    <div className="flex-1 min-w-0">
+      {/* Row 1: title + amount */}
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-sm font-bold text-white leading-snug truncate">{transaction.title}</p>
+        <span className="text-sm font-bold shrink-0" style={{ color: "#F87171" }}>
+          -₹{transaction._amt.toFixed(2)}
+        </span>
+      </div>
 
-  return (
-    <div className="flex flex-col gap-6">
-      {/* Filters Toolbar */}
-      <div className="flex flex-col xl:flex-row xl:items-end gap-4">
-        {/* Search & Date */}
-        <div className="flex flex-1 flex-wrap gap-4">
-          <div className="flex-1 min-w-60">
-            <label className="block text-xs font-semibold text-slate-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">
-              Search
-            </label>
-            <div className="relative group">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary material-symbols-outlined">
-                search
+      {/* Row 2: date + category pill */}
+      <div className="flex items-center gap-2 mt-1 flex-wrap">
+        <span className="text-[11px]" style={{ color: "#7B8FA8" }}>{transaction._dateStr}</span>
+        {transaction._catName !== "Uncategorised" && (
+          <span
+            className="text-[10px] font-bold px-1.5 py-0.5 rounded-md"
+            style={{ background: `${transaction._catColor}18`, color: transaction._catColor }}
+          >
+            {transaction._catName}
+          </span>
+        )}
+      </div>
+
+      {/* Row 3: payment method + notes */}
+      <div className="flex items-center justify-between gap-2 mt-1.5">
+        <div className="flex items-center gap-1.5 min-w-0">
+          {transaction._pmName ? (
+            <>
+              <div
+                className="w-4 h-4 rounded flex items-center justify-center shrink-0"
+                style={{ background: `${transaction._pmColor}22` }}
+              >
+                <span
+                  className="material-symbols-rounded"
+                  style={{ fontSize: "10px", color: transaction._pmColor, fontVariationSettings: "'FILL' 1" }}
+                >
+                  {transaction._pmIcon}
+                </span>
+              </div>
+              <span className="text-[11px] truncate" style={{ color: transaction._pmColor }}>
+                {transaction._pmLast4 ? `•••• ${transaction._pmLast4}` : transaction._pmName}
               </span>
-              <input
-                className="w-full bg-white dark:bg-[#1c2127] border border-gray-200 dark:border-[#3b4754] rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary placeholder:text-gray-400 transition-all"
-                placeholder="Search by merchant or description..."
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-          </div>
-          <div className="flex-1 min-w-[240px]">
-            <label className="block text-xs font-semibold text-slate-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">
-              Date Range
-            </label>
-            <div className="relative group">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary material-symbols-outlined">
-                calendar_today
-              </span>
-              <input
-                className="w-full bg-white dark:bg-[#1c2127] border border-gray-200 dark:border-[#3b4754] rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary placeholder:text-gray-400 transition-all"
-                type="text"
-                value={selectedDateRange}
-                readOnly
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 material-symbols-outlined cursor-pointer hover:text-white">
-                expand_more
-              </span>
-            </div>
-          </div>
+            </>
+          ) : transaction._notes ? (
+            <span className="text-[11px] text-text-secondary truncate">{transaction._notes}</span>
+          ) : null}
         </div>
-        {/* Chips */}
-        <div className="flex gap-2 overflow-x-auto pb-1 xl:pb-0 no-scrollbar">
-          <button className="whitespace-nowrap flex items-center gap-2 h-10 px-4 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-bold shadow-md">
-            {selectedCategory}
+
+        {/* Action buttons — always visible on mobile */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          <button
+            onClick={() => onEdit?.(transaction)}
+            className="w-7 h-7 rounded-lg flex items-center justify-center active:scale-90 transition-all"
+            style={{ background: "rgba(139,92,246,0.12)" }}
+          >
+            <span className="material-symbols-rounded" style={{ fontSize: "14px", color: "#A78BFA", fontVariationSettings: "'FILL' 1" }}>edit</span>
           </button>
-          <button className="whitespace-nowrap flex items-center gap-2 h-10 px-4 rounded-lg bg-white dark:bg-[#283039] border border-gray-200 dark:border-transparent text-slate-600 dark:text-gray-300 text-sm font-medium hover:bg-slate-50 dark:hover:bg-[#3b4754] transition-colors">
-            Income
-            <span className="material-symbols-outlined text-[18px]">
-              expand_more
-            </span>
-          </button>
-          <button className="whitespace-nowrap flex items-center gap-2 h-10 px-4 rounded-lg bg-white dark:bg-[#283039] border border-gray-200 dark:border-transparent text-slate-600 dark:text-gray-300 text-sm font-medium hover:bg-slate-50 dark:hover:bg-[#3b4754] transition-colors">
-            Expenses
-            <span className="material-symbols-outlined text-[18px]">
-              expand_more
-            </span>
-          </button>
-          <button className="whitespace-nowrap flex items-center gap-2 h-10 px-4 rounded-lg bg-white dark:bg-[#283039] border border-gray-200 dark:border-transparent text-slate-600 dark:text-gray-300 text-sm font-medium hover:bg-slate-50 dark:hover:bg-[#3b4754] transition-colors">
-            Transfers
-            <span className="material-symbols-outlined text-[18px]">
-              expand_more
-            </span>
+          <button
+            onClick={() => onDelete?.(transaction)}
+            className="w-7 h-7 rounded-lg flex items-center justify-center active:scale-90 transition-all"
+            style={{ background: "rgba(239,68,68,0.1)" }}
+          >
+            <span className="material-symbols-rounded" style={{ fontSize: "14px", color: "#F87171", fontVariationSettings: "'FILL' 1" }}>delete</span>
           </button>
         </div>
       </div>
+    </div>
+  </div>
+);
 
-      {/* Data Table */}
-      <div className="w-full overflow-hidden rounded-xl border border-gray-200 dark:border-[#3b4754] bg-white dark:bg-[#182029] shadow-sm">
+const TransactionsTable = ({ transactions, filterOptions, categories = [], onEdit, onDelete }) => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+
+  const rows = transactions.map(normalise);
+
+  // Build category pills from real transaction data
+  const usedCategories = Array.from(
+    new Map(
+      rows
+        .filter((tx) => tx._catName !== "Uncategorised")
+        .map((tx) => [tx._catName, { name: tx._catName, color: tx._catColor }])
+    ).values()
+  );
+
+  const filteredTransactions = rows.filter((transaction) => {
+    const matchesSearch =
+      transaction.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      transaction._notes.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      transaction._catName.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory =
+      selectedCategory === "All" ||
+      transaction._catName === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  const footerRow = (
+    <div
+      className="flex items-center justify-between px-4 py-3"
+      style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}
+    >
+      <p className="text-xs text-text-secondary">
+        Showing <span className="font-bold text-white">{filteredTransactions.length}</span> results
+      </p>
+    </div>
+  );
+
+  return (
+    <div className="flex flex-col gap-4">
+      {/* Filters */}
+      <div className="flex flex-col gap-3">
+        <div className="relative">
+          <span
+            className="material-symbols-rounded absolute left-3 top-1/2 -translate-y-1/2"
+            style={{ fontSize: "18px", color: "#7B8FA8" }}
+          >
+            search
+          </span>
+          <input
+            className="w-full py-2.5 pl-10 pr-4 text-sm placeholder:text-text-secondary"
+            style={inputStyle}
+            placeholder="Search transactions…"
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        {usedCategories.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setSelectedCategory("All")}
+              className="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all"
+              style={selectedCategory === "All"
+                ? { background: "linear-gradient(135deg, #8B5CF6, #6D28D9)", color: "white" }
+                : { background: "rgba(255,255,255,0.05)", color: "#7B8FA8", border: "1px solid rgba(255,255,255,0.07)" }
+              }
+            >
+              All
+            </button>
+            {usedCategories.map(({ name, color }) => (
+              <button
+                key={name}
+                onClick={() => setSelectedCategory(name)}
+                className="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all"
+                style={selectedCategory === name
+                  ? { background: color, color: "white" }
+                  : { background: `${color}18`, color: color, border: `1px solid ${color}30` }
+                }
+              >
+                {name}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ── Mobile card list (hidden on md+) ── */}
+      <div className="flex flex-col md:hidden rounded-2xl overflow-hidden" style={glassStyle}>
+        {filteredTransactions.length === 0 ? (
+          <p className="px-4 py-8 text-center text-sm text-text-secondary">No transactions found</p>
+        ) : (
+          filteredTransactions.map((tx, i) => (
+            <MobileTransactionCard
+              key={tx.id}
+              transaction={tx}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              isLast={i === filteredTransactions.length - 1}
+            />
+          ))
+        )}
+        {footerRow}
+      </div>
+
+      {/* ── Desktop table (hidden below md) ── */}
+      <div className="hidden md:block w-full overflow-hidden rounded-2xl" style={glassStyle}>
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-50 dark:bg-[#1c252e] border-b border-gray-200 dark:border-[#3b4754]">
-                <th className="p-4 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-gray-400 whitespace-nowrap">
-                  Date
-                </th>
-                <th className="p-4 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-gray-400 whitespace-nowrap w-1/3">
-                  Description
-                </th>
-                <th className="p-4 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-gray-400 whitespace-nowrap">
-                  Category
-                </th>
-                <th className="p-4 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-gray-400 whitespace-nowrap">
-                  Type
-                </th>
-                <th className="p-4 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-gray-400 whitespace-nowrap">
-                  Status
-                </th>
-                <th className="p-4 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-gray-400 whitespace-nowrap text-right">
-                  Amount
-                </th>
-                <th className="p-4 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-gray-400 whitespace-nowrap text-center">
-                  Actions
-                </th>
+          <table className="w-full text-left text-sm min-w-[640px]">
+            <thead style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+              <tr>
+                {["Date", "Description", "Category", "Paid Via", "Amount", ""].map((h) => (
+                  <th
+                    key={h}
+                    className="px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest whitespace-nowrap"
+                    style={{ color: "#7B8FA8" }}
+                  >
+                    {h}
+                  </th>
+                ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-[#3b4754]">
-              {filteredTransactions.map((transaction) => (
+            <tbody>
+              {filteredTransactions.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-4 py-10 text-center text-sm text-text-secondary">
+                    No transactions found
+                  </td>
+                </tr>
+              ) : filteredTransactions.map((transaction, i) => (
                 <tr
                   key={transaction.id}
-                  className="group hover:bg-slate-50 dark:hover:bg-[#1f2833] transition-colors"
+                  className="group transition-all"
+                  style={i < filteredTransactions.length - 1
+                    ? { borderBottom: "1px solid rgba(255,255,255,0.05)" }
+                    : {}}
                 >
-                  <td className="p-4 text-sm text-slate-600 dark:text-gray-300 whitespace-nowrap">
-                    {transaction.date}
+                  <td className="px-4 py-3.5 text-text-secondary whitespace-nowrap text-xs">
+                    {transaction._dateStr}
                   </td>
-                  <td className="p-4">
+                  <td className="px-4 py-3.5">
                     <div className="flex items-center gap-3">
                       <div
-                        className={`h-10 w-10 rounded-lg ${transaction.iconBg} flex items-center justify-center ${transaction.iconColor} shrink-0`}
+                        className="h-9 w-9 rounded-xl flex items-center justify-center shrink-0"
+                        style={{ background: `${transaction._catColor}18` }}
                       >
-                        <span className="material-symbols-outlined">
-                          {transaction.icon}
+                        <span
+                          className="material-symbols-rounded"
+                          style={{ fontSize: "18px", color: transaction._catColor, fontVariationSettings: "'FILL' 1" }}
+                        >
+                          {transaction._catIcon}
                         </span>
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-slate-900 dark:text-white">
-                          {transaction.title}
-                        </p>
-                        <p className="text-xs text-slate-500 dark:text-gray-400">
-                          {transaction.description}
-                        </p>
+                        <p className="text-sm font-semibold text-white">{transaction.title}</p>
+                        {transaction._notes && (
+                          <p className="text-xs text-text-secondary">{transaction._notes}</p>
+                        )}
                       </div>
                     </div>
                   </td>
-                  <td className="p-4 text-sm text-slate-600 dark:text-gray-300 whitespace-nowrap">
-                    {transaction.category}
-                  </td>
-                  <td className="p-4 text-sm text-slate-600 dark:text-gray-300 whitespace-nowrap">
-                    {transaction.type}
-                  </td>
-                  <td className="p-4 whitespace-nowrap">
-                    <span
-                      className={`inline-flex items-center gap-1.5 py-1 px-2.5 rounded-full text-xs font-medium border ${
-                        statusColors[transaction.status]
-                      }`}
-                    >
+                  <td className="px-4 py-3.5 whitespace-nowrap">
+                    {transaction._catName !== "Uncategorised" ? (
                       <span
-                        className={`w-1.5 h-1.5 rounded-full ${
-                          transaction.status === "completed"
-                            ? "bg-green-500"
-                            : transaction.status === "pending"
-                              ? "bg-yellow-500 animate-pulse"
-                              : "bg-red-500"
-                        }`}
-                      ></span>
-                      {transaction.statusText}
-                    </span>
+                        className="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-lg text-[10px] font-bold"
+                        style={{ background: `${transaction._catColor}18`, color: transaction._catColor }}
+                      >
+                        {transaction._catName}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-text-secondary">—</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3.5 whitespace-nowrap">
+                    {transaction._pmName ? (
+                      <div className="flex items-center gap-1.5">
+                        <div
+                          className="w-5 h-5 rounded-md flex items-center justify-center shrink-0"
+                          style={{ background: `${transaction._pmColor}22` }}
+                        >
+                          <span
+                            className="material-symbols-rounded"
+                            style={{ fontSize: "12px", color: transaction._pmColor, fontVariationSettings: "'FILL' 1" }}
+                          >
+                            {transaction._pmIcon}
+                          </span>
+                        </div>
+                        <span className="text-xs font-medium" style={{ color: transaction._pmColor }}>
+                          {transaction._pmLast4 ? `•••• ${transaction._pmLast4}` : transaction._pmName}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-text-secondary">—</span>
+                    )}
                   </td>
                   <td
-                    className={`p-4 text-sm font-bold ${getAmountColor(
-                      transaction.amount,
-                    )} text-right whitespace-nowrap`}
+                    className="px-4 py-3.5 text-sm font-bold text-right whitespace-nowrap"
+                    style={{ color: "#F87171" }}
                   >
-                    {formatCurrency(transaction.amount)}
+                    -₹{transaction._amt.toFixed(2)}
                   </td>
-                  <td className="p-4 text-center whitespace-nowrap">
-                    <button className="text-gray-400 hover:text-primary transition-colors p-1">
-                      <span className="material-symbols-outlined text-[20px]">
-                        more_vert
-                      </span>
-                    </button>
+                  <td className="px-4 py-3.5 text-center whitespace-nowrap">
+                    <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                      <button
+                        onClick={() => onEdit?.(transaction)}
+                        className="w-7 h-7 rounded-lg flex items-center justify-center transition-all active:scale-90"
+                        style={{ background: "rgba(139,92,246,0.12)" }}
+                        title="Edit"
+                      >
+                        <span className="material-symbols-rounded" style={{ fontSize: "14px", color: "#A78BFA", fontVariationSettings: "'FILL' 1" }}>edit</span>
+                      </button>
+                      <button
+                        onClick={() => onDelete?.(transaction)}
+                        className="w-7 h-7 rounded-lg flex items-center justify-center transition-all active:scale-90"
+                        style={{ background: "rgba(239,68,68,0.12)" }}
+                        title="Delete"
+                      >
+                        <span className="material-symbols-rounded" style={{ fontSize: "14px", color: "#F87171", fontVariationSettings: "'FILL' 1" }}>delete</span>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-        {/* Pagination */}
-        <div className="flex items-center justify-between p-4 border-t border-gray-200 dark:border-[#3b4754] bg-slate-50 dark:bg-[#1c252e]">
-          <p className="text-sm text-slate-500 dark:text-gray-400">
-            Showing{" "}
-            <span className="font-bold text-slate-900 dark:text-white">1</span>{" "}
-            to{" "}
-            <span className="font-bold text-slate-900 dark:text-white">
-              {filteredTransactions.length}
-            </span>{" "}
-            of{" "}
-            <span className="font-bold text-slate-900 dark:text-white">
-              {filteredTransactions.length}
-            </span>{" "}
-            results
-          </p>
-          <div className="flex gap-2">
-            <button
-              className="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-[#3b4754] text-slate-600 dark:text-gray-400 text-sm font-medium hover:bg-white dark:hover:bg-[#283039] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              disabled
-            >
-              Previous
-            </button>
-            <button className="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-[#3b4754] text-slate-600 dark:text-gray-400 text-sm font-medium hover:bg-white dark:hover:bg-[#283039] transition-colors">
-              Next
-            </button>
-          </div>
-        </div>
+        {footerRow}
       </div>
     </div>
   );

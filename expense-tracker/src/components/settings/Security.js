@@ -2,32 +2,48 @@ import React from "react";
 
 const Security = ({ securityOptions, onSecurityAction }) => {
   return (
-    <div className="rounded-xl bg-white dark:bg-surface-dark border border-[#e5e7eb] dark:border-surface-highlight shadow-sm p-6">
-      <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4">
-        Security
-      </h2>
-      <div className="space-y-4">
+    <div
+      style={{
+        background: "rgba(255,255,255,0.04)",
+        backdropFilter: "blur(20px)",
+        border: "1px solid rgba(255,255,255,0.07)",
+        borderRadius: "1rem",
+        padding: "1.5rem",
+      }}
+    >
+      <h2 className="text-white font-bold text-lg mb-4">Security</h2>
+      <div className="space-y-3">
         {securityOptions.map((option) => (
-          <div key={option.id}>
-            <button
-              onClick={() => onSecurityAction && onSecurityAction(option.id)}
-              className="w-full text-left px-4 py-3 rounded-lg border border-[#e5e7eb] dark:border-surface-highlight hover:bg-slate-50 dark:hover:bg-surface-highlight/30 transition-colors"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-slate-900 dark:text-white">
-                    {option.title}
-                  </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                    {option.description}
-                  </p>
-                </div>
-                <span className="material-symbols-outlined text-slate-400">
-                  {option.icon}
-                </span>
+          <button
+            key={option.id}
+            onClick={() => onSecurityAction && onSecurityAction(option.id)}
+            className="w-full text-left px-4 py-3 rounded-lg transition-all"
+            style={{
+              background: "rgba(255,255,255,0.03)",
+              border: "1px solid rgba(255,255,255,0.07)",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "rgba(255,255,255,0.06)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "rgba(255,255,255,0.03)";
+            }}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-white">{option.title}</p>
+                <p className="text-xs mt-1" style={{ color: "#7B8FA8" }}>
+                  {option.description}
+                </p>
               </div>
-            </button>
-          </div>
+              <span
+                className="material-symbols-rounded"
+                style={{ color: "#A78BFA", fontVariationSettings: "'FILL' 1" }}
+              >
+                {option.icon}
+              </span>
+            </div>
+          </button>
         ))}
       </div>
     </div>

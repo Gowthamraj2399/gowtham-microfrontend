@@ -20,11 +20,20 @@ const CustomBarChart = ({ title, subtitle, data }) => {
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white dark:bg-surface-dark border border-surface-highlight rounded-lg p-3 shadow-lg">
-          <p className="font-medium text-slate-900 dark:text-white">{`${label}`}</p>
+        <div
+          style={{
+            background: "rgba(13,17,23,0.95)",
+            backdropFilter: "blur(20px)",
+            border: "1px solid rgba(255,255,255,0.1)",
+            borderRadius: "12px",
+            padding: "10px 14px",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+          }}
+        >
+          <p style={{ color: "#E2E8F0", fontWeight: 600, marginBottom: 6, fontSize: 13 }}>{label}</p>
           {payload.map((entry, index) => (
-            <p key={index} style={{ color: entry.color }} className="text-sm">
-              {`${entry.dataKey}: ${entry.value}%`}
+            <p key={index} style={{ color: entry.color, fontSize: 12, marginTop: 2 }}>
+              {entry.dataKey}: {entry.value}%
             </p>
           ))}
         </div>
@@ -34,64 +43,52 @@ const CustomBarChart = ({ title, subtitle, data }) => {
   };
 
   return (
-    <div className="lg:col-span-2 rounded-xl bg-white dark:bg-surface-dark border border-[#e5e7eb] dark:border-surface-highlight p-5 shadow-sm flex flex-col">
+    <div
+      className="lg:col-span-2 rounded-2xl p-5 flex flex-col"
+      style={{
+        background: "rgba(255,255,255,0.04)",
+        backdropFilter: "blur(20px)",
+        border: "1px solid rgba(255,255,255,0.07)",
+      }}
+    >
       <div className="flex justify-between items-center mb-4">
         <div>
-          <h3 className="text-base font-bold text-slate-900 dark:text-white">
-            {title}
-          </h3>
-          <p className="text-xs text-text-secondary">{subtitle}</p>
+          <h3 className="text-sm font-bold text-white">{title}</h3>
+          <p className="text-xs text-text-secondary mt-0.5">{subtitle}</p>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-primary"></span>
-          <span className="text-xs text-text-secondary">Income</span>
-          <span className="w-2.5 h-2.5 rounded-full bg-orange-500 ml-1"></span>
-          <span className="text-xs text-text-secondary">Expense</span>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full" style={{ background: "#8B5CF6" }}></span>
+            <span className="text-xs text-text-secondary">Income</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full" style={{ background: "#F59E0B" }}></span>
+            <span className="text-xs text-text-secondary">Expense</span>
+          </div>
         </div>
       </div>
       <div className="flex-1" style={{ minHeight: "220px" }}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={chartData}
-            margin={{
-              top: 10,
-              right: 20,
-              left: 10,
-              bottom: 5,
-            }}
-            barCategoryGap="15%"
+            margin={{ top: 10, right: 10, left: -10, bottom: 5 }}
+            barCategoryGap="20%"
           >
-            <CartesianGrid
-              strokeDasharray="3 3"
-              stroke="#e5e7eb"
-              className="dark:stroke-surface-highlight"
-            />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
             <XAxis
               dataKey="month"
               axisLine={false}
               tickLine={false}
-              tick={{ fill: "#64748b", fontSize: 12 }}
-              className="dark:fill-text-secondary"
+              tick={{ fill: "#7B8FA8", fontSize: 11, fontFamily: "Inter" }}
             />
             <YAxis
               axisLine={false}
               tickLine={false}
-              tick={{ fill: "#64748b", fontSize: 12 }}
-              className="dark:fill-text-secondary"
+              tick={{ fill: "#7B8FA8", fontSize: 11, fontFamily: "Inter" }}
             />
-            <Tooltip content={<CustomTooltip />} />
-            <Bar
-              dataKey="Income"
-              fill="#137fec"
-              radius={[4, 4, 0, 0]}
-              className="hover:opacity-80 transition-opacity cursor-pointer"
-            />
-            <Bar
-              dataKey="Expense"
-              fill="#f97316"
-              radius={[4, 4, 0, 0]}
-              className="hover:opacity-80 transition-opacity cursor-pointer"
-            />
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(139,92,246,0.06)" }} />
+            <Bar dataKey="Income" fill="#8B5CF6" radius={[5, 5, 0, 0]} />
+            <Bar dataKey="Expense" fill="#F59E0B" radius={[5, 5, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>

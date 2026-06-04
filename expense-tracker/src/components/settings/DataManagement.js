@@ -2,8 +2,19 @@ import React from "react";
 
 const DataManagement = ({ options, onAction }) => {
   return (
-    <div className="rounded-xl bg-white dark:bg-surface-dark border border-[#e5e7eb] dark:border-surface-highlight shadow-sm p-6">
-      <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-4 uppercase tracking-wider">
+    <div
+      style={{
+        background: "rgba(255,255,255,0.04)",
+        backdropFilter: "blur(20px)",
+        border: "1px solid rgba(255,255,255,0.07)",
+        borderRadius: "1rem",
+        padding: "1.5rem",
+      }}
+    >
+      <h3
+        className="text-xs font-semibold uppercase tracking-widest mb-4"
+        style={{ color: "#A78BFA" }}
+      >
         Data Management
       </h3>
       <div className="space-y-3">
@@ -11,9 +22,16 @@ const DataManagement = ({ options, onAction }) => {
           <button
             key={option.id}
             onClick={() => onAction && onAction(option.id)}
-            className="w-full px-4 py-2.5 rounded-lg bg-slate-100 dark:bg-surface-highlight hover:bg-slate-200 dark:hover:bg-surface-highlight/70 text-slate-900 dark:text-white text-sm font-medium transition-colors flex items-center justify-center gap-2"
+            className="w-full px-4 py-2.5 rounded-lg text-white text-sm font-medium transition-all flex items-center justify-center gap-2"
+            style={{
+              background: "rgba(255,255,255,0.06)",
+              border: "1px solid rgba(255,255,255,0.08)",
+            }}
           >
-            <span className="material-symbols-outlined text-[18px]">
+            <span
+              className="material-symbols-rounded text-[18px]"
+              style={{ fontVariationSettings: "'FILL' 1", color: "#A78BFA" }}
+            >
               {option.icon}
             </span>
             {option.label}
