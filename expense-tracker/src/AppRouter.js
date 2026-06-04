@@ -13,7 +13,11 @@ import PaymentMethodsPage from "./pages/payment-methods";
 import SettingsPage from "./pages/settings";
 import NotFoundPage from "./pages/not-found";
 import AuthPage from "./pages/auth";
+import NotificationsPage from "./pages/notifications";
 import { AuthProvider, useAuth } from "./lib/AuthContext";
+import { useAutoCreateRecurring, useRecurringPayments } from "./lib/recurring-query";
+import { useAutoCreateEmiPayments, useEmis } from "./lib/emi-query";
+import { triggerOverdueNotifications, requestNotificationPermission } from "./lib/notifications";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +49,7 @@ const AnimatedRoutes = () => {
           <Route path="/emi" element={<EmiPage />} />
           <Route path="/recurring-payments" element={<RecurringPaymentsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </motion.div>
@@ -61,6 +66,7 @@ const MobileHeader = ({ onMenuOpen }) => {
     "/payment-methods": "Accounts & Cards",
     "/emi": "EMI Management",
     "/recurring-payments": "Recurring",
+    "/notifications": "Notifications",
     "/settings": "Settings",
   };
   const title = pageTitles[location.pathname] || "SpendTracker";
@@ -134,8 +140,29 @@ const ProtectedRoute = ({ children }) => {
   return session ? children : <Navigate to="/auth/login" replace />;
 };
 
+function useOverdueNotificationTrigger() {
+  const { data: recurring = [] } = useRecurringPayments();
+  const { data: emis = [] }      = useEmis();
+  const hasRun = React.useRef(false);
+  useEffect(() => {
+    if (hasRun.current || (!recurring.length && !emis.length)) return;
+    hasRun.current = true;
+    // Request permission silently on first overdue item, then fire
+    const today = new Date().toISOString().split("T")[0];
+    const hasOverdue = recurring.some((r) => r.is_active && r.next_due_date <= today)
+      || emis.some((e) => e.is_active && e.next_due_date <= today);
+    if (!hasOverdue) return;
+    requestNotificationPermission().then((granted) => {
+      if (granted) triggerOverdueNotifications(recurring, emis);
+    });
+  }, [recurring, emis]);
+}
+
 const AppLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  useAutoCreateRecurring();
+  useAutoCreateEmiPayments();
+  useOverdueNotificationTrigger();
 
   return (
     <div className="flex h-screen w-full overflow-hidden" style={{ background: "#080B14" }}>

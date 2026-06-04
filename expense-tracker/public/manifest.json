@@ -1,13 +1,14 @@
 {
-  "name": "Finance Tracker",
-  "short_name": "Finance",
+  "name": "SpendTracker",
+  "short_name": "SpendTracker",
   "description": "Track expenses, EMIs, goals and investments",
   "start_url": "/expense-tracker/dashboard",
   "id": "/expense-tracker/dashboard",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#3b82f6",
+  "display_override": ["standalone", "minimal-ui"],
+  "background_color": "#080B14",
+  "theme_color": "#080B14",
   "orientation": "portrait-primary",
   "icons": [
     {

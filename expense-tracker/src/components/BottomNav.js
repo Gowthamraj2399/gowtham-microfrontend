@@ -2,13 +2,21 @@ import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { sidebarConfig } from "../config/sidebarConfig";
+import { useRecurringPayments } from "../lib/recurring-query";
+import { useEmis } from "../lib/emi-query";
 
 // Show only top 5 nav items in bottom bar
-const BOTTOM_NAV_IDS = ["dashboard", "transactions", "goals", "emi", "settings"];
+const BOTTOM_NAV_IDS = ["dashboard", "transactions", "recurring-payments", "notifications", "settings"];
 
 const BottomNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { data: recurring = [] } = useRecurringPayments();
+  const { data: emis = [] }      = useEmis();
+
+  const today = new Date().toISOString().split("T")[0];
+  const overdueCount = recurring.filter((r) => r.is_active && r.next_due_date <= today).length
+    + emis.filter((e) => e.is_active && e.next_due_date <= today).length;
 
   const items = sidebarConfig.menuItems.filter((item) =>
     BOTTOM_NAV_IDS.includes(item.id)
@@ -48,6 +56,12 @@ const BottomNav = () => {
             >
               {item.icon}
             </span>
+            {item.id === "notifications" && overdueCount > 0 && (
+              <span className="absolute top-1.5 right-3.5 z-20 flex items-center justify-center"
+                style={{ minWidth: "14px", height: "14px", borderRadius: "7px", background: "#EF4444", border: "2px solid #080B14", fontSize: "8px", fontWeight: 900, color: "white", lineHeight: 1, padding: "0 2px" }}>
+                {overdueCount > 9 ? "9+" : overdueCount}
+              </span>
+            )}
             <span
               className={`text-[9px] font-semibold relative z-10 transition-colors duration-200 leading-tight ${
                 isActive ? "text-primary-light" : "text-text-secondary"

@@ -45,6 +45,15 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background: #080B14;
   color: #F1F5F9;
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: pan-y;
+}
+
+/* ─── Prevent iOS auto-zoom on input focus (font-size must be ≥ 16px) ── */
+input, textarea, select {
+  font-size: 16px !important;
+  font-family: 'Inter', sans-serif;
 }
 
 /* ─── Scrollbar ─────────────────────────────────────────── */
@@ -147,6 +156,22 @@ body {
 .sidebar-active {
   background: linear-gradient(135deg, rgba(139,92,246,0.2) 0%, rgba(6,182,212,0.1) 100%);
   border-left: 3px solid #8B5CF6;
+}
+
+/* ─── Date input: strip iOS native chrome ──────────────── */
+input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  min-height: 2.625rem; /* matches py-2.5 + font */
+  line-height: normal;
+}
+input[type="date"]::-webkit-date-and-time-value {
+  text-align: left;
+}
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.6);
+  cursor: pointer;
+  opacity: 0.5;
 }
 
 /* ─── Input Styles ──────────────────────────────────────── */

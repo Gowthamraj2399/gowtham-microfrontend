@@ -531,7 +531,12 @@ const AddTransactionModal = ({ open, onClose, onSuccess, initial = null }) => {
                     boxShadow: `0 4px 15px ${accent}44`,
                   }}
                 >
-                  {isSaving ? "Saving…" : isEditing ? "Save Changes" : "Add Expense"}
+                  {isSaving ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <span className="w-4 h-4 rounded-full border-2 shrink-0 animate-spin" style={{ borderColor: "rgba(255,255,255,0.3)", borderTopColor: "white" }} />
+                      Saving…
+                    </span>
+                  ) : isEditing ? "Save Changes" : "Add Expense"}
                 </button>
               </div>
             </form>

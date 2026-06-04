@@ -101,24 +101,88 @@ const TransactionsPage = () => {
         </motion.button>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
-        {liveStats.map((stat, i) => (
-          <motion.div
-            key={stat.id}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: i * 0.07 }}
+      {/* Stats — desktop: 3-col grid of cards | mobile: compact inline bar */}
+      {!isLoading && (
+        <>
+          {/* Mobile summary bar */}
+          <div
+            className="flex sm:hidden rounded-2xl mb-4 overflow-hidden"
+            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}
           >
-            <TransactionStatsCard stat={stat} />
-          </motion.div>
-        ))}
-      </div>
+            {liveStats.map((stat, i) => (
+              <div
+                key={stat.id}
+                className="flex-1 flex flex-col gap-0.5 px-4 py-3 min-w-0"
+                style={i < liveStats.length - 1 ? { borderRight: "1px solid rgba(255,255,255,0.07)" } : {}}
+              >
+                <p
+                  className="text-[9px] font-bold uppercase tracking-widest truncate"
+                  style={{ color: "#7B8FA8" }}
+                >
+                  {stat.title}
+                </p>
+                <p className="text-white text-base font-bold leading-tight truncate">{stat.value}</p>
+                <p className="text-[10px] truncate" style={{ color: "#7B8FA8" }}>{stat.trend?.label}</p>
+              </div>
+            ))}
+          </div>
 
-      {/* Loading */}
+          {/* Desktop 3-col grid */}
+          <div className="hidden sm:grid grid-cols-3 gap-3 mb-6">
+            {liveStats.map((stat, i) => (
+              <motion.div
+                key={stat.id}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: i * 0.07 }}
+              >
+                <TransactionStatsCard stat={stat} />
+              </motion.div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Stats skeleton — mobile */}
       {isLoading && (
-        <div className="flex items-center justify-center py-16">
-          <div className="w-6 h-6 rounded-full border-2 border-violet-500 border-t-transparent animate-spin" />
+        <div
+          className="flex sm:hidden items-center rounded-2xl mb-4 overflow-hidden"
+          style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}
+        >
+          {[0,1,2].map((i) => (
+            <div
+              key={i}
+              className="flex-1 flex flex-col items-center px-3 py-3 gap-1.5"
+              style={i < 2 ? { borderRight: "1px solid rgba(255,255,255,0.07)" } : {}}
+            >
+              <div className="w-4 h-4 rounded animate-pulse" style={{ background: "rgba(255,255,255,0.08)" }} />
+              <div className="h-3 w-14 rounded animate-pulse" style={{ background: "rgba(255,255,255,0.08)" }} />
+              <div className="h-2 w-10 rounded animate-pulse" style={{ background: "rgba(255,255,255,0.05)" }} />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Skeleton loader */}
+      {isLoading && (
+        <div
+          className="rounded-2xl overflow-hidden"
+          style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}
+        >
+          {[...Array(6)].map((_, i) => (
+            <div
+              key={i}
+              className="px-4 py-3 flex items-center gap-3"
+              style={i < 5 ? { borderBottom: "1px solid rgba(255,255,255,0.05)" } : {}}
+            >
+              <div className="w-9 h-9 rounded-xl shrink-0 animate-pulse" style={{ background: "rgba(255,255,255,0.07)" }} />
+              <div className="flex-1 flex flex-col gap-2">
+                <div className="h-3 rounded-full animate-pulse" style={{ background: "rgba(255,255,255,0.07)", width: `${50 + (i * 13) % 35}%` }} />
+                <div className="h-2 rounded-full animate-pulse" style={{ background: "rgba(255,255,255,0.04)", width: `${25 + (i * 7) % 25}%` }} />
+              </div>
+              <div className="h-3.5 w-16 rounded-full animate-pulse shrink-0" style={{ background: "rgba(255,255,255,0.07)" }} />
+            </div>
+          ))}
         </div>
       )}
 

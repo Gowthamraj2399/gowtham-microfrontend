@@ -38,7 +38,7 @@ export const SpendingTrendChart = ({ title, subtitle, data }) => {
           <p style={{ color: "#E2E8F0", fontWeight: 600, marginBottom: 6, fontSize: 12 }}>Day {label}</p>
           {payload.map((entry) => (
             <p key={entry.dataKey} style={{ color: entry.color, fontSize: 12, marginTop: 2 }}>
-              {entry.dataKey === "thisMonth" ? "This month" : "Last month"}: ${entry.value}
+              {entry.dataKey === "thisMonth" ? "This month" : "Last month"}: ₹{entry.value.toLocaleString("en-IN")}
             </p>
           ))}
         </div>
@@ -89,7 +89,7 @@ export const SpendingTrendChart = ({ title, subtitle, data }) => {
               axisLine={false}
               tickLine={false}
               tick={{ fill: "#7B8FA8", fontSize: 11, fontFamily: "Inter" }}
-              tickFormatter={(v) => `$${v}`}
+              tickFormatter={(v) => `₹${v.toLocaleString("en-IN")}`}
             />
             <Tooltip content={<CustomTooltip />} cursor={{ stroke: "rgba(139,92,246,0.2)", strokeWidth: 1 }} />
             <Area
@@ -124,7 +124,7 @@ export const MonthlyComparisonChart = ({ title, subtitle, data, previousAvg }) =
       return (
         <div style={tooltipStyle}>
           <p style={{ color: "#E2E8F0", fontWeight: 600, marginBottom: 4, fontSize: 12 }}>{label}</p>
-          <p style={{ color: "#A78BFA", fontSize: 13, fontWeight: 700 }}>${payload[0].value.toLocaleString()}</p>
+          <p style={{ color: "#A78BFA", fontSize: 13, fontWeight: 700 }}>₹{payload[0].value.toLocaleString("en-IN")}</p>
         </div>
       );
     }
@@ -140,7 +140,7 @@ export const MonthlyComparisonChart = ({ title, subtitle, data, previousAvg }) =
         </div>
         <div className="flex items-center gap-1.5">
           <span className="text-[10px] text-text-secondary">Avg</span>
-          <span className="text-xs font-bold" style={{ color: "#F59E0B" }}>${previousAvg.toLocaleString()}</span>
+          <span className="text-xs font-bold" style={{ color: "#F59E0B" }}>₹{previousAvg.toLocaleString("en-IN")}</span>
         </div>
       </div>
       <div className="flex-1" style={{ minHeight: "180px" }}>
@@ -157,7 +157,7 @@ export const MonthlyComparisonChart = ({ title, subtitle, data, previousAvg }) =
               axisLine={false}
               tickLine={false}
               tick={{ fill: "#7B8FA8", fontSize: 10, fontFamily: "Inter" }}
-              tickFormatter={(v) => `$${v / 1000}k`}
+              tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`}
             />
             <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(139,92,246,0.06)" }} />
             <ReferenceLine

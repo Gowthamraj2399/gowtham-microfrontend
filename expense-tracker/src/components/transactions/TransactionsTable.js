@@ -41,87 +41,61 @@ function normalise(tx) {
 // ── Mobile transaction card ────────────────────────────────────────────────
 const MobileTransactionCard = ({ transaction, onEdit, onDelete, isLast }) => (
   <div
-    className="px-4 py-3.5 flex items-start gap-3"
+    className="px-3.5 py-2.5 flex items-center gap-2.5"
     style={!isLast ? { borderBottom: "1px solid rgba(255,255,255,0.05)" } : {}}
   >
     {/* Icon */}
     <div
-      className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
-      style={{ background: `${transaction._catColor}18` }}
+      className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+      style={{ background: `${transaction._catColor}15` }}
     >
       <span
         className="material-symbols-rounded"
-        style={{ fontSize: "19px", color: transaction._catColor, fontVariationSettings: "'FILL' 1" }}
+        style={{ fontSize: "17px", color: transaction._catColor, fontVariationSettings: "'FILL' 1" }}
       >
         {transaction._catIcon}
       </span>
     </div>
 
-    {/* Content */}
+    {/* Center: title + meta row */}
     <div className="flex-1 min-w-0">
-      {/* Row 1: title + amount */}
-      <div className="flex items-start justify-between gap-2">
-        <p className="text-sm font-bold text-white leading-snug truncate">{transaction.title}</p>
-        <span className="text-sm font-bold shrink-0" style={{ color: "#F87171" }}>
-          -₹{transaction._amt.toFixed(2)}
-        </span>
-      </div>
-
-      {/* Row 2: date + category pill */}
-      <div className="flex items-center gap-2 mt-1 flex-wrap">
-        <span className="text-[11px]" style={{ color: "#7B8FA8" }}>{transaction._dateStr}</span>
+      <p className="text-sm font-semibold text-white truncate leading-snug">{transaction.title}</p>
+      <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+        <span className="text-[10px]" style={{ color: "#7B8FA8" }}>{transaction._dateStr}</span>
         {transaction._catName !== "Uncategorised" && (
           <span
-            className="text-[10px] font-bold px-1.5 py-0.5 rounded-md"
-            style={{ background: `${transaction._catColor}18`, color: transaction._catColor }}
+            className="text-[9px] font-bold px-1.5 py-0.5 rounded"
+            style={{ background: `${transaction._catColor}15`, color: transaction._catColor }}
           >
             {transaction._catName}
           </span>
         )}
+        {transaction._pmName && (
+          <span className="text-[10px] truncate" style={{ color: transaction._pmColor }}>
+            {transaction._pmLast4 ? `•••• ${transaction._pmLast4}` : transaction._pmName}
+          </span>
+        )}
       </div>
+    </div>
 
-      {/* Row 3: payment method + notes */}
-      <div className="flex items-center justify-between gap-2 mt-1.5">
-        <div className="flex items-center gap-1.5 min-w-0">
-          {transaction._pmName ? (
-            <>
-              <div
-                className="w-4 h-4 rounded flex items-center justify-center shrink-0"
-                style={{ background: `${transaction._pmColor}22` }}
-              >
-                <span
-                  className="material-symbols-rounded"
-                  style={{ fontSize: "10px", color: transaction._pmColor, fontVariationSettings: "'FILL' 1" }}
-                >
-                  {transaction._pmIcon}
-                </span>
-              </div>
-              <span className="text-[11px] truncate" style={{ color: transaction._pmColor }}>
-                {transaction._pmLast4 ? `•••• ${transaction._pmLast4}` : transaction._pmName}
-              </span>
-            </>
-          ) : transaction._notes ? (
-            <span className="text-[11px] text-text-secondary truncate">{transaction._notes}</span>
-          ) : null}
-        </div>
-
-        {/* Action buttons — always visible on mobile */}
-        <div className="flex items-center gap-1.5 shrink-0">
-          <button
-            onClick={() => onEdit?.(transaction)}
-            className="w-7 h-7 rounded-lg flex items-center justify-center active:scale-90 transition-all"
-            style={{ background: "rgba(139,92,246,0.12)" }}
-          >
-            <span className="material-symbols-rounded" style={{ fontSize: "14px", color: "#A78BFA", fontVariationSettings: "'FILL' 1" }}>edit</span>
-          </button>
-          <button
-            onClick={() => onDelete?.(transaction)}
-            className="w-7 h-7 rounded-lg flex items-center justify-center active:scale-90 transition-all"
-            style={{ background: "rgba(239,68,68,0.1)" }}
-          >
-            <span className="material-symbols-rounded" style={{ fontSize: "14px", color: "#F87171", fontVariationSettings: "'FILL' 1" }}>delete</span>
-          </button>
-        </div>
+    {/* Right: amount + action buttons stacked */}
+    <div className="flex flex-col items-end gap-1.5 shrink-0">
+      <span className="text-sm font-bold" style={{ color: "#F87171" }}>-₹{transaction._amt.toFixed(2)}</span>
+      <div className="flex items-center gap-1">
+        <button
+          onClick={() => onEdit?.(transaction)}
+          className="w-6 h-6 rounded-md flex items-center justify-center active:scale-90 transition-all"
+          style={{ background: "rgba(139,92,246,0.12)" }}
+        >
+          <span className="material-symbols-rounded" style={{ fontSize: "12px", color: "#A78BFA", fontVariationSettings: "'FILL' 1" }}>edit</span>
+        </button>
+        <button
+          onClick={() => onDelete?.(transaction)}
+          className="w-6 h-6 rounded-md flex items-center justify-center active:scale-90 transition-all"
+          style={{ background: "rgba(239,68,68,0.09)" }}
+        >
+          <span className="material-symbols-rounded" style={{ fontSize: "12px", color: "#F87171", fontVariationSettings: "'FILL' 1" }}>delete</span>
+        </button>
       </div>
     </div>
   </div>
