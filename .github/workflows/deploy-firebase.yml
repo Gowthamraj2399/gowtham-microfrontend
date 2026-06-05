@@ -39,6 +39,7 @@ jobs:
           PRODUCTION_DOMAIN: ${{ secrets.PRODUCTION_DOMAIN }}
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY }}
+          VITE_VAPID_PUBLIC_KEY: ${{ secrets.VITE_VAPID_PUBLIC_KEY }}
 
       - name: Deploy to Firebase Hosting
         run: npx firebase-tools deploy --only hosting --non-interactive --token "$FIREBASE_TOKEN"
