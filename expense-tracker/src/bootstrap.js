@@ -8,10 +8,11 @@ import "./index.css";
 // Skip in development — SW causes issues with webpack HMR and microfrontend dev server
 if ("serviceWorker" in navigator && process.env.NODE_ENV === "production") {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/service-worker.js").catch((err) => {
-      console.warn("Service worker registration failed:", err);
-    });
+    navigator.serviceWorker.register("/service-worker.js")
+      .then((reg) => console.log("[SW] Registered, scope:", reg.scope))
+      .catch((err) => console.warn("[SW] Registration failed:", err));
   });
+  console.log("[Push] VAPID key present:", !!process.env.VITE_VAPID_PUBLIC_KEY);
 }
 
 // Mount function to start up the app
