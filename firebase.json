@@ -6,7 +6,20 @@
       "**/.*",
       "**/node_modules/**"
     ],
+    "headers": [
+      {
+        "source": "/service-worker.js",
+        "headers": [
+          { "key": "Content-Type", "value": "application/javascript" },
+          { "key": "Service-Worker-Allowed", "value": "/" }
+        ]
+      }
+    ],
     "rewrites": [
+      {
+        "source": "/service-worker.js",
+        "destination": "/service-worker.js"
+      },
       {
         "source": "**",
         "destination": "/index.html"
