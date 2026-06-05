@@ -140,24 +140,33 @@ function urlBase64ToUint8Array(base64String) {
  * @param {string} userId  - auth.users id
  */
 export async function subscribeToPush(userId) {
-  if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+  if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+    console.warn("[Push] SW or PushManager not supported");
+    return;
+  }
   const publicKey = process.env.VITE_VAPID_PUBLIC_KEY;
-  if (!publicKey) return;
+  if (!publicKey) {
+    console.warn("[Push] VITE_VAPID_PUBLIC_KEY is not set");
+    return;
+  }
 
   try {
     const reg = await navigator.serviceWorker.ready;
+    console.log("[Push] SW ready, subscribing...");
 
-    // Reuse existing subscription or create a new one
     let pushSub = await reg.pushManager.getSubscription();
     if (!pushSub) {
       pushSub = await reg.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(publicKey),
       });
+      console.log("[Push] New subscription created");
+    } else {
+      console.log("[Push] Reusing existing subscription");
     }
 
     const json = pushSub.toJSON();
-    await supabase.from("push_subscriptions").upsert(
+    const { error } = await supabase.from("push_subscriptions").upsert(
       {
         user_id: userId,
         endpoint: json.endpoint,
@@ -166,8 +175,9 @@ export async function subscribeToPush(userId) {
       },
       { onConflict: "endpoint" }
     );
+    if (error) console.warn("[Push] Supabase upsert failed:", error.message);
+    else console.log("[Push] Subscription saved to Supabase");
   } catch (err) {
-    // Permission denied or browser doesn't support — fail silently
-    console.warn("Push subscription failed:", err.message);
+    console.warn("[Push] Push subscription failed:", err.message);
   }
 }
