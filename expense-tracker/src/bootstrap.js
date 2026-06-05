@@ -5,7 +5,8 @@ import App from "./App";
 import "./index.css";
 
 // Register service worker (needed for push notifications + offline)
-if ("serviceWorker" in navigator) {
+// Skip in development — SW causes issues with webpack HMR and microfrontend dev server
+if ("serviceWorker" in navigator && process.env.NODE_ENV === "production") {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("/service-worker.js").catch((err) => {
       console.warn("Service worker registration failed:", err);

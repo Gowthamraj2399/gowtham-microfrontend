@@ -13,6 +13,7 @@ const devConfig = {
     historyApiFallback: {
       historyApiFallback: true,
     },
+    contentBase: require("path").join(__dirname, "../public"),
   },
   plugins: [
     new ModuleFederationPlugin({
