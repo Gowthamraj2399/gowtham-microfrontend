@@ -17,7 +17,7 @@ import NotificationsPage from "./pages/notifications";
 import { AuthProvider, useAuth } from "./lib/AuthContext";
 import { useAutoCreateRecurring, useRecurringPayments } from "./lib/recurring-query";
 import { useAutoCreateEmiPayments, useEmis } from "./lib/emi-query";
-import { triggerOverdueNotifications, requestNotificationPermission } from "./lib/notifications";
+import { triggerOverdueNotifications, requestNotificationPermission, subscribeToPush } from "./lib/notifications";
 
 const queryClient = new QueryClient();
 
@@ -140,8 +140,7 @@ const ProtectedRoute = ({ children }) => {
   return session ? children : <Navigate to="/auth/login" replace />;
 };
 
-function useOverdueNotificationTrigger() {
-  const { data: recurring = [] } = useRecurringPayments();
+function useOverdueNotificationTrigger() {  const { data: recurring = [] } = useRecurringPayments();
   const { data: emis = [] }      = useEmis();
   const hasRun = React.useRef(false);
   useEffect(() => {
@@ -159,10 +158,20 @@ function useOverdueNotificationTrigger() {
 }
 
 const AppLayout = () => {
+  const { session } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   useAutoCreateRecurring();
   useAutoCreateEmiPayments();
   useOverdueNotificationTrigger();
+
+  // Register for background push once per session
+  useEffect(() => {
+    if (session?.user?.id) {
+      requestNotificationPermission().then((granted) => {
+        if (granted) subscribeToPush(session.user.id);
+      });
+    }
+  }, [session?.user?.id]);
 
   return (
     <div className="flex h-screen w-full overflow-hidden" style={{ background: "#080B14" }}>

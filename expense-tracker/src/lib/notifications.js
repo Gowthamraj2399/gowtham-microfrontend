@@ -1,14 +1,18 @@
 /**
  * Native Web Push notifications via the browser Notifications API + Service Worker.
- * No external service needed — entirely free, works offline as a PWA.
  *
- * How it works:
- *  1. On first open we request Notification permission.
- *  2. On every app load we check overdue recurring + EMI items.
- *  3. We fire a native notification for each unpaid overdue item ONCE per day
- *     (tracked in localStorage so we don't spam).
- *  4. If the SW supports push, we register for background push too (optional future upgrade).
+ * Background push (works even when app is closed):
+ *  - subscribeToPush() registers the browser with the push service and saves
+ *    the subscription to Supabase `push_subscriptions` table.
+ *  - A Supabase Edge Function (called every 8h by cron-job.org) reads all
+ *    subscriptions, checks each user's overdue items, and fires VAPID push.
+ *
+ * In-app push (fallback while app is open):
+ *  - triggerOverdueNotifications() fires local SW notifications once per day
+ *    per overdue item, tracked in localStorage.
  */
+
+import { supabase } from "./supabase";
 
 const NOTIF_LOG_KEY = "sp_notif_log"; // { [itemId]: "YYYY-MM-DD" }
 
@@ -119,4 +123,51 @@ export async function triggerOverdueNotifications(recurringPayments = [], emis =
   }
 
   writeLog(updated);
+}
+
+// ── Background push subscription ─────────────────────────────────────────────
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const raw = atob(base64);
+  return Uint8Array.from([...raw].map((c) => c.charCodeAt(0)));
+}
+
+/**
+ * Subscribe the browser to Web Push and persist the subscription to Supabase.
+ * Safe to call on every app load — it's idempotent (upsert on endpoint).
+ * @param {string} userId  - auth.users id
+ */
+export async function subscribeToPush(userId) {
+  if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+  const publicKey = process.env.VITE_VAPID_PUBLIC_KEY;
+  if (!publicKey) return;
+
+  try {
+    const reg = await navigator.serviceWorker.ready;
+
+    // Reuse existing subscription or create a new one
+    let pushSub = await reg.pushManager.getSubscription();
+    if (!pushSub) {
+      pushSub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(publicKey),
+      });
+    }
+
+    const json = pushSub.toJSON();
+    await supabase.from("push_subscriptions").upsert(
+      {
+        user_id: userId,
+        endpoint: json.endpoint,
+        p256dh: json.keys.p256dh,
+        auth: json.keys.auth,
+      },
+      { onConflict: "endpoint" }
+    );
+  } catch (err) {
+    // Permission denied or browser doesn't support — fail silently
+    console.warn("Push subscription failed:", err.message);
+  }
 }

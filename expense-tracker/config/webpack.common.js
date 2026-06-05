@@ -13,6 +13,9 @@ module.exports = {
       "process.env.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY": JSON.stringify(
         process.env.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY || ""
       ),
+      "process.env.VITE_VAPID_PUBLIC_KEY": JSON.stringify(
+        process.env.VITE_VAPID_PUBLIC_KEY || ""
+      ),
     }),
   ],
   module: {

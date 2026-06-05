@@ -4,6 +4,15 @@ import { createMemoryHistory, createBrowserHistory } from "history";
 import App from "./App";
 import "./index.css";
 
+// Register service worker (needed for push notifications + offline)
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/service-worker.js").catch((err) => {
+      console.warn("Service worker registration failed:", err);
+    });
+  });
+}
+
 // Mount function to start up the app
 const mount = (el, { onNavigate, defaultHistory, initialPath }) => {
   const history =
