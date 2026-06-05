@@ -14,6 +14,7 @@ import SettingsPage from "./pages/settings";
 import NotFoundPage from "./pages/not-found";
 import AuthPage from "./pages/auth";
 import NotificationsPage from "./pages/notifications";
+import BudgetsPage from "./pages/budgets";
 import { AuthProvider, useAuth } from "./lib/AuthContext";
 import { useAutoCreateRecurring, useRecurringPayments } from "./lib/recurring-query";
 import { useAutoCreateEmiPayments, useEmis } from "./lib/emi-query";
@@ -50,6 +51,7 @@ const AnimatedRoutes = () => {
           <Route path="/recurring-payments" element={<RecurringPaymentsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
+          <Route path="/budgets" element={<BudgetsPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </motion.div>
@@ -67,6 +69,7 @@ const MobileHeader = ({ onMenuOpen }) => {
     "/emi": "EMI Management",
     "/recurring-payments": "Recurring",
     "/notifications": "Notifications",
+    "/budgets": "Budgets",
     "/settings": "Settings",
   };
   const title = pageTitles[location.pathname] || "SpendTracker";

@@ -42,6 +42,12 @@ export const sidebarConfig = {
       path: "/recurring-payments",
     },
     {
+      id: "budgets",
+      label: "Budgets",
+      icon: "savings",
+      path: "/budgets",
+    },
+    {
       id: "notifications",
       label: "Notifications",
       icon: "notifications",

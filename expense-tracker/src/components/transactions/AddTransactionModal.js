@@ -4,7 +4,12 @@ import { Link } from "react-router-dom";
 import { useCategories } from "../../lib/categories-query";
 import { useAddTransaction, useUpdateTransaction } from "../../lib/transactions-query";
 import { usePaymentMethods } from "../../lib/payment-methods-query";
+import { useBudgetsWithSpending } from "../../lib/budget-query";
 import { PAYMENT_TYPES } from "../payment-methods/PaymentMethodFormModal";
+
+const now = new Date();
+const CURRENT_MONTH = now.getMonth() + 1;
+const CURRENT_YEAR = now.getFullYear();
 
 const overlayStyle = {
   background: "rgba(0,0,0,0.7)",
@@ -296,14 +301,64 @@ const CategorySelect = ({ categories, value, onChange }) => {
   );
 };
 
+// ── Budget picker ─────────────────────────────────────────────────────────
+const BudgetPicker = ({ budgets, onSelect, selectedBudgetId }) => {
+  if (!budgets.length) return null;
+  return (
+    <div>
+      <label className="block text-xs font-semibold text-text-secondary mb-1.5">Quick Budget</label>
+      <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
+        {budgets.map((b) => {
+          const cat = b.category;
+          const isSelected = selectedBudgetId === b.id;
+          const remaining = b.remaining;
+          const isOver = remaining < 0;
+          return (
+            <button
+              key={b.id}
+              type="button"
+              onClick={() => onSelect(isSelected ? null : b)}
+              className="flex flex-col items-start gap-1 px-3 py-2.5 rounded-xl transition-all shrink-0 active:scale-95"
+              style={{
+                background: isSelected ? `${cat?.color}22` : "rgba(255,255,255,0.04)",
+                border: isSelected ? `1.5px solid ${cat?.color}88` : "1.5px solid rgba(255,255,255,0.08)",
+                minWidth: "110px",
+              }}
+            >
+              <div className="flex items-center gap-1.5">
+                {cat && (
+                  <span
+                    className="material-symbols-rounded"
+                    style={{ fontSize: "14px", color: cat.color, fontVariationSettings: "'FILL' 1" }}
+                  >
+                    {cat.icon}
+                  </span>
+                )}
+                <span className="text-xs font-bold truncate" style={{ color: isSelected ? cat?.color : "#E2E8F0", maxWidth: "76px" }}>
+                  {cat?.name ?? "—"}
+                </span>
+              </div>
+              <span className="text-[10px] font-semibold" style={{ color: isOver ? "#F87171" : "#22C55E" }}>
+                {isOver ? `₹${Math.abs(remaining).toLocaleString("en-IN")} over` : `₹${remaining.toLocaleString("en-IN")} left`}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
 // ── Main modal ─────────────────────────────────────────────────────────────
 const AddTransactionModal = ({ open, onClose, onSuccess, initial = null }) => {
   const { data: categories = [] } = useCategories();
   const { data: paymentMethods = [] } = usePaymentMethods();
+  const { data: budgets = [] } = useBudgetsWithSpending(CURRENT_YEAR, CURRENT_MONTH);
   const addTransaction    = useAddTransaction();
   const updateTransaction = useUpdateTransaction();
   const [form, setForm] = useState(DEFAULT_FORM);
   const [error, setError] = useState(null);
+  const [selectedBudgetId, setSelectedBudgetId] = useState(null);
 
   const isEditing = !!initial?.id;
 
@@ -322,8 +377,22 @@ const AddTransactionModal = ({ open, onClose, onSuccess, initial = null }) => {
         setForm({ ...DEFAULT_FORM, date: today() });
       }
       setError(null);
+      setSelectedBudgetId(null);
     }
   }, [open, initial]);
+
+  const handleBudgetSelect = (budget) => {
+    if (!budget) {
+      setSelectedBudgetId(null);
+      return;
+    }
+    setSelectedBudgetId(budget.id);
+    setForm((f) => ({
+      ...f,
+      category_id: budget.category_id || "",
+      payment_method_id: budget.payment_method_id || "",
+    }));
+  };
 
   const set = (field) => (e) =>
     setForm((f) => ({ ...f, [field]: e.target.value }));
@@ -438,6 +507,15 @@ const AddTransactionModal = ({ open, onClose, onSuccess, initial = null }) => {
                     />
                   </div>
                 </div>
+
+                {/* Budget quick-pick (only for new transactions) */}
+                {!isEditing && budgets.length > 0 && (
+                  <BudgetPicker
+                    budgets={budgets}
+                    selectedBudgetId={selectedBudgetId}
+                    onSelect={handleBudgetSelect}
+                  />
+                )}
 
                 {/* Title */}
                 <div>
