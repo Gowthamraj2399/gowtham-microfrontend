@@ -52,7 +52,7 @@ async function fireNotification({ id, title, body, icon = "/icons/icon-192x192.p
   if ("serviceWorker" in navigator) {
     const reg = await navigator.serviceWorker.getRegistration();
     if (reg) {
-      await reg.showNotification(title, { body, icon, tag, badge: icon, vibrate: [200, 100, 200] });
+      await reg.showNotification(title, { body, icon, tag, badge: icon, vibrate: [200, 100, 200], data: { url: '/expense-tracker/notifications' } });
       return;
     }
   }

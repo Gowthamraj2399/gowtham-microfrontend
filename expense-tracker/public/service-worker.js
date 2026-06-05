@@ -72,7 +72,7 @@ self.addEventListener('push', (event) => {
       icon: data.icon || '/icons/icon-192x192.png',
       badge: '/icons/icon-72x72.png',
       tag: data.tag || 'finance',
-      data: { url: data.url || '/notifications' },
+      data: { url: data.url || '/expense-tracker/notifications' },
       vibrate: [200, 100, 200],
     })
   );
@@ -81,7 +81,7 @@ self.addEventListener('push', (event) => {
 // ── Notification click → open notifications page ──────────────────────────────
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const url = (event.notification.data && event.notification.data.url) || '/notifications';
+  const url = (event.notification.data && event.notification.data.url) || '/expense-tracker/notifications';
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
       for (const client of windowClients) {

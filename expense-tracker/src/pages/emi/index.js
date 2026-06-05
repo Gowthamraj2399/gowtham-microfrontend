@@ -3,7 +3,30 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useEmis, useDeleteEmi, useUpdateEmi } from "../../lib/emi-query";
 import EMIFormModal, { LOAN_TYPES } from "../../components/emi/EMIFormModal";
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+// ── Amortization helpers ─────────────────────────────────────────────────────
+function computeAmortization(principal, annualRate, tenureMonths, paidCount, emiAmount) {
+  const r = (annualRate || 0) / 12 / 100;
+  const remaining = Math.max(tenureMonths - paidCount, 0);
+
+  if (!principal || !remaining) return { principalRemaining: 0, interestRemaining: 0 };
+
+  let principalRemaining;
+  if (r === 0) {
+    // Zero-interest: linear reduction
+    principalRemaining = principal * (remaining / tenureMonths);
+  } else {
+    const k = paidCount;
+    const emi = emiAmount || principal * r * Math.pow(1+r, tenureMonths) / (Math.pow(1+r, tenureMonths) - 1);
+    principalRemaining = principal * Math.pow(1+r, k) - (emi / r) * (Math.pow(1+r, k) - 1);
+  }
+
+  principalRemaining = Math.max(principalRemaining, 0);
+  const totalRemaining = remaining * (emiAmount || 0);
+  const interestRemaining = Math.max(totalRemaining - principalRemaining, 0);
+  return { principalRemaining, interestRemaining };
+}
+
+
 function getDueStatus(nextDueDateStr) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -38,6 +61,16 @@ const EMICard = ({ emi, onEdit, onDelete }) => {
   const progress    = total > 0 ? Math.min((paid / total) * 100, 100) : 0;
   const outstanding = Math.max((total - paid) * emi.emi_amount, 0);
   const status      = getDueStatus(emi.next_due_date);
+
+  // Principal / interest split using reducing-balance amortization
+  const { principalRemaining, interestRemaining } = computeAmortization(
+    Number(emi.principal) || 0,
+    Number(emi.interest_rate) || 0,
+    total,
+    paid,
+    emi.emi_amount
+  );
+  const hasPrincipal = !!(Number(emi.principal) || 0);
 
   return (
     <motion.div layout className="rounded-2xl px-4 py-4 flex flex-col gap-3"
@@ -78,9 +111,23 @@ const EMICard = ({ emi, onEdit, onDelete }) => {
           <span className="text-[10px] font-bold" style={{ color: "#7B8FA8" }}>
             {paid} / {total} months paid
           </span>
-          <span className="text-[10px] font-bold" style={{ color: "#7B8FA8" }}>
-            {fmtCurrency(outstanding)} left
-          </span>
+          <div className="flex items-center gap-2">
+            {hasPrincipal ? (
+              <>
+                <span className="text-[10px] font-bold" style={{ color: "#34D399" }}>
+                  P: {fmtCurrency(principalRemaining)}
+                </span>
+                <span className="text-[10px]" style={{ color: "#4B5768" }}>+</span>
+                <span className="text-[10px] font-bold" style={{ color: "#F87171" }}>
+                  I: {fmtCurrency(interestRemaining)}
+                </span>
+              </>
+            ) : (
+              <span className="text-[10px] font-bold" style={{ color: "#7B8FA8" }}>
+                {fmtCurrency(outstanding)} left
+              </span>
+            )}
+          </div>
         </div>
         <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.07)" }}>
           <motion.div className="h-full rounded-full"
@@ -187,6 +234,21 @@ const EmiPage = () => {
   const totalMonthlyEMI  = active.reduce((s, e) => s + e.emi_amount, 0);
   const totalOutstanding = active.reduce((s, e) => s + Math.max((e.tenure_months - e.paid_count) * e.emi_amount, 0), 0);
 
+  // Split using proper reducing-balance amortization
+  const { totalPrincipalRemaining, totalInterestRemaining } = active.reduce((acc, e) => {
+    const { principalRemaining, interestRemaining } = computeAmortization(
+      Number(e.principal) || 0,
+      Number(e.interest_rate) || 0,
+      e.tenure_months,
+      e.paid_count,
+      e.emi_amount
+    );
+    return {
+      totalPrincipalRemaining: acc.totalPrincipalRemaining + principalRemaining,
+      totalInterestRemaining:  acc.totalInterestRemaining  + interestRemaining,
+    };
+  }, { totalPrincipalRemaining: 0, totalInterestRemaining: 0 });
+
   const handleAdd    = ()     => { setEditItem(null);  setModalOpen(true); };
   const handleEdit   = (item) => { setEditItem(item);  setModalOpen(true); };
   const handleClose  = ()     => { setModalOpen(false); setEditItem(null); };
@@ -216,16 +278,17 @@ const EmiPage = () => {
 
       {/* Summary bar */}
       {!isLoading && emis.length > 0 && (
-        <div className="grid grid-cols-3 gap-2 mb-5 rounded-2xl p-3"
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-5 rounded-2xl p-3"
           style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
           {[
-            { label: "MONTHLY EMI",   value: fmtCurrency(totalMonthlyEMI),  sub: "total" },
-            { label: "ACTIVE LOANS",  value: active.length,                  sub: "ongoing" },
-            { label: "OUTSTANDING",   value: fmtCurrency(totalOutstanding),  sub: "remaining" },
-          ].map(({ label, value, sub }) => (
-            <div key={label} className="flex flex-col items-center text-center gap-0.5">
+            { label: "MONTHLY EMI",   value: fmtCurrency(totalMonthlyEMI),         sub: "total",       color: "#A78BFA" },
+            { label: "ACTIVE LOANS",  value: active.length,                         sub: "ongoing",     color: "#7B8FA8" },
+            { label: "PRINCIPAL",     value: fmtCurrency(totalPrincipalRemaining),  sub: "remaining",   color: "#34D399" },
+            { label: "INTEREST",      value: fmtCurrency(totalInterestRemaining),   sub: "remaining",   color: "#F87171" },
+          ].map(({ label, value, sub, color }) => (
+            <div key={label} className="flex flex-col items-center text-center gap-0.5 py-1">
               <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: "#7B8FA8" }}>{label}</span>
-              <span className="text-base font-black text-white leading-tight">{value}</span>
+              <span className="text-sm font-black leading-tight" style={{ color }}>{value}</span>
               <span className="text-[10px] font-medium" style={{ color: "#4B5768" }}>{sub}</span>
             </div>
           ))}

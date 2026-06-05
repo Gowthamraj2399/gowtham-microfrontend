@@ -68,7 +68,7 @@ Deno.serve(async (req) => {
       body: items.slice(0, 3).join(", ") + (items.length > 3 ? ` +${items.length - 3} more` : ""),
       icon: "/icons/icon-192x192.png",
       tag: "overdue-payments",
-      url: "/notifications",
+      url: "/expense-tracker/notifications",
     });
 
     try {
