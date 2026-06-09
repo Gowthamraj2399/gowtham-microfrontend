@@ -7,6 +7,7 @@ import SpendingByCategory from "../../components/dashboard/SpendingByCategory";
 import EMIList from "../../components/dashboard/EMIList";
 import RecurringList from "../../components/dashboard/RecurringList";
 import { useDashboard } from "../../lib/dashboard-query";
+import { useBudgetsWithSpending } from "../../lib/budget-query";
 import { usePartner } from "../../lib/PartnerContext";
 import { usePartnerTransactions, usePartnerEmis, usePartnerRecurring } from "../../lib/partner-query";
 
@@ -27,6 +28,15 @@ const glassStyle = {
 
 const fmtINR = (n) =>
   new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n || 0);
+
+function getFillColor(pct, over) {
+  if (over) return "#EF4444";
+  const rem = 100 - pct;
+  if (rem <= 15) return "#EF4444";
+  if (rem <= 30) return "#F97316";
+  if (rem <= 50) return "#EAB308";
+  return "#22C55E";
+}
 
 // ── Skeleton block ────────────────────────────────────────────────────────
 const Skel = ({ h = "h-5", w = "w-full", className = "" }) => (
@@ -83,6 +93,8 @@ const DashboardPage = () => {
     thisMonth,
     thisYear,
   } = useDashboard();
+
+  const { data: budgets = [] } = useBudgetsWithSpending(thisYear, thisMonth);
 
   // Partner data (only fetched when connected + toggle on)
   const lastMonth = thisMonth === 1 ? 12 : thisMonth - 1;
@@ -190,6 +202,13 @@ const DashboardPage = () => {
   const monthLabel = new Date(thisYear, thisMonth - 1, 1)
     .toLocaleDateString("en-IN", { month: "long", year: "numeric" });
 
+  const statRoutes = {
+    "this-month": "/transactions",
+    "last-month": "/transactions",
+    "emis-due": "/emi",
+    "recurring-total": "/recurring-payments",
+  };
+
   // avg6m computed from mergedMonthlyComparison above
 
   return (
@@ -243,7 +262,7 @@ const DashboardPage = () => {
             ))
           : displayStats.map((stat) => (
               <motion.div key={stat.id} variants={itemVariants}>
-                <StatsCard {...stat} />
+                <StatsCard {...stat} to={statRoutes[stat.id]} />
               </motion.div>
             ))
         }
@@ -269,7 +288,7 @@ const DashboardPage = () => {
               <div className="hidden sm:block w-px h-10 self-center" style={{ background: "rgba(255,255,255,0.08)" }} />
 
               {/* EMI */}
-              <div className="flex items-center gap-2.5">
+              <Link to="/emi" className="no-underline flex items-center gap-2.5 rounded-xl px-2 py-1 -mx-2 -my-1 transition-all hover:bg-white/5">
                 <div className="p-2 rounded-xl shrink-0" style={{ background: "rgba(168,85,247,0.12)" }}>
                   <span className="material-symbols-rounded" style={{ fontSize: "16px", color: "#C084FC", fontVariationSettings: "'FILL' 1" }}>credit_card</span>
                 </div>
@@ -277,12 +296,13 @@ const DashboardPage = () => {
                   <p className="text-[11px] text-text-secondary font-medium">EMIs</p>
                   <p className="text-sm font-bold text-white">{fmtINR(displayEmiTotal)}</p>
                 </div>
-              </div>
+                <span className="material-symbols-rounded" style={{ fontSize: "14px", color: "rgba(255,255,255,0.25)" }}>chevron_right</span>
+              </Link>
 
               <span className="text-text-secondary font-bold text-xs">+</span>
 
               {/* Recurring */}
-              <div className="flex items-center gap-2.5">
+              <Link to="/recurring-payments" className="no-underline flex items-center gap-2.5 rounded-xl px-2 py-1 -mx-2 -my-1 transition-all hover:bg-white/5">
                 <div className="p-2 rounded-xl shrink-0" style={{ background: "rgba(16,185,129,0.12)" }}>
                   <span className="material-symbols-rounded" style={{ fontSize: "16px", color: "#34D399", fontVariationSettings: "'FILL' 1" }}>replay</span>
                 </div>
@@ -290,7 +310,8 @@ const DashboardPage = () => {
                   <p className="text-[11px] text-text-secondary font-medium">Recurring</p>
                   <p className="text-sm font-bold text-white">{fmtINR(displayRecurringTotal)}</p>
                 </div>
-              </div>
+                <span className="material-symbols-rounded" style={{ fontSize: "14px", color: "rgba(255,255,255,0.25)" }}>chevron_right</span>
+              </Link>
 
               {/* Progress */}
               {combinedTotal > 0 && (
@@ -311,6 +332,62 @@ const DashboardPage = () => {
           </motion.div>
         </motion.div>
       )}
+      {/* ── Budget Health ── */}
+      {!isLoading && budgets.length > 0 && (
+        <motion.div variants={containerVariants} initial="hidden" animate="show" className="mt-4">
+          <motion.div variants={itemVariants}>
+            <div className="rounded-2xl p-4 sm:p-5 flex flex-col gap-4" style={glassStyle}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-bold text-white">Budget Health</h3>
+                  <p className="text-xs text-text-secondary mt-0.5">{budgets.length} budget{budgets.length !== 1 ? "s" : ""} · {monthLabel}</p>
+                </div>
+                <Link to="/budgets" className="text-xs font-semibold no-underline flex items-center gap-0.5" style={{ color: "#22C55E" }}>
+                  View all
+                  <span className="material-symbols-rounded" style={{ fontSize: "14px" }}>chevron_right</span>
+                </Link>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+                {budgets.slice(0, 10).map((b, i) => {
+                  const cat = b.category;
+                  const fillColor = getFillColor(b.pct, b.over);
+                  const fillPct = b.over ? 100 : Math.max(0, 100 - b.pct);
+                  return (
+                    <Link
+                      key={b.id}
+                      to="/budgets"
+                      className="relative rounded-xl p-3 overflow-hidden no-underline flex flex-col gap-1.5"
+                      style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${fillColor}25` }}
+                    >
+                      <motion.div
+                        className="absolute inset-y-0 left-0 pointer-events-none"
+                        style={{ background: fillColor, opacity: b.over ? 0.15 : 0.09 }}
+                        initial={{ width: "100%" }}
+                        animate={{ width: `${fillPct}%` }}
+                        transition={{ duration: 0.7, ease: "easeOut", delay: i * 0.05 }}
+                      />
+                      <div className="relative flex items-center gap-1.5">
+                        {cat && (
+                          <div className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0" style={{ background: `${cat.color}20` }}>
+                            <span className="material-symbols-rounded" style={{ fontSize: "13px", color: cat.color, fontVariationSettings: "'FILL' 1" }}>{cat.icon}</span>
+                          </div>
+                        )}
+                        <p className="text-xs font-bold text-white truncate">{cat?.name ?? "—"}</p>
+                      </div>
+                      <p className="relative text-[11px]" style={{ color: "#94A3B8" }}>
+                        {fmtINR(b.spent)} <span style={{ color: "#475569" }}>/ {fmtINR(b.monthly_amount)}</span>
+                      </p>
+                      <p className="relative text-[10px] font-semibold" style={{ color: b.over ? "#F87171" : fillColor }}>
+                        {b.over ? `${fmtINR(Math.abs(b.remaining))} over` : `${fmtINR(b.remaining)} left`}
+                      </p>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
 
       {/* ── Charts ── */}
       <motion.div variants={containerVariants} initial="hidden" animate="show"
@@ -318,13 +395,13 @@ const DashboardPage = () => {
         <motion.div variants={itemVariants} className="lg:col-span-2">
           {isLoading
             ? <div className="rounded-2xl p-5 h-64 animate-pulse" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }} />
-            : <SpendingTrendChart title="Daily Spending" subtitle={`${monthLabel} vs previous month`} data={mergedSpendingTrend} />
+            : <SpendingTrendChart title="Daily Spending" subtitle={`${monthLabel} vs previous month`} data={mergedSpendingTrend} to="/transactions" />
           }
         </motion.div>
         <motion.div variants={itemVariants}>
           {isLoading
             ? <div className="rounded-2xl p-5 h-64 animate-pulse" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }} />
-            : <MonthlyComparisonChart title="Monthly Comparison" subtitle="Last 6 months" data={mergedMonthlyComparison} previousAvg={avg6m} />
+            : <MonthlyComparisonChart title="Monthly Comparison" subtitle="Last 6 months" data={mergedMonthlyComparison} previousAvg={avg6m} to="/transactions" />
           }
         </motion.div>
       </motion.div>
@@ -335,7 +412,7 @@ const DashboardPage = () => {
         <motion.div variants={itemVariants} className="lg:col-span-2">
           {isLoading
             ? <div className="rounded-2xl p-5 h-64 animate-pulse" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }} />
-            : <SpendingByCategory categories={mergedCategoryBreakdown} />
+            : <SpendingByCategory categories={mergedCategoryBreakdown} to="/categories" />
           }
         </motion.div>
         <motion.div variants={itemVariants}>

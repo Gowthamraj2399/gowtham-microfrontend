@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Routes, Route, Router, Navigate, useLocation } from "react-router-dom";
+import { Routes, Route, Router, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Sidebar from "./components/Sidebar";
 import BottomNav from "./components/BottomNav";
@@ -62,7 +62,15 @@ const AnimatedRoutes = () => {
 
 const MobileHeader = ({ onMenuOpen }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { partnerId, partnerName, showPartner, setShowPartner } = usePartner();
+  const { data: recurring = [] } = useRecurringPayments();
+  const { data: emis = [] }      = useEmis();
+
+  const today = new Date().toISOString().split("T")[0];
+  const overdueCount =
+    recurring.filter((r) => r.is_active && r.next_due_date <= today).length +
+    emis.filter((e) => e.is_active && e.next_due_date <= today).length;
   const pageTitles = {
     "/dashboard": "Dashboard",
     "/transactions": "Transactions",
@@ -99,18 +107,46 @@ const MobileHeader = ({ onMenuOpen }) => {
         <span className="text-white font-bold text-sm">{title}</span>
       </div>
       {partnerId ? (
-        <button
-          onClick={() => setShowPartner((p) => !p)}
-          className="w-9 h-9 rounded-xl flex items-center justify-center transition-all active:scale-90"
-          style={showPartner
-            ? { background: "rgba(244,114,182,0.2)", border: "1.5px solid rgba(244,114,182,0.5)" }
-            : { background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}
-        >
-          <span className="material-symbols-rounded" style={{ fontSize: "18px", color: showPartner ? "#F472B6" : "#7B8FA8", fontVariationSettings: "'FILL' 1" }}>favorite</span>
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Notification bell — always visible */}
+          <button
+            onClick={() => navigate("/notifications")}
+            className="relative w-9 h-9 rounded-xl flex items-center justify-center transition-all active:scale-90"
+            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}
+          >
+            <span className="material-symbols-rounded text-text-secondary" style={{ fontSize: "20px", fontVariationSettings: overdueCount > 0 ? "'FILL' 1" : "'FILL' 0" }}>notifications</span>
+            {overdueCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 flex items-center justify-center"
+                style={{ minWidth: "16px", height: "16px", borderRadius: "8px", background: "#EF4444", border: "2px solid #080B14", fontSize: "9px", fontWeight: 900, color: "white", lineHeight: 1, padding: "0 3px" }}>
+                {overdueCount > 9 ? "9+" : overdueCount}
+              </span>
+            )}
+          </button>
+          {/* Partner toggle */}
+          <button
+            onClick={() => setShowPartner((p) => !p)}
+            className="w-9 h-9 rounded-xl flex items-center justify-center transition-all active:scale-90"
+            style={showPartner
+              ? { background: "rgba(244,114,182,0.2)", border: "1.5px solid rgba(244,114,182,0.5)" }
+              : { background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}
+          >
+            <span className="material-symbols-rounded" style={{ fontSize: "18px", color: showPartner ? "#F472B6" : "#7B8FA8", fontVariationSettings: "'FILL' 1" }}>favorite</span>
+          </button>
+        </div>
       ) : (
-        <button className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}>
-          <span className="material-symbols-rounded text-text-secondary" style={{ fontSize: "20px" }}>notifications</span>
+        /* Notification bell only */
+        <button
+          onClick={() => navigate("/notifications")}
+          className="relative w-9 h-9 rounded-xl flex items-center justify-center transition-all active:scale-90"
+          style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}
+        >
+          <span className="material-symbols-rounded text-text-secondary" style={{ fontSize: "20px", fontVariationSettings: overdueCount > 0 ? "'FILL' 1" : "'FILL' 0" }}>notifications</span>
+          {overdueCount > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 flex items-center justify-center"
+              style={{ minWidth: "16px", height: "16px", borderRadius: "8px", background: "#EF4444", border: "2px solid #080B14", fontSize: "9px", fontWeight: 900, color: "white", lineHeight: 1, padding: "0 3px" }}>
+              {overdueCount > 9 ? "9+" : overdueCount}
+            </span>
+          )}
         </button>
       )}
     </header>

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import {
   AreaChart,
   Area,
@@ -28,7 +29,7 @@ const tooltipStyle = {
 };
 
 // --- Daily Spending Trend (Area chart: this month vs last month) ---
-export const SpendingTrendChart = ({ title, subtitle, data }) => {
+export const SpendingTrendChart = ({ title, subtitle, data, to }) => {
   const [hoveredMonth, setHoveredMonth] = useState(null);
 
   const CustomTooltip = ({ active, payload, label }) => {
@@ -54,7 +55,7 @@ export const SpendingTrendChart = ({ title, subtitle, data }) => {
           <h3 className="text-sm font-bold text-white">{title}</h3>
           <p className="text-xs text-text-secondary mt-0.5">{subtitle}</p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full" style={{ background: "#8B5CF6" }} />
             <span className="text-xs text-text-secondary">This month</span>
@@ -63,6 +64,11 @@ export const SpendingTrendChart = ({ title, subtitle, data }) => {
             <span className="w-2 h-2 rounded-full" style={{ background: "#475569" }} />
             <span className="text-xs text-text-secondary">Last month</span>
           </div>
+          {to && (
+            <Link to={to} className="no-underline flex items-center gap-0.5 text-xs font-semibold" style={{ color: "#A78BFA" }}>
+              View <span className="material-symbols-rounded" style={{ fontSize: "13px" }}>chevron_right</span>
+            </Link>
+          )}
         </div>
       </div>
       <div style={{ height: "220px" }}>
@@ -118,7 +124,7 @@ export const SpendingTrendChart = ({ title, subtitle, data }) => {
 };
 
 // --- Monthly Comparison Bar Chart ---
-export const MonthlyComparisonChart = ({ title, subtitle, data, previousAvg }) => {
+export const MonthlyComparisonChart = ({ title, subtitle, data, previousAvg, to }) => {
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
@@ -138,9 +144,14 @@ export const MonthlyComparisonChart = ({ title, subtitle, data, previousAvg }) =
           <h3 className="text-sm font-bold text-white">{title}</h3>
           <p className="text-xs text-text-secondary mt-0.5">{subtitle}</p>
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           <span className="text-[10px] text-text-secondary">Avg</span>
           <span className="text-xs font-bold" style={{ color: "#F59E0B" }}>₹{previousAvg.toLocaleString("en-IN")}</span>
+          {to && (
+            <Link to={to} className="no-underline flex items-center gap-0.5 text-xs font-semibold" style={{ color: "#A78BFA" }}>
+              View <span className="material-symbols-rounded" style={{ fontSize: "13px" }}>chevron_right</span>
+            </Link>
+          )}
         </div>
       </div>
       <div style={{ height: "200px" }}>

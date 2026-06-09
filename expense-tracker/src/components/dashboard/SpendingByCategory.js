@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const glassStyle = {
   background: "rgba(255,255,255,0.04)",
@@ -9,7 +10,7 @@ const glassStyle = {
 const fmtINR = (n) =>
   new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n || 0);
 
-const SpendingByCategory = ({ categories }) => {
+const SpendingByCategory = ({ categories, to }) => {
   const total = categories.reduce((sum, c) => sum + c.amount, 0);
   const max   = categories.length > 0 ? categories[0].amount : 1; // already sorted descending
 
@@ -29,6 +30,12 @@ const SpendingByCategory = ({ categories }) => {
           <h3 className="text-sm font-bold text-white">Spending by Category</h3>
           <p className="text-xs text-text-secondary mt-0.5">This month · {fmtINR(total)} total</p>
         </div>
+        {to && (
+          <Link to={to} className="text-xs font-semibold no-underline flex items-center gap-0.5" style={{ color: "#A78BFA" }}>
+            View all
+            <span className="material-symbols-rounded" style={{ fontSize: "14px" }}>chevron_right</span>
+          </Link>
+        )}
       </div>
 
       <div className="flex flex-col gap-3">

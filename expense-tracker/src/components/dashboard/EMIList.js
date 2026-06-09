@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import EMIItem from "./EMIItem";
 
 const EMIList = ({ emis, total }) => {
@@ -18,9 +19,9 @@ const EMIList = ({ emis, total }) => {
         <h3 className="text-sm font-bold text-white">Upcoming EMIs</h3>
         <div className="flex items-center gap-3">
           {total && <p className="text-xs text-text-secondary">Total: {total}</p>}
-          <button className="text-xs font-semibold" style={{ color: "#A78BFA" }}>
+          <Link to="/emi" className="text-xs font-semibold no-underline" style={{ color: "#A78BFA" }}>
             View All
-          </button>
+          </Link>
         </div>
       </div>
       <div className="flex flex-col">

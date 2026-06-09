@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import RecurringItem from "./RecurringItem";
 
 const RecurringList = ({ title, total, items }) => {
@@ -13,7 +14,10 @@ const RecurringList = ({ title, total, items }) => {
     >
       <div className="flex justify-between items-center mb-1">
         <h3 className="text-sm font-bold text-white">{title}</h3>
-        <p className="text-xs text-text-secondary">Total: {total}</p>
+        <div className="flex items-center gap-3">
+          <p className="text-xs text-text-secondary">Total: {total}</p>
+          <Link to="/recurring-payments" className="text-xs font-semibold no-underline" style={{ color: "#34D399" }}>View All</Link>
+        </div>
       </div>
       {items.map((item) => (
         <RecurringItem key={item.id} {...item} />

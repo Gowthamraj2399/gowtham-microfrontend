@@ -1,5 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 const colorMap = {
   blue:    { icon: "rgba(139,92,246,0.15)",  iconText: "#A78BFA", glow: "rgba(139,92,246,0.15)"  },
@@ -15,11 +16,11 @@ const changePalette = {
   neutral:  { bg: "rgba(255,255,255,0.07)", text: "#7B8FA8", arrow: null             },
 };
 
-const StatsCard = ({ title, value, change, changeType = "neutral", icon, color }) => {
+const StatsCard = ({ title, value, change, changeType = "neutral", icon, color, to }) => {
   const colors = colorMap[color] || colorMap.blue;
   const cp     = changePalette[changeType] || changePalette.neutral;
 
-  return (
+  const card = (
     <motion.div
       whileHover={{ y: -2, scale: 1.01 }}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
@@ -42,6 +43,7 @@ const StatsCard = ({ title, value, change, changeType = "neutral", icon, color }
         <p className="text-text-secondary text-xs font-semibold uppercase tracking-wider leading-tight">
           {title}
         </p>
+        {to && <span className="ml-auto material-symbols-rounded" style={{ fontSize: "14px", color: "rgba(255,255,255,0.2)" }}>chevron_right</span>}
       </div>
 
       {/* Value */}
@@ -64,6 +66,11 @@ const StatsCard = ({ title, value, change, changeType = "neutral", icon, color }
       )}
     </motion.div>
   );
+
+  if (to) {
+    return <Link to={to} className="no-underline block">{card}</Link>;
+  }
+  return card;
 };
 
 export default StatsCard;

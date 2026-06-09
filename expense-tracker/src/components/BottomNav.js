@@ -6,7 +6,7 @@ import { useRecurringPayments } from "../lib/recurring-query";
 import { useEmis } from "../lib/emi-query";
 
 // Show only top 5 nav items in bottom bar
-const BOTTOM_NAV_IDS = ["dashboard", "transactions", "emi", "recurring-payments", "notifications"];
+const BOTTOM_NAV_IDS = ["dashboard", "transactions", "emi", "recurring-payments", "budgets"];
 
 const BottomNav = () => {
   const navigate = useNavigate();
@@ -56,12 +56,6 @@ const BottomNav = () => {
             >
               {item.icon}
             </span>
-            {item.id === "notifications" && overdueCount > 0 && (
-              <span className="absolute top-1.5 right-3.5 z-20 flex items-center justify-center"
-                style={{ minWidth: "14px", height: "14px", borderRadius: "7px", background: "#EF4444", border: "2px solid #080B14", fontSize: "8px", fontWeight: 900, color: "white", lineHeight: 1, padding: "0 2px" }}>
-                {overdueCount > 9 ? "9+" : overdueCount}
-              </span>
-            )}
             <span
               className={`text-[9px] font-semibold relative z-10 transition-colors duration-200 leading-tight ${
                 isActive ? "text-primary-light" : "text-text-secondary"
