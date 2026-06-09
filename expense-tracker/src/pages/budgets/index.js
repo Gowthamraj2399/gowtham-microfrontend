@@ -160,7 +160,8 @@ const BudgetsPage = () => {
               <motion.div
                 key={budget.id}
                 initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
                 transition={{ duration: 0.3, delay: i * 0.05 }}
                 className="rounded-2xl p-5 relative overflow-hidden"
                 style={{
@@ -175,7 +176,8 @@ const BudgetsPage = () => {
                   className="absolute inset-y-0 left-0 pointer-events-none"
                   style={{ background: fillColor, opacity: budget.over ? 0.18 : 0.1 }}
                   initial={{ width: "100%" }}
-                  animate={{ width: `${fillPct}%` }}
+                  whileInView={{ width: `${fillPct}%` }}
+                  viewport={{ once: true, margin: "-40px" }}
                   transition={{ duration: 0.8, ease: "easeOut", delay: i * 0.05 + 0.1 }}
                 />
                 {/* Top row */}
@@ -276,7 +278,8 @@ const BudgetsPage = () => {
                 <motion.div
                   key={budget.id}
                   initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-40px" }}
                   transition={{ duration: 0.3, delay: i * 0.05 }}
                   className="rounded-2xl p-5 relative overflow-hidden"
                   style={{
@@ -289,7 +292,8 @@ const BudgetsPage = () => {
                     className="absolute inset-y-0 left-0 pointer-events-none"
                     style={{ background: getFillColor(budget.pct, budget.over), opacity: budget.over ? 0.18 : 0.1 }}
                     initial={{ width: "100%" }}
-                    animate={{ width: `${budget.over ? 100 : Math.max(0, 100 - budget.pct)}%` }}
+                    whileInView={{ width: `${budget.over ? 100 : Math.max(0, 100 - budget.pct)}%` }}
+                    viewport={{ once: true, margin: "-40px" }}
                     transition={{ duration: 0.8, ease: "easeOut", delay: i * 0.05 + 0.1 }}
                   />
                   <div className="flex items-start justify-between gap-3 mb-4">

@@ -109,9 +109,8 @@ const MobileTransactionCard = ({ transaction, onEdit, onDelete, isLast }) => (
   </div>
 );
 
-const TransactionsTable = ({ transactions, filterOptions, categories = [], onEdit, onDelete }) => {
+const TransactionsTable = ({ transactions, filterOptions, categories = [], selectedCategory = "All", onCategoryChange, onEdit, onDelete }) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All");
 
   const rows = transactions.map(normalise);
 
@@ -169,7 +168,7 @@ const TransactionsTable = ({ transactions, filterOptions, categories = [], onEdi
         {usedCategories.length > 0 && (
           <div className="flex flex-wrap gap-2">
             <button
-              onClick={() => setSelectedCategory("All")}
+              onClick={() => onCategoryChange("All")}
               className="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all"
               style={selectedCategory === "All"
                 ? { background: "linear-gradient(135deg, #8B5CF6, #6D28D9)", color: "white" }
@@ -181,7 +180,7 @@ const TransactionsTable = ({ transactions, filterOptions, categories = [], onEdi
             {usedCategories.map(({ name, color }) => (
               <button
                 key={name}
-                onClick={() => setSelectedCategory(name)}
+                onClick={() => onCategoryChange(name)}
                 className="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all"
                 style={selectedCategory === name
                   ? { background: color, color: "white" }

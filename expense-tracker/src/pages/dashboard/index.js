@@ -270,7 +270,7 @@ const DashboardPage = () => {
 
       {/* ── Monthly Commitments ── */}
       {!isLoading && (
-        <motion.div variants={containerVariants} initial="hidden" animate="show" className="mb-4">
+        <motion.div variants={containerVariants} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }} className="mb-4">
           <motion.div variants={itemVariants}>
             <div className="rounded-2xl px-4 sm:px-6 py-4 flex flex-wrap items-center gap-4 sm:gap-6" style={glassStyle}>
               {/* Total */}
@@ -334,7 +334,7 @@ const DashboardPage = () => {
       )}
       {/* ── Budget Health ── */}
       {!isLoading && budgets.length > 0 && (
-        <motion.div variants={containerVariants} initial="hidden" animate="show" className="mt-4">
+        <motion.div variants={containerVariants} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }} className="mt-4">
           <motion.div variants={itemVariants}>
             <div className="rounded-2xl p-4 sm:p-5 flex flex-col gap-4" style={glassStyle}>
               <div className="flex items-center justify-between">
@@ -363,7 +363,8 @@ const DashboardPage = () => {
                         className="absolute inset-y-0 left-0 pointer-events-none"
                         style={{ background: fillColor, opacity: b.over ? 0.15 : 0.09 }}
                         initial={{ width: "100%" }}
-                        animate={{ width: `${fillPct}%` }}
+                        whileInView={{ width: `${fillPct}%` }}
+                        viewport={{ once: true, margin: "-40px" }}
                         transition={{ duration: 0.7, ease: "easeOut", delay: i * 0.05 }}
                       />
                       <div className="relative flex items-center gap-1.5">
@@ -390,7 +391,7 @@ const DashboardPage = () => {
       )}
 
       {/* ── Charts ── */}
-      <motion.div variants={containerVariants} initial="hidden" animate="show"
+      <motion.div variants={containerVariants} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }}
         className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
         <motion.div variants={itemVariants} className="lg:col-span-2">
           {isLoading
@@ -407,7 +408,7 @@ const DashboardPage = () => {
       </motion.div>
 
       {/* ── Category + Recent ── */}
-      <motion.div variants={containerVariants} initial="hidden" animate="show"
+      <motion.div variants={containerVariants} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }}
         className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
         <motion.div variants={itemVariants} className="lg:col-span-2">
           {isLoading
@@ -443,7 +444,7 @@ const DashboardPage = () => {
       </motion.div>
 
       {/* ── EMIs + Recurring ── */}
-      <motion.div variants={containerVariants} initial="hidden" animate="show"
+      <motion.div variants={containerVariants} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }}
         className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <motion.div variants={itemVariants}>
           {isLoading

@@ -30,10 +30,11 @@ function buildMonthOptions() {
 const MONTH_OPTIONS = buildMonthOptions();
 
 const TransactionsPage = () => {
-  const [modalOpen, setModalOpen]       = useState(false);
-  const [editTarget, setEditTarget]     = useState(null);
-  const [deleteTarget, setDeleteTarget] = useState(null);
-  const [selectedMonth, setSelectedMonth] = useState({ month: CURRENT_MONTH, year: CURRENT_YEAR });
+  const [modalOpen, setModalOpen]             = useState(false);
+  const [editTarget, setEditTarget]           = useState(null);
+  const [deleteTarget, setDeleteTarget]       = useState(null);
+  const [selectedMonth, setSelectedMonth]     = useState({ month: CURRENT_MONTH, year: CURRENT_YEAR });
+  const [selectedCategory, setSelectedCategory] = useState("All");
 
   const { showPartner, partnerId, partnerName } = usePartner();
 
@@ -69,9 +70,29 @@ const TransactionsPage = () => {
     }
   };
 
+  // Reset category filter when month changes
+  const handleMonthChange = (opt) => {
+    setSelectedMonth({ month: opt.month, year: opt.year });
+    setSelectedCategory("All");
+  };
+
+  // Transactions filtered by selected category (for stats)
+  const filteredForStats = useMemo(() =>
+    selectedCategory === "All"
+      ? allTransactions
+      : allTransactions.filter((tx) => {
+          const catName = tx.category && typeof tx.category === "object"
+            ? tx.category.name
+            : typeof tx.category === "string" ? tx.category : "Uncategorised";
+          return catName === selectedCategory;
+        }),
+    [allTransactions, selectedCategory]
+  );
+
   // Derive stats from combined data when partner toggle is on
-  const { total, avgDaily, largest } = computeStats(allTransactions);
+  const { total, avgDaily, largest } = computeStats(filteredForStats);
   const selectedLabel = MONTH_OPTIONS.find(o => o.month === selectedMonth.month && o.year === selectedMonth.year)?.label ?? "";
+  const statsLabel = selectedCategory !== "All" ? selectedCategory : selectedLabel;
   const liveStats = [
     {
       id: 1,
@@ -80,7 +101,7 @@ const TransactionsPage = () => {
       icon: "payments",
       iconBg: "bg-orange-500/10",
       iconColor: "text-orange-400",
-      trend: { value: "", label: selectedLabel, color: "text-text-secondary" },
+      trend: { value: "", label: statsLabel, color: "text-text-secondary" },
     },
     {
       id: 2,
@@ -89,7 +110,7 @@ const TransactionsPage = () => {
       icon: "trending_up",
       iconBg: "bg-purple-500/10",
       iconColor: "text-purple-400",
-      trend: { value: "", label: `${allTransactions.length} transactions`, color: "text-text-secondary" },
+      trend: { value: "", label: `${filteredForStats.length} transaction${filteredForStats.length !== 1 ? "s" : ""}`, color: "text-text-secondary" },
     },
     {
       id: 3,
@@ -148,7 +169,7 @@ const TransactionsPage = () => {
           return (
             <button
               key={`${opt.year}-${opt.month}`}
-              onClick={() => setSelectedMonth({ month: opt.month, year: opt.year })}
+              onClick={() => handleMonthChange(opt)}
               className="shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all"
               style={active ? {
                 background: "linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)",
@@ -269,6 +290,8 @@ const TransactionsPage = () => {
             transactions={allTransactions}
             filterOptions={liveFilterOptions}
             categories={categories}
+            selectedCategory={selectedCategory}
+            onCategoryChange={setSelectedCategory}
             onEdit={openEdit}
             onDelete={setDeleteTarget}
           />
