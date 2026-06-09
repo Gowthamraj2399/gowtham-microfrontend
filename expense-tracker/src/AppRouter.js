@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Routes, Route, Router, Navigate, useLocation, useNavigate } from "react-router-dom";
+import { Routes, Route, Router, Navigate, useLocation, useNavigate, useRef } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Sidebar from "./components/Sidebar";
 import BottomNav from "./components/BottomNav";
@@ -32,6 +32,13 @@ const pageTransition = { duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] };
 
 const AnimatedRoutes = () => {
   const location = useLocation();
+
+  // Scroll the parent <main> to top instantly on every route change
+  useEffect(() => {
+    const main = document.querySelector("main.scroll-container");
+    if (main) main.scrollTop = 0;
+  }, [location.pathname]);
+
   return (
     <AnimatePresence mode="wait">
       <motion.div
@@ -219,7 +226,7 @@ const AppLayout = () => {
       <Sidebar mobileOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0">
         <MobileHeader onMenuOpen={() => setSidebarOpen(true)} />
-        <main className="flex-1 overflow-y-auto pb-20 md:pb-0">
+        <main className="flex-1 overflow-y-auto pb-20 md:pb-0 scroll-container" style={{ scrollBehavior: "smooth" }}>
           <AnimatedRoutes />
         </main>
         <BottomNav />
