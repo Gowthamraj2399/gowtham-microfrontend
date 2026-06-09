@@ -16,6 +16,7 @@ import AuthPage from "./pages/auth";
 import NotificationsPage from "./pages/notifications";
 import BudgetsPage from "./pages/budgets";
 import { AuthProvider, useAuth } from "./lib/AuthContext";
+import { PartnerProvider, usePartner } from "./lib/PartnerContext";
 import { useAutoCreateRecurring, useRecurringPayments } from "./lib/recurring-query";
 import { useAutoCreateEmiPayments, useEmis } from "./lib/emi-query";
 import { triggerOverdueNotifications, requestNotificationPermission, subscribeToPush } from "./lib/notifications";
@@ -61,6 +62,7 @@ const AnimatedRoutes = () => {
 
 const MobileHeader = ({ onMenuOpen }) => {
   const location = useLocation();
+  const { partnerId, partnerName, showPartner, setShowPartner } = usePartner();
   const pageTitles = {
     "/dashboard": "Dashboard",
     "/transactions": "Transactions",
@@ -88,29 +90,29 @@ const MobileHeader = ({ onMenuOpen }) => {
         className="w-9 h-9 rounded-xl flex items-center justify-center transition-all active:scale-90"
         style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}
       >
-        <span className="material-symbols-rounded text-white" style={{ fontSize: "20px" }}>
-          menu
-        </span>
+        <span className="material-symbols-rounded text-white" style={{ fontSize: "20px" }}>menu</span>
       </button>
       <div className="flex items-center gap-2">
-        <div
-          className="rounded-lg w-7 h-7 flex items-center justify-center"
-          style={{ background: "linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%)" }}
-        >
-          <span className="material-symbols-rounded text-white" style={{ fontSize: "14px", fontVariationSettings: "'FILL' 1" }}>
-            account_balance_wallet
-          </span>
+        <div className="rounded-lg w-7 h-7 flex items-center justify-center" style={{ background: "linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%)" }}>
+          <span className="material-symbols-rounded text-white" style={{ fontSize: "14px", fontVariationSettings: "'FILL' 1" }}>account_balance_wallet</span>
         </div>
         <span className="text-white font-bold text-sm">{title}</span>
       </div>
-      <button
-        className="w-9 h-9 rounded-xl flex items-center justify-center"
-        style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}
-      >
-        <span className="material-symbols-rounded text-text-secondary" style={{ fontSize: "20px" }}>
-          notifications
-        </span>
-      </button>
+      {partnerId ? (
+        <button
+          onClick={() => setShowPartner((p) => !p)}
+          className="w-9 h-9 rounded-xl flex items-center justify-center transition-all active:scale-90"
+          style={showPartner
+            ? { background: "rgba(244,114,182,0.2)", border: "1.5px solid rgba(244,114,182,0.5)" }
+            : { background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}
+        >
+          <span className="material-symbols-rounded" style={{ fontSize: "18px", color: showPartner ? "#F472B6" : "#7B8FA8", fontVariationSettings: "'FILL' 1" }}>favorite</span>
+        </button>
+      ) : (
+        <button className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}>
+          <span className="material-symbols-rounded text-text-secondary" style={{ fontSize: "20px" }}>notifications</span>
+        </button>
+      )}
     </header>
   );
 };
@@ -210,7 +212,9 @@ export default ({ history }) => {
               path="/*"
               element={
                 <ProtectedRoute>
-                  <AppLayout />
+                  <PartnerProvider>
+                    <AppLayout />
+                  </PartnerProvider>
                 </ProtectedRoute>
               }
             />

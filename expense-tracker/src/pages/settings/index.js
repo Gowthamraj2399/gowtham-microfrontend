@@ -7,6 +7,14 @@ import {
   subscribeToPush,
   getNotificationPermission,
 } from "../../lib/notifications";
+import {
+  usePartnerConnection,
+  usePartnerInfo,
+  useCreateInvite,
+  useCancelInvite,
+  useAcceptInvite,
+  useDisconnect,
+} from "../../lib/partner-query";
 
 const cardStyle = {
   background: "rgba(255,255,255,0.03)",
@@ -71,6 +79,69 @@ const SettingsPage = () => {
 
   // Sign out
   const [signingOut, setSigningOut] = useState(false);
+
+  // Partner connect
+  const { data: partnerData, isLoading: partnerLoading } = usePartnerConnection();
+  const { partnerName, connectionId } = usePartnerInfo();
+  const createInvite   = useCreateInvite();
+  const cancelInvite   = useCancelInvite();
+  const acceptInvite   = useAcceptInvite();
+  const disconnect     = useDisconnect();
+  const [partnerCode, setPartnerCode]     = useState("");
+  const [partnerMsg, setPartnerMsg]       = useState(null);
+  const [generatedCode, setGeneratedCode] = useState(null); // display-format code
+  const [copied, setCopied]               = useState(false);
+
+  // Sync generated code from pending invite
+  useEffect(() => {
+    if (partnerData?.pending && !generatedCode) {
+      const raw = partnerData.pending.invite_code;
+      setGeneratedCode(raw.slice(0, 4) + "-" + raw.slice(4));
+    }
+    if (!partnerData?.pending) setGeneratedCode(null);
+  }, [partnerData?.pending]);
+
+  const handleGenerateCode = async () => {
+    setPartnerMsg(null);
+    try {
+      const result = await createInvite.mutateAsync();
+      setGeneratedCode(result.display_code);
+    } catch (err) {
+      setPartnerMsg({ type: "error", text: err.message });
+    }
+  };
+
+  const handleCancelInvite = async () => {
+    if (!partnerData?.pending) return;
+    await cancelInvite.mutateAsync(partnerData.pending.id);
+    setGeneratedCode(null);
+    setPartnerMsg(null);
+  };
+
+  const handleAcceptInvite = async () => {
+    if (!partnerCode.trim()) return;
+    setPartnerMsg(null);
+    try {
+      await acceptInvite.mutateAsync(partnerCode.trim());
+      setPartnerCode("");
+      setPartnerMsg({ type: "success", text: "Connected with partner!" });
+    } catch (err) {
+      setPartnerMsg({ type: "error", text: err.message });
+    }
+    setTimeout(() => setPartnerMsg(null), 4000);
+  };
+
+  const handleDisconnect = async () => {
+    if (!connectionId) return;
+    await disconnect.mutateAsync(connectionId);
+    setPartnerMsg(null);
+  };
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(generatedCode || "");
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   // ── Profile save ──────────────────────────────────────────────────────────
   const handleProfileSave = async (e) => {
@@ -218,8 +289,127 @@ const SettingsPage = () => {
           )}
         </motion.div>
 
-        {/* ── Account / Sign out ──────────────────────────────────────────── */}
+        {/* ── Partner Connect ─────────────────────────────────────────── */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.15 }} style={cardStyle}>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="material-symbols-rounded" style={{ fontSize: "18px", color: "#F472B6", fontVariationSettings: "'FILL' 1" }}>favorite</span>
+            <h2 className="text-white font-bold text-base">Partner Connect</h2>
+          </div>
+          <p className="text-xs mb-4" style={{ color: "#7B8FA8" }}>
+            Share finances with your partner — see each other's transactions, budgets, and use shared payment methods.
+          </p>
+
+          {partnerLoading ? (
+            <div className="h-10 rounded-xl animate-pulse" style={{ background: "rgba(255,255,255,0.06)" }} />
+          ) : partnerData?.active ? (
+            /* ── Connected ── */
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                  style={{ background: "linear-gradient(135deg, #F472B6 0%, #EC4899 100%)" }}>
+                  <span className="material-symbols-rounded text-white" style={{ fontSize: "18px", fontVariationSettings: "'FILL' 1" }}>favorite</span>
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-white">Connected</p>
+                  <p className="text-xs mt-0.5" style={{ color: "#7B8FA8" }}>Partner: {partnerName || "—"}</p>
+                </div>
+              </div>
+              <button
+                onClick={handleDisconnect}
+                disabled={disconnect.isPending}
+                className="px-4 py-2 rounded-xl text-xs font-semibold disabled:opacity-60 shrink-0"
+                style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", color: "#F87171" }}
+              >
+                {disconnect.isPending ? "Disconnecting…" : "Disconnect"}
+              </button>
+            </div>
+          ) : (
+            /* ── Not connected ── */
+            <div className="flex flex-col gap-4">
+              {/* My code */}
+              {generatedCode ? (
+                <div>
+                  <p className="text-xs font-semibold mb-2" style={{ color: "#7B8FA8" }}>Share this code with your partner:</p>
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="flex-1 flex items-center justify-center py-3 rounded-xl font-black text-2xl tracking-widest select-all"
+                      style={{ background: "rgba(244,114,182,0.1)", border: "1px solid rgba(244,114,182,0.3)", color: "#F472B6", letterSpacing: "0.15em" }}
+                    >
+                      {generatedCode}
+                    </div>
+                    <button
+                      onClick={handleCopy}
+                      className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 transition-all active:scale-90"
+                      style={{ background: copied ? "rgba(34,197,94,0.15)" : "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)" }}
+                    >
+                      <span className="material-symbols-rounded" style={{ fontSize: "18px", color: copied ? "#22C55E" : "#7B8FA8" }}>
+                        {copied ? "check" : "content_copy"}
+                      </span>
+                    </button>
+                    <button
+                      onClick={handleCancelInvite}
+                      className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 transition-all active:scale-90"
+                      style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.15)" }}
+                    >
+                      <span className="material-symbols-rounded" style={{ fontSize: "18px", color: "#F87171" }}>close</span>
+                    </button>
+                  </div>
+                  <p className="text-[10px] mt-1.5" style={{ color: "#475569" }}>Code expires when partner connects or you cancel it.</p>
+                </div>
+              ) : (
+                <button
+                  onClick={handleGenerateCode}
+                  disabled={createInvite.isPending}
+                  className="flex items-center justify-center gap-2 h-11 rounded-xl text-sm font-bold text-white disabled:opacity-60 transition-all active:scale-95"
+                  style={{ background: "linear-gradient(135deg, #F472B6 0%, #EC4899 100%)", boxShadow: "0 4px 15px rgba(244,114,182,0.3)" }}
+                >
+                  <span className="material-symbols-rounded" style={{ fontSize: "18px" }}>share</span>
+                  {createInvite.isPending ? "Generating…" : "Generate My Invite Code"}
+                </button>
+              )}
+
+              {/* Divider */}
+              <div className="flex items-center gap-3">
+                <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.07)" }} />
+                <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "#475569" }}>or enter partner's code</span>
+                <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.07)" }} />
+              </div>
+
+              {/* Enter partner's code */}
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="ABCD-EF23"
+                  value={partnerCode}
+                  onChange={(e) => setPartnerCode(e.target.value.toUpperCase())}
+                  maxLength={9}
+                  className="flex-1 px-3 py-2.5 text-sm font-bold tracking-widest"
+                  style={{ ...inputStyle, letterSpacing: "0.1em", textTransform: "uppercase" }}
+                  onFocus={(e) => (e.target.style.borderColor = "rgba(244,114,182,0.5)")}
+                  onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.08)")}
+                  onKeyDown={(e) => e.key === "Enter" && handleAcceptInvite()}
+                />
+                <button
+                  onClick={handleAcceptInvite}
+                  disabled={acceptInvite.isPending || !partnerCode.trim()}
+                  className="px-4 py-2.5 rounded-xl text-sm font-bold text-white disabled:opacity-50 shrink-0 transition-all active:scale-95"
+                  style={{ background: "linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)" }}
+                >
+                  {acceptInvite.isPending ? "…" : "Connect"}
+                </button>
+              </div>
+
+              {partnerMsg && (
+                <p className="text-xs font-semibold" style={{ color: partnerMsg.type === "success" ? "#22C55E" : "#F87171" }}>
+                  {partnerMsg.text}
+                </p>
+              )}
+            </div>
+          )}
+        </motion.div>
+
+        {/* ── Account / Sign out ──────────────────────────────────────────── */}
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.2 }} style={cardStyle}>
           <h2 className="text-white font-bold text-base mb-4">Account</h2>
 
           <div className="flex items-center justify-between">

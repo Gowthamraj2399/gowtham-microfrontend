@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useBudgetsWithSpending, useDeleteBudget } from "../../lib/budget-query";
+import { usePartnerBudgetsWithSpending } from "../../lib/partner-query";
+import { usePartner } from "../../lib/PartnerContext";
 import BudgetFormModal from "../../components/budgets/BudgetFormModal";
 
 const now = new Date();
@@ -16,6 +18,16 @@ function getBarColor(pct, over) {
   return "#22C55E";
 }
 
+// Fill color based on remaining budget (inverse of spent)
+function getFillColor(pct, over) {
+  if (over) return "#EF4444";
+  const rem = 100 - pct;
+  if (rem <= 15) return "#EF4444";
+  if (rem <= 30) return "#F97316";
+  if (rem <= 50) return "#EAB308";
+  return "#22C55E";
+}
+
 const BudgetsPage = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
@@ -23,6 +35,14 @@ const BudgetsPage = () => {
 
   const { data: budgets = [], isLoading } = useBudgetsWithSpending(CURRENT_YEAR, CURRENT_MONTH);
   const deleteBudget = useDeleteBudget();
+
+  // Partner budgets
+  const { showPartner, partnerId, partnerName } = usePartner();
+  const { data: partnerBudgets = [] } = usePartnerBudgetsWithSpending(
+    showPartner ? partnerId : null,
+    CURRENT_YEAR,
+    CURRENT_MONTH
+  );
 
   const existingCategoryIds = budgets.map((b) => b.category_id);
 
@@ -131,7 +151,9 @@ const BudgetsPage = () => {
       ) : (
         <div className="flex flex-col gap-4">
           {budgets.map((budget, i) => {
-            const barColor = getBarColor(budget.pct, budget.over);
+            const barColor  = getBarColor(budget.pct, budget.over);
+            const fillColor = getFillColor(budget.pct, budget.over);
+            const fillPct   = budget.over ? 100 : Math.max(0, 100 - budget.pct);
             const cat = budget.category;
             const pm = budget.payment_method;
             return (
@@ -140,16 +162,22 @@ const BudgetsPage = () => {
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: i * 0.05 }}
-                className="rounded-2xl p-5"
+                className="rounded-2xl p-5 relative overflow-hidden"
                 style={{
-                  background: budget.over
-                    ? "rgba(239,68,68,0.05)"
-                    : "rgba(255,255,255,0.03)",
+                  background: "rgba(255,255,255,0.03)",
                   border: budget.over
-                    ? "1px solid rgba(239,68,68,0.2)"
-                    : "1px solid rgba(255,255,255,0.07)",
+                    ? "1px solid rgba(239,68,68,0.25)"
+                    : `1px solid ${fillColor}30`,
                 }}
               >
+                {/* Fill background — drains left as spending rises */}
+                <motion.div
+                  className="absolute inset-y-0 left-0 pointer-events-none"
+                  style={{ background: fillColor, opacity: budget.over ? 0.18 : 0.1 }}
+                  initial={{ width: "100%" }}
+                  animate={{ width: `${fillPct}%` }}
+                  transition={{ duration: 0.8, ease: "easeOut", delay: i * 0.05 + 0.1 }}
+                />
                 {/* Top row */}
                 <div className="flex items-start justify-between gap-3 mb-4">
                   <div className="flex items-center gap-3 min-w-0">
@@ -215,17 +243,6 @@ const BudgetsPage = () => {
                   </span>
                 </div>
 
-                {/* Progress bar */}
-                <div className="w-full rounded-full overflow-hidden mb-3" style={{ height: "10px", background: "rgba(255,255,255,0.07)" }}>
-                  <motion.div
-                    className="h-full rounded-full"
-                    style={{ background: barColor, boxShadow: `0 0 8px ${barColor}66` }}
-                    initial={{ width: 0 }}
-                    animate={{ width: `${budget.pct}%` }}
-                    transition={{ duration: 0.7, ease: "easeOut", delay: i * 0.05 }}
-                  />
-                </div>
-
                 {/* Remaining */}
                 <p className="text-xs font-semibold" style={{ color: budget.over ? "#F87171" : "#22C55E" }}>
                   {budget.over
@@ -236,6 +253,82 @@ const BudgetsPage = () => {
             );
           })}
         </div>
+      )}
+
+      {/* Partner budgets section */}
+      {showPartner && partnerId && partnerBudgets.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
+          className="mt-8"
+        >
+          <div className="flex items-center gap-2 mb-4">
+            <span className="material-symbols-rounded" style={{ fontSize: "16px", color: "#F472B6", fontVariationSettings: "'FILL' 1" }}>favorite</span>
+            <h2 className="text-sm font-bold text-white">{partnerName || "Partner"}'s Budgets</h2>
+          </div>
+          <div className="flex flex-col gap-4">
+            {partnerBudgets.map((budget, i) => {
+              const barColor = getBarColor(budget.pct, budget.over);
+              const cat = budget.category;
+              const pm  = budget.payment_method;
+              return (
+                <motion.div
+                  key={budget.id}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: i * 0.05 }}
+                  className="rounded-2xl p-5 relative overflow-hidden"
+                  style={{
+                    background: "rgba(255,255,255,0.02)",
+                    border: budget.over ? "1px solid rgba(239,68,68,0.25)" : `1px solid ${getFillColor(budget.pct, budget.over)}30`,
+                  }}
+                >
+                  {/* Fill background — drains left as spending rises */}
+                  <motion.div
+                    className="absolute inset-y-0 left-0 pointer-events-none"
+                    style={{ background: getFillColor(budget.pct, budget.over), opacity: budget.over ? 0.18 : 0.1 }}
+                    initial={{ width: "100%" }}
+                    animate={{ width: `${budget.over ? 100 : Math.max(0, 100 - budget.pct)}%` }}
+                    transition={{ duration: 0.8, ease: "easeOut", delay: i * 0.05 + 0.1 }}
+                  />
+                  <div className="flex items-start justify-between gap-3 mb-4">
+                    <div className="flex items-center gap-3 min-w-0">
+                      {cat && (
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${cat.color}22` }}>
+                          <span className="material-symbols-rounded" style={{ fontSize: "20px", color: cat.color, fontVariationSettings: "'FILL' 1" }}>{cat.icon}</span>
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="text-white font-bold truncate">{cat?.name ?? "Unknown"}</p>
+                        {pm && (
+                          <p className="text-xs mt-0.5 truncate" style={{ color: "#475569" }}>
+                            Default: {pm.name}{pm.last4 ? ` •••• ${pm.last4}` : ""}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    {budget.over && (
+                      <span className="px-2 py-0.5 rounded-full text-xs font-bold shrink-0" style={{ background: "rgba(239,68,68,0.15)", color: "#F87171" }}>Over budget</span>
+                    )}
+                  </div>
+
+                  <div className="flex items-baseline gap-1.5 mb-3">
+                    <span className="text-xl font-black" style={{ color: barColor }}>₹{budget.spent.toLocaleString("en-IN")}</span>
+                    <span className="text-sm" style={{ color: "#475569" }}>/ ₹{budget.monthly_amount.toLocaleString("en-IN")}</span>
+                    <span className="text-xs ml-auto" style={{ color: "#7B8FA8" }}>{budget.pct.toFixed(0)}%</span>
+                  </div>
+
+                  <p className="text-xs font-semibold" style={{ color: budget.over ? "#F87171" : "#22C55E" }}>
+                    {budget.over
+                      ? `₹${Math.abs(budget.remaining).toLocaleString("en-IN")} over budget`
+                      : `₹${budget.remaining.toLocaleString("en-IN")} remaining`}
+                  </p>
+                </motion.div>
+              );
+            })}
+          </div>
+        </motion.div>
       )}
 
       {/* Budget form modal */}

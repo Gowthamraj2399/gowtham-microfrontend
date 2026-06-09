@@ -1,7 +1,7 @@
 import React from "react";
 import EMIItem from "./EMIItem";
 
-const EMIList = ({ emis }) => {
+const EMIList = ({ emis, total }) => {
   return (
     <div
       className="rounded-2xl overflow-hidden flex flex-col"
@@ -16,9 +16,12 @@ const EMIList = ({ emis }) => {
         style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
       >
         <h3 className="text-sm font-bold text-white">Upcoming EMIs</h3>
-        <button className="text-xs font-semibold" style={{ color: "#A78BFA" }}>
-          View All
-        </button>
+        <div className="flex items-center gap-3">
+          {total && <p className="text-xs text-text-secondary">Total: {total}</p>}
+          <button className="text-xs font-semibold" style={{ color: "#A78BFA" }}>
+            View All
+          </button>
+        </div>
       </div>
       <div className="flex flex-col">
         {emis.map((emi) => (

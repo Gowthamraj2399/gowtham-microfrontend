@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "./supabase";
 import { useAuth } from "./AuthContext";
+import { BUDGETS_KEY } from "./budget-query";
 
 export const TRANSACTIONS_KEY = "transactions";
 
@@ -85,7 +86,10 @@ export function useAddTransaction() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: [TRANSACTIONS_KEY] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: [TRANSACTIONS_KEY] });
+      qc.invalidateQueries({ queryKey: [BUDGETS_KEY] });
+    },
   });
 }
 
@@ -110,7 +114,10 @@ export function useUpdateTransaction() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: [TRANSACTIONS_KEY] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: [TRANSACTIONS_KEY] });
+      qc.invalidateQueries({ queryKey: [BUDGETS_KEY] });
+    },
   });
 }
 
@@ -122,6 +129,9 @@ export function useDeleteTransaction() {
       const { error } = await supabase.from("transactions").delete().eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: [TRANSACTIONS_KEY] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: [TRANSACTIONS_KEY] });
+      qc.invalidateQueries({ queryKey: [BUDGETS_KEY] });
+    },
   });
 }

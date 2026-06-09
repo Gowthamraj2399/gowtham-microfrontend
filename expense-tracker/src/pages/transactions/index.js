@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import TransactionStatsCard from "../../components/transactions/TransactionStatsCard";
 import TransactionsTable from "../../components/transactions/TransactionsTable";
@@ -6,6 +6,8 @@ import AddTransactionModal from "../../components/transactions/AddTransactionMod
 import { useTransactions, computeStats, useDeleteTransaction } from "../../lib/transactions-query";
 import { useCategories } from "../../lib/categories-query";
 import { filterOptions } from "../../config/transactionsConfig";
+import { usePartnerTransactions } from "../../lib/partner-query";
+import { usePartner } from "../../lib/PartnerContext";
 
 const now = new Date();
 const CURRENT_MONTH = now.getMonth() + 1;
@@ -32,9 +34,27 @@ const TransactionsPage = () => {
   const [editTarget, setEditTarget]     = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState({ month: CURRENT_MONTH, year: CURRENT_YEAR });
+
+  const { showPartner, partnerId, partnerName } = usePartner();
+
   const { data: transactions = [], isLoading, error } = useTransactions({ year: selectedMonth.year, month: selectedMonth.month });
   const { data: categories = [] } = useCategories();
   const deleteTransaction = useDeleteTransaction();
+
+  // Partner data
+  const { data: partnerTxs = [] } = usePartnerTransactions(
+    showPartner ? partnerId : null,
+    { year: selectedMonth.year, month: selectedMonth.month }
+  );
+
+  // Merged + sorted transactions
+  const allTransactions = useMemo(() => {
+    if (!showPartner || !partnerId) return transactions;
+    return [...transactions, ...partnerTxs].sort((a, b) => {
+      if (b.date !== a.date) return b.date.localeCompare(a.date);
+      return new Date(b.created_at) - new Date(a.created_at);
+    });
+  }, [transactions, partnerTxs, showPartner, partnerId]);
 
   const openAdd  = () => { setEditTarget(null); setModalOpen(true); };
   const openEdit = (tx) => { setEditTarget(tx); setModalOpen(true); };
@@ -49,8 +69,8 @@ const TransactionsPage = () => {
     }
   };
 
-  // Derive stats from real data
-  const { total, avgDaily, largest } = computeStats(transactions);
+  // Derive stats from combined data when partner toggle is on
+  const { total, avgDaily, largest } = computeStats(allTransactions);
   const selectedLabel = MONTH_OPTIONS.find(o => o.month === selectedMonth.month && o.year === selectedMonth.year)?.label ?? "";
   const liveStats = [
     {
@@ -69,7 +89,7 @@ const TransactionsPage = () => {
       icon: "trending_up",
       iconBg: "bg-purple-500/10",
       iconColor: "text-purple-400",
-      trend: { value: "", label: `${transactions.length} transactions`, color: "text-text-secondary" },
+      trend: { value: "", label: `${allTransactions.length} transactions`, color: "text-text-secondary" },
     },
     {
       id: 3,
@@ -103,20 +123,22 @@ const TransactionsPage = () => {
             {MONTH_OPTIONS.find(o => o.month === selectedMonth.month && o.year === selectedMonth.year)?.label ?? ""}
           </p>
         </motion.div>
-        <motion.button
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.3, delay: 0.1 }}
-          onClick={() => openAdd()}
-          className="inline-flex items-center justify-center gap-2 text-white text-sm font-bold h-10 px-5 rounded-xl transition-all active:scale-95 shrink-0"
-          style={{
-            background: "linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)",
-            boxShadow: "0 4px 15px rgba(139,92,246,0.35)",
-          }}
-        >
-          <span className="material-symbols-rounded" style={{ fontSize: "18px" }}>add</span>
-          Add Expense
-        </motion.button>
+        <div className="flex items-center gap-2 shrink-0">
+          <motion.button
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+            onClick={() => openAdd()}
+            className="inline-flex items-center justify-center gap-2 text-white text-sm font-bold h-10 px-5 rounded-xl transition-all active:scale-95"
+            style={{
+              background: "linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)",
+              boxShadow: "0 4px 15px rgba(139,92,246,0.35)",
+            }}
+          >
+            <span className="material-symbols-rounded" style={{ fontSize: "18px" }}>add</span>
+            Add Expense
+          </motion.button>
+        </div>
       </div>
 
       {/* Month picker */}
@@ -244,7 +266,7 @@ const TransactionsPage = () => {
           transition={{ duration: 0.3, delay: 0.25 }}
         >
           <TransactionsTable
-            transactions={transactions}
+            transactions={allTransactions}
             filterOptions={liveFilterOptions}
             categories={categories}
             onEdit={openEdit}

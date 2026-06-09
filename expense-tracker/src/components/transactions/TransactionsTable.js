@@ -35,6 +35,7 @@ function normalise(tx) {
     _pmColor:   pm?.color ?? "#7B8FA8",
     _pmIcon:    pm?.icon  ?? null,
     _pmLast4:   pm?.last4 ?? null,
+    _isPartner: !!tx._isPartner,
   };
 }
 
@@ -59,7 +60,12 @@ const MobileTransactionCard = ({ transaction, onEdit, onDelete, isLast }) => (
 
     {/* Center: title + meta row */}
     <div className="flex-1 min-w-0">
-      <p className="text-sm font-semibold text-white truncate leading-snug">{transaction.title}</p>
+      <div className="flex items-center gap-1.5">
+        <p className="text-sm font-semibold text-white truncate leading-snug">{transaction.title}</p>
+        {transaction._isPartner && (
+          <span className="text-[9px] font-bold px-1 py-0.5 rounded shrink-0" style={{ background: "rgba(244,114,182,0.15)", color: "#F472B6" }}>Partner</span>
+        )}
+      </div>
       <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
         <span className="text-[10px]" style={{ color: "#7B8FA8" }}>{transaction._dateStr}</span>
         {transaction._catName !== "Uncategorised" && (
@@ -81,22 +87,24 @@ const MobileTransactionCard = ({ transaction, onEdit, onDelete, isLast }) => (
     {/* Right: amount + action buttons stacked */}
     <div className="flex flex-col items-end gap-1.5 shrink-0">
       <span className="text-sm font-bold" style={{ color: "#F87171" }}>-₹{transaction._amt.toFixed(2)}</span>
-      <div className="flex items-center gap-1">
-        <button
-          onClick={() => onEdit?.(transaction)}
-          className="w-6 h-6 rounded-md flex items-center justify-center active:scale-90 transition-all"
-          style={{ background: "rgba(139,92,246,0.12)" }}
-        >
-          <span className="material-symbols-rounded" style={{ fontSize: "12px", color: "#A78BFA", fontVariationSettings: "'FILL' 1" }}>edit</span>
-        </button>
-        <button
-          onClick={() => onDelete?.(transaction)}
-          className="w-6 h-6 rounded-md flex items-center justify-center active:scale-90 transition-all"
-          style={{ background: "rgba(239,68,68,0.09)" }}
-        >
-          <span className="material-symbols-rounded" style={{ fontSize: "12px", color: "#F87171", fontVariationSettings: "'FILL' 1" }}>delete</span>
-        </button>
-      </div>
+      {!transaction._isPartner && (
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => onEdit?.(transaction)}
+            className="w-6 h-6 rounded-md flex items-center justify-center active:scale-90 transition-all"
+            style={{ background: "rgba(139,92,246,0.12)" }}
+          >
+            <span className="material-symbols-rounded" style={{ fontSize: "12px", color: "#A78BFA", fontVariationSettings: "'FILL' 1" }}>edit</span>
+          </button>
+          <button
+            onClick={() => onDelete?.(transaction)}
+            className="w-6 h-6 rounded-md flex items-center justify-center active:scale-90 transition-all"
+            style={{ background: "rgba(239,68,68,0.09)" }}
+          >
+            <span className="material-symbols-rounded" style={{ fontSize: "12px", color: "#F87171", fontVariationSettings: "'FILL' 1" }}>delete</span>
+          </button>
+        </div>
+      )}
     </div>
   </div>
 );
@@ -254,7 +262,12 @@ const TransactionsTable = ({ transactions, filterOptions, categories = [], onEdi
                         </span>
                       </div>
                       <div>
-                        <p className="text-sm font-semibold text-white">{transaction.title}</p>
+                        <div className="flex items-center gap-1.5">
+                          <p className="text-sm font-semibold text-white">{transaction.title}</p>
+                          {transaction._isPartner && (
+                            <span className="text-[9px] font-bold px-1 py-0.5 rounded" style={{ background: "rgba(244,114,182,0.15)", color: "#F472B6" }}>Partner</span>
+                          )}
+                        </div>
                         {transaction._notes && (
                           <p className="text-xs text-text-secondary">{transaction._notes}</p>
                         )}
@@ -302,24 +315,26 @@ const TransactionsTable = ({ transactions, filterOptions, categories = [], onEdi
                     -₹{transaction._amt.toFixed(2)}
                   </td>
                   <td className="px-4 py-3.5 text-center whitespace-nowrap">
-                    <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                      <button
-                        onClick={() => onEdit?.(transaction)}
-                        className="w-7 h-7 rounded-lg flex items-center justify-center transition-all active:scale-90"
-                        style={{ background: "rgba(139,92,246,0.12)" }}
-                        title="Edit"
-                      >
-                        <span className="material-symbols-rounded" style={{ fontSize: "14px", color: "#A78BFA", fontVariationSettings: "'FILL' 1" }}>edit</span>
-                      </button>
-                      <button
-                        onClick={() => onDelete?.(transaction)}
-                        className="w-7 h-7 rounded-lg flex items-center justify-center transition-all active:scale-90"
-                        style={{ background: "rgba(239,68,68,0.12)" }}
-                        title="Delete"
-                      >
-                        <span className="material-symbols-rounded" style={{ fontSize: "14px", color: "#F87171", fontVariationSettings: "'FILL' 1" }}>delete</span>
-                      </button>
-                    </div>
+                    {!transaction._isPartner && (
+                      <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                        <button
+                          onClick={() => onEdit?.(transaction)}
+                          className="w-7 h-7 rounded-lg flex items-center justify-center transition-all active:scale-90"
+                          style={{ background: "rgba(139,92,246,0.12)" }}
+                          title="Edit"
+                        >
+                          <span className="material-symbols-rounded" style={{ fontSize: "14px", color: "#A78BFA", fontVariationSettings: "'FILL' 1" }}>edit</span>
+                        </button>
+                        <button
+                          onClick={() => onDelete?.(transaction)}
+                          className="w-7 h-7 rounded-lg flex items-center justify-center transition-all active:scale-90"
+                          style={{ background: "rgba(239,68,68,0.12)" }}
+                          title="Delete"
+                        >
+                          <span className="material-symbols-rounded" style={{ fontSize: "14px", color: "#F87171", fontVariationSettings: "'FILL' 1" }}>delete</span>
+                        </button>
+                      </div>
+                    )}
                   </td>
                 </tr>
               ))}

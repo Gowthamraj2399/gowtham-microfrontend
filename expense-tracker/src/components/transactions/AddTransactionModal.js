@@ -5,7 +5,18 @@ import { useCategories } from "../../lib/categories-query";
 import { useAddTransaction, useUpdateTransaction } from "../../lib/transactions-query";
 import { usePaymentMethods } from "../../lib/payment-methods-query";
 import { useBudgetsWithSpending } from "../../lib/budget-query";
+import { usePartnerInfo, usePartnerPaymentMethods } from "../../lib/partner-query";
 import { PAYMENT_TYPES } from "../payment-methods/PaymentMethodFormModal";
+
+// Fill color based on remaining budget (inverse of spent)
+function getBarColor(pct, over) {
+  if (over) return "#EF4444";
+  const rem = 100 - pct;
+  if (rem <= 15) return "#EF4444";
+  if (rem <= 30) return "#F97316";
+  if (rem <= 50) return "#EAB308";
+  return "#22C55E";
+}
 
 const now = new Date();
 const CURRENT_MONTH = now.getMonth() + 1;
@@ -39,11 +50,13 @@ const DEFAULT_FORM = {
 };
 
 // ── Payment method dropdown ────────────────────────────────────────────────
-const PaymentMethodSelect = ({ methods, value, onChange }) => {
+const PaymentMethodSelect = ({ methods, partnerMethods = [], partnerName = "Partner", value, onChange }) => {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
-  const selected = methods.find((m) => m.id === value);
+  const allMethods = [...methods, ...partnerMethods];
+  const selected = allMethods.find((m) => m.id === value);
   const typeInfo = selected ? PAYMENT_TYPES.find((t) => t.value === selected.type) : null;
+  const isPartnerSelected = partnerMethods.some((m) => m.id === value);
 
   useEffect(() => {
     const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
@@ -78,6 +91,11 @@ const PaymentMethodSelect = ({ methods, value, onChange }) => {
             <span className="text-white font-medium truncate">
               {selected.name}{selected.last4 ? ` •••• ${selected.last4}` : ""}
             </span>
+            {isPartnerSelected && (
+              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0" style={{ background: "rgba(244,114,182,0.15)", color: "#F472B6" }}>
+                {partnerName}
+              </span>
+            )}
           </>
         ) : (
           <span style={{ color: "#4B5768" }}>Select payment method…</span>
@@ -165,6 +183,43 @@ const PaymentMethodSelect = ({ methods, value, onChange }) => {
                 No methods yet.{" "}
                 <Link to="/payment-methods" className="underline" style={{ color: "#A78BFA" }}>Add one</Link>
               </p>
+            )}
+
+            {/* Partner's payment methods */}
+            {partnerMethods.length > 0 && (
+              <>
+                <div className="px-3 py-1.5 flex items-center gap-1.5" style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}>
+                  <span className="material-symbols-rounded" style={{ fontSize: "11px", color: "#F472B6", fontVariationSettings: "'FILL' 1" }}>favorite</span>
+                  <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: "#F472B6" }}>{partnerName}'s cards</span>
+                </div>
+                {partnerMethods.map((m) => {
+                  const ti = PAYMENT_TYPES.find((t) => t.value === m.type);
+                  return (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => { onChange(m.id); setOpen(false); }}
+                      className="w-full px-3 py-2.5 text-left flex items-center gap-2 text-sm transition-all"
+                      style={{ background: value === m.id ? `${m.color}18` : "transparent" }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = `${m.color}12`)}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = value === m.id ? `${m.color}18` : "transparent")}
+                    >
+                      <div className="w-5 h-5 rounded-md flex items-center justify-center shrink-0" style={{ background: `${m.color}22` }}>
+                        <span className="material-symbols-rounded" style={{ fontSize: "13px", color: m.color, fontVariationSettings: "'FILL' 1" }}>{m.icon}</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="truncate block" style={{ color: value === m.id ? m.color : "#E2E8F0" }}>
+                          {m.name}{m.last4 ? ` •••• ${m.last4}` : ""}
+                        </span>
+                        {ti && <span className="text-[10px]" style={{ color: "#475569" }}>{ti.label}</span>}
+                      </div>
+                      {value === m.id && (
+                        <span className="material-symbols-rounded ml-auto shrink-0" style={{ fontSize: "14px", color: m.color }}>check</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </>
             )}
           </motion.div>
         )}
@@ -313,19 +368,29 @@ const BudgetPicker = ({ budgets, onSelect, selectedBudgetId }) => {
           const isSelected = selectedBudgetId === b.id;
           const remaining = b.remaining;
           const isOver = remaining < 0;
+          const barColor = getBarColor(b.pct, isOver);
+          const fillPct  = isOver ? 100 : Math.max(0, 100 - b.pct);
           return (
             <button
               key={b.id}
               type="button"
               onClick={() => onSelect(isSelected ? null : b)}
-              className="flex flex-col items-start gap-1 px-3 py-2.5 rounded-xl transition-all shrink-0 active:scale-95"
+              className="relative flex flex-col items-start gap-1 px-3 py-2.5 rounded-xl transition-all shrink-0 active:scale-95 overflow-hidden"
               style={{
                 background: isSelected ? `${cat?.color}22` : "rgba(255,255,255,0.04)",
-                border: isSelected ? `1.5px solid ${cat?.color}88` : "1.5px solid rgba(255,255,255,0.08)",
+                border: isSelected ? `1.5px solid ${cat?.color}88` : `1.5px solid ${barColor}40`,
                 minWidth: "110px",
               }}
             >
-              <div className="flex items-center gap-1.5">
+              {/* Animated fill — drains as spending rises */}
+              <motion.div
+                className="absolute inset-y-0 left-0 pointer-events-none"
+                style={{ background: barColor, opacity: isOver ? 0.18 : 0.1 }}
+                initial={{ width: "100%" }}
+                animate={{ width: `${fillPct}%` }}
+                transition={{ duration: 0.7, ease: "easeOut" }}
+              />
+              <div className="relative flex items-center gap-1.5">
                 {cat && (
                   <span
                     className="material-symbols-rounded"
@@ -338,7 +403,7 @@ const BudgetPicker = ({ budgets, onSelect, selectedBudgetId }) => {
                   {cat?.name ?? "—"}
                 </span>
               </div>
-              <span className="text-[10px] font-semibold" style={{ color: isOver ? "#F87171" : "#22C55E" }}>
+              <span className="relative text-[10px] font-semibold" style={{ color: isOver ? "#F87171" : "#22C55E" }}>
                 {isOver ? `₹${Math.abs(remaining).toLocaleString("en-IN")} over` : `₹${remaining.toLocaleString("en-IN")} left`}
               </span>
             </button>
@@ -354,6 +419,8 @@ const AddTransactionModal = ({ open, onClose, onSuccess, initial = null }) => {
   const { data: categories = [] } = useCategories();
   const { data: paymentMethods = [] } = usePaymentMethods();
   const { data: budgets = [] } = useBudgetsWithSpending(CURRENT_YEAR, CURRENT_MONTH);
+  const { partnerId, partnerName } = usePartnerInfo();
+  const { data: partnerMethods = [] } = usePartnerPaymentMethods(partnerId);
   const addTransaction    = useAddTransaction();
   const updateTransaction = useUpdateTransaction();
   const [form, setForm] = useState(DEFAULT_FORM);
@@ -546,6 +613,8 @@ const AddTransactionModal = ({ open, onClose, onSuccess, initial = null }) => {
                   <label className="block text-xs font-semibold text-text-secondary mb-1.5">Paid via</label>
                   <PaymentMethodSelect
                     methods={paymentMethods}
+                    partnerMethods={partnerMethods}
+                    partnerName={partnerName || "Partner"}
                     value={form.payment_method_id}
                     onChange={(id) => setForm((f) => ({ ...f, payment_method_id: id }))}
                   />

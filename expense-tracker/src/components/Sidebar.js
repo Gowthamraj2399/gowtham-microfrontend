@@ -3,11 +3,13 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { sidebarConfig } from "../config/sidebarConfig";
 import { useAuth } from "../lib/AuthContext";
+import { usePartner } from "../lib/PartnerContext";
 
 const Sidebar = ({ mobileOpen, onClose }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { session, signOut } = useAuth();
+  const { partnerId, partnerName, showPartner, setShowPartner } = usePartner();
 
   const activeItem =
     sidebarConfig.menuItems.find((item) => item.path === location.pathname)
@@ -119,6 +121,30 @@ const Sidebar = ({ mobileOpen, onClose }) => {
           })}
         </div>
       </div>
+
+      {/* Partner toggle (desktop sidebar) */}
+      {partnerId && (
+        <div className="px-4 pb-2">
+          <button
+            onClick={() => setShowPartner((p) => !p)}
+            className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl transition-all active:scale-95"
+            style={showPartner
+              ? { background: "rgba(244,114,182,0.12)", border: "1.5px solid rgba(244,114,182,0.35)" }
+              : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}
+          >
+            <span className="material-symbols-rounded" style={{ fontSize: "18px", color: showPartner ? "#F472B6" : "#7B8FA8", fontVariationSettings: "'FILL' 1" }}>favorite</span>
+            <div className="flex-1 text-left">
+              <p className="text-xs font-bold" style={{ color: showPartner ? "#F472B6" : "#7B8FA8" }}>
+                {showPartner ? "Showing combined" : "Show partner"}
+              </p>
+              <p className="text-[10px]" style={{ color: "#475569" }}>{partnerName || "Partner"}</p>
+            </div>
+            <span className="material-symbols-rounded" style={{ fontSize: "14px", color: showPartner ? "#F472B6" : "#475569" }}>
+              {showPartner ? "toggle_on" : "toggle_off"}
+            </span>
+          </button>
+        </div>
+      )}
 
       {/* User Profile */}
       <div className="p-4">

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import CategoryFormModal from "../../components/categories/CategoryFormModal";
 import {
@@ -7,6 +7,8 @@ import {
   useUpdateCategory,
   useDeleteCategory,
 } from "../../lib/categories-query";
+import { usePartnerCategories } from "../../lib/partner-query";
+import { usePartner } from "../../lib/PartnerContext";
 
 const glassStyle = {
   background: "rgba(255,255,255,0.04)",
@@ -79,7 +81,7 @@ const DeleteConfirmModal = ({ category, onConfirm, onCancel, loading }) => (
 );
 
 // ── Category card ──────────────────────────────────────────────────────────
-const CategoryCard = ({ category, onEdit, onDelete }) => (
+const CategoryCard = ({ category, onEdit, onDelete, partnerName }) => (
   <motion.div
     variants={itemVariants}
     className="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all"
@@ -107,44 +109,62 @@ const CategoryCard = ({ category, onEdit, onDelete }) => (
           className="w-2 h-2 rounded-full shrink-0"
           style={{ background: category.color }}
         />
+        {category._isPartner && partnerName && (
+          <span
+            className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md shrink-0"
+            style={{ background: "rgba(251,146,60,0.15)", color: "#FB923C", border: "1px solid rgba(251,146,60,0.25)" }}
+          >
+            {partnerName}
+          </span>
+        )}
       </div>
       {category.description && (
         <p className="text-xs text-text-secondary truncate mt-0.5">{category.description}</p>
       )}
     </div>
 
-    {/* Actions */}
-    <div className="flex items-center gap-1.5 shrink-0">
-      <button
-        onClick={() => onEdit(category)}
-        className="w-8 h-8 rounded-xl flex items-center justify-center transition-all active:scale-90"
-        style={{ background: "rgba(139,92,246,0.1)" }}
-        title="Edit"
-      >
-        <span className="material-symbols-rounded" style={{ fontSize: "15px", color: "#A78BFA", fontVariationSettings: "'FILL' 1" }}>
-          edit
-        </span>
-      </button>
-      <button
-        onClick={() => onDelete(category)}
-        className="w-8 h-8 rounded-xl flex items-center justify-center transition-all active:scale-90"
-        style={{ background: "rgba(239,68,68,0.1)" }}
-        title="Delete"
-      >
-        <span className="material-symbols-rounded" style={{ fontSize: "15px", color: "#F87171", fontVariationSettings: "'FILL' 1" }}>
-          delete
-        </span>
-      </button>
-    </div>
+    {/* Actions — hidden for partner categories */}
+    {!category._isPartner && (
+      <div className="flex items-center gap-1.5 shrink-0">
+        <button
+          onClick={() => onEdit(category)}
+          className="w-8 h-8 rounded-xl flex items-center justify-center transition-all active:scale-90"
+          style={{ background: "rgba(139,92,246,0.1)" }}
+          title="Edit"
+        >
+          <span className="material-symbols-rounded" style={{ fontSize: "15px", color: "#A78BFA", fontVariationSettings: "'FILL' 1" }}>
+            edit
+          </span>
+        </button>
+        <button
+          onClick={() => onDelete(category)}
+          className="w-8 h-8 rounded-xl flex items-center justify-center transition-all active:scale-90"
+          style={{ background: "rgba(239,68,68,0.1)" }}
+          title="Delete"
+        >
+          <span className="material-symbols-rounded" style={{ fontSize: "15px", color: "#F87171", fontVariationSettings: "'FILL' 1" }}>
+            delete
+          </span>
+        </button>
+      </div>
+    )}
   </motion.div>
 );
 
 // ── Page ───────────────────────────────────────────────────────────────────
 const CategoriesPage = () => {
-  const { data: categories = [], isLoading, error } = useCategories();
+  const { data: myCategories = [], isLoading, error } = useCategories();
   const addCategory    = useAddCategory();
   const updateCategory = useUpdateCategory();
   const deleteCategory = useDeleteCategory();
+
+  const { showPartner, partnerId, partnerName } = usePartner();
+  const { data: partnerCategories = [] } = usePartnerCategories(showPartner ? partnerId : null);
+
+  const categories = useMemo(() => {
+    if (!showPartner || !partnerId) return myCategories;
+    return [...myCategories, ...partnerCategories].sort((a, b) => a.name.localeCompare(b.name));
+  }, [myCategories, partnerCategories, showPartner, partnerId]);
 
   const [formOpen, setFormOpen]         = useState(false);
   const [editTarget, setEditTarget]     = useState(null);
@@ -189,7 +209,7 @@ const CategoriesPage = () => {
           </p>
           <h1 className="text-2xl sm:text-3xl font-black leading-tight text-white">Categories</h1>
           <p className="text-text-secondary text-sm mt-1">
-            {categories.length} {categories.length === 1 ? "category" : "categories"} · Organise your spending
+            {categories.length} {categories.length === 1 ? "category" : "categories"}{showPartner && partnerId ? ` · Combined with ${partnerName}` : " · Organise your spending"}
           </p>
         </motion.div>
         <motion.button
@@ -265,6 +285,7 @@ const CategoriesPage = () => {
               category={cat}
               onEdit={openEdit}
               onDelete={setDeleteTarget}
+              partnerName={partnerName}
             />
           ))}
         </motion.div>

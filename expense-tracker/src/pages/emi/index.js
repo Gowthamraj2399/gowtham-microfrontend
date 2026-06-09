@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEmis, useDeleteEmi, useUpdateEmi } from "../../lib/emi-query";
 import EMIFormModal, { LOAN_TYPES } from "../../components/emi/EMIFormModal";
+import { usePartner } from "../../lib/PartnerContext";
+import { usePartnerEmis } from "../../lib/partner-query";
 
 // ── Amortization helpers ─────────────────────────────────────────────────────
 function computeAmortization(principal, annualRate, tenureMonths, paidCount, emiAmount) {
@@ -85,7 +87,10 @@ const EMICard = ({ emi, onEdit, onDelete }) => {
         </div>
 
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-bold text-white truncate">{emi.title}</p>
+          <div className="flex items-center gap-1.5">
+            <p className="text-sm font-bold text-white truncate">{emi.title}</p>
+            {emi._isPartner && <span className="text-[9px] font-bold px-1 py-0.5 rounded shrink-0" style={{ background: "rgba(244,114,182,0.15)", color: "#F472B6" }}>Partner</span>}
+          </div>
           <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
             <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md"
               style={{ background: `${color}18`, color }}>{lt.label}</span>
@@ -139,16 +144,20 @@ const EMICard = ({ emi, onEdit, onDelete }) => {
       {/* Actions */}
       <div className="flex items-center gap-1.5 pt-0.5" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
         <div className="flex-1" />
-        <button onClick={() => onEdit(emi)}
-          className="w-7 h-7 rounded-lg flex items-center justify-center transition-all active:scale-90"
-          style={{ background: "rgba(139,92,246,0.12)", color: "#A78BFA" }}>
-          <span className="material-symbols-rounded" style={{ fontSize: "14px" }}>edit</span>
-        </button>
-        <button onClick={() => onDelete(emi)}
-          className="w-7 h-7 rounded-lg flex items-center justify-center transition-all active:scale-90"
-          style={{ background: "rgba(239,68,68,0.1)", color: "#F87171" }}>
-          <span className="material-symbols-rounded" style={{ fontSize: "14px" }}>delete</span>
-        </button>
+        {!emi._isPartner && (
+          <>
+            <button onClick={() => onEdit(emi)}
+              className="w-7 h-7 rounded-lg flex items-center justify-center transition-all active:scale-90"
+              style={{ background: "rgba(139,92,246,0.12)", color: "#A78BFA" }}>
+              <span className="material-symbols-rounded" style={{ fontSize: "14px" }}>edit</span>
+            </button>
+            <button onClick={() => onDelete(emi)}
+              className="w-7 h-7 rounded-lg flex items-center justify-center transition-all active:scale-90"
+              style={{ background: "rgba(239,68,68,0.1)", color: "#F87171" }}>
+              <span className="material-symbols-rounded" style={{ fontSize: "14px" }}>delete</span>
+            </button>
+          </>
+        )}
       </div>
     </motion.div>
   );
@@ -220,16 +229,20 @@ const DeleteModal = ({ item, onConfirm, onCancel, isPending }) => (
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 const EmiPage = () => {
-  const { data: emis = [], isLoading } = useEmis();
+  const { data: emis = [], isLoading: isOwnLoading } = useEmis();
   const deleteEmi = useDeleteEmi();
+  const { showPartner, partnerId, isPartnerConnLoading } = usePartner();
+  const { data: partnerEmiData = [], isLoading: isPartnerLoading } = usePartnerEmis(showPartner ? partnerId : null);
+  const isLoading = isOwnLoading || (showPartner && (isPartnerConnLoading || (!!partnerId && isPartnerLoading)));
 
   const [modalOpen,  setModalOpen]  = useState(false);
   const [editItem,   setEditItem]   = useState(null);
   const [deleteItem, setDeleteItem] = useState(null);
   const [showDone,   setShowDone]   = useState(false);
 
-  const active    = emis.filter((e) => e.is_active);
-  const completed = emis.filter((e) => !e.is_active);
+  const allEmis    = showPartner ? [...emis, ...partnerEmiData] : emis;
+  const active     = allEmis.filter((e) => e.is_active);
+  const completed  = emis.filter((e) => !e.is_active); // only own completed
 
   const totalMonthlyEMI  = active.reduce((s, e) => s + e.emi_amount, 0);
   const totalOutstanding = active.reduce((s, e) => s + Math.max((e.tenure_months - e.paid_count) * e.emi_amount, 0), 0);
@@ -277,7 +290,7 @@ const EmiPage = () => {
       </header>
 
       {/* Summary bar */}
-      {!isLoading && emis.length > 0 && (
+      {!isLoading && allEmis.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-5 rounded-2xl p-3"
           style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
           {[
@@ -298,7 +311,7 @@ const EmiPage = () => {
       {/* Active EMIs */}
       {isLoading ? (
         <Skeleton />
-      ) : active.length === 0 && completed.length === 0 ? (
+      ) : active.length === 0 && completed.length === 0 && !showPartner ? (
         <motion.div className="flex flex-col items-center justify-center py-16 text-center"
           initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
@@ -326,7 +339,7 @@ const EmiPage = () => {
             </AnimatePresence>
           )}
 
-          {active.length === 0 && (
+          {active.length === 0 && !isLoading && (
             <motion.div className="flex flex-col items-center justify-center py-10 text-center mb-5"
               initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
               <p className="text-sm font-semibold text-white mb-1">No active loans</p>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import StatsCard from "../../components/dashboard/StatsCard";
@@ -7,6 +7,8 @@ import SpendingByCategory from "../../components/dashboard/SpendingByCategory";
 import EMIList from "../../components/dashboard/EMIList";
 import RecurringList from "../../components/dashboard/RecurringList";
 import { useDashboard } from "../../lib/dashboard-query";
+import { usePartner } from "../../lib/PartnerContext";
+import { usePartnerTransactions, usePartnerEmis, usePartnerRecurring } from "../../lib/partner-query";
 
 const containerVariants = {
   hidden: {},
@@ -32,7 +34,7 @@ const Skel = ({ h = "h-5", w = "w-full", className = "" }) => (
 );
 
 // ── Recent transaction row ────────────────────────────────────────────────
-const RecentTxRow = ({ tx }) => {
+const RecentTxRow = ({ tx, isPartner }) => {
   const cat   = tx.category;
   const color = cat?.color || "#8B5CF6";
   const icon  = cat?.icon  || "receipt_long";
@@ -45,7 +47,10 @@ const RecentTxRow = ({ tx }) => {
           <span className="material-symbols-rounded" style={{ fontSize: "16px", color, fontVariationSettings: "'FILL' 1" }}>{icon}</span>
         </div>
         <div>
-          <p className="text-xs font-semibold text-white leading-tight">{tx.title}</p>
+          <div className="flex items-center gap-1.5">
+            <p className="text-xs font-semibold text-white leading-tight">{tx.title}</p>
+            {isPartner && <span className="text-[9px] font-bold px-1 py-0.5 rounded" style={{ background: "rgba(244,114,182,0.15)", color: "#F472B6" }}>Partner</span>}
+          </div>
           <p className="text-[11px] text-text-secondary">{cat?.name || "Uncategorised"}</p>
         </div>
       </div>
@@ -59,6 +64,7 @@ const RecentTxRow = ({ tx }) => {
 
 // ── Dashboard page ────────────────────────────────────────────────────────
 const DashboardPage = () => {
+  const { showPartner, partnerId, partnerName } = usePartner();
   const {
     isLoading,
     stats,
@@ -72,16 +78,119 @@ const DashboardPage = () => {
     recentTransactions,
     upcomingEmis,
     upcomingRecurring,
+    emiMonthlyTotal,
+    recurringMonthlyTotal,
     thisMonth,
     thisYear,
   } = useDashboard();
 
+  // Partner data (only fetched when connected + toggle on)
+  const lastMonth = thisMonth === 1 ? 12 : thisMonth - 1;
+  const lastMonthYear = thisMonth === 1 ? thisYear - 1 : thisYear;
+
+  const { data: partnerTxsThis = [] } = usePartnerTransactions(
+    showPartner ? partnerId : null,
+    { year: thisYear, month: thisMonth }
+  );
+  const { data: partnerTxsLast = [] } = usePartnerTransactions(
+    showPartner ? partnerId : null,
+    { year: lastMonthYear, month: lastMonth }
+  );
+  const { data: partnerEmis = [] }      = usePartnerEmis(showPartner ? partnerId : null);
+  const { data: partnerRecurring = [] } = usePartnerRecurring(showPartner ? partnerId : null);
+
+  const partnerThisTotal        = partnerTxsThis.reduce((s, t) => s + Number(t.amount), 0);
+  const combinedTotal           = showPartner ? thisTotal + partnerThisTotal : thisTotal;
+  const partnerEmiMonthly       = partnerEmis.filter((e) => e.is_active).reduce((s, e) => s + Number(e.emi_amount), 0);
+  const partnerRecurringMonthly = partnerRecurring.filter((r) => r.is_active && r.frequency === "monthly").reduce((s, r) => s + Number(r.amount), 0);
+
+  // Merged daily spending trend
+  const mergedSpendingTrend = useMemo(() => {
+    if (!showPartner) return spendingTrend;
+    const buildMap = (txns) => {
+      const m = {};
+      for (const tx of txns) { const d = parseInt(tx.date.split("-")[2], 10); m[d] = (m[d] || 0) + Number(tx.amount); }
+      return m;
+    };
+    const pThis = buildMap(partnerTxsThis);
+    const pLast = buildMap(partnerTxsLast);
+    return spendingTrend.map((item) => ({
+      ...item,
+      thisMonth: item.thisMonth != null ? item.thisMonth + (pThis[parseInt(item.day, 10)] || 0) : item.thisMonth,
+      lastMonth: item.lastMonth != null ? item.lastMonth + (pLast[parseInt(item.day, 10)] || 0) : item.lastMonth,
+    }));
+  }, [showPartner, spendingTrend, partnerTxsThis, partnerTxsLast]);
+
+  // Merged category breakdown
+  const mergedCategoryBreakdown = useMemo(() => {
+    if (!showPartner || partnerTxsThis.length === 0) return categoryBreakdown;
+    const catMap = {};
+    for (const cat of categoryBreakdown) catMap[cat.id] = { ...cat };
+    for (const tx of partnerTxsThis) {
+      const cat = tx.category;
+      if (!cat) continue;
+      if (catMap[cat.id]) catMap[cat.id].amount += Number(tx.amount);
+      else catMap[cat.id] = { id: cat.id, name: cat.name, color: cat.color, icon: cat.icon, amount: Number(tx.amount) };
+    }
+    return Object.values(catMap).sort((a, b) => b.amount - a.amount).slice(0, 6);
+  }, [showPartner, categoryBreakdown, partnerTxsThis]);
+
+  // Merged monthly comparison (only this + last month data available)
+  const mergedMonthlyComparison = useMemo(() => {
+    if (!showPartner) return monthlyComparison;
+    const thisLabel = new Date(thisYear, thisMonth - 1, 1).toLocaleDateString("en-IN", { month: "short" });
+    const lastLabel = new Date(lastMonthYear, lastMonth - 1, 1).toLocaleDateString("en-IN", { month: "short" });
+    const pThisAmt = partnerTxsThis.reduce((s, t) => s + Number(t.amount), 0);
+    const pLastAmt = partnerTxsLast.reduce((s, t) => s + Number(t.amount), 0);
+    return monthlyComparison.map((m) => {
+      if (m.month === thisLabel) return { ...m, amount: m.amount + pThisAmt };
+      if (m.month === lastLabel) return { ...m, amount: m.amount + pLastAmt };
+      return m;
+    });
+  }, [showPartner, monthlyComparison, partnerTxsThis, partnerTxsLast, thisMonth, thisYear, lastMonth, lastMonthYear]);
+
+  const avg6m = mergedMonthlyComparison.filter((m) => m.amount > 0).length > 0
+    ? Math.round(mergedMonthlyComparison.reduce((s, m) => s + m.amount, 0) / mergedMonthlyComparison.filter((m) => m.amount > 0).length)
+    : 0;
+
+  const displayEmiTotal       = showPartner ? emiMonthlyTotal + partnerEmiMonthly : emiMonthlyTotal;
+  const displayRecurringTotal  = showPartner ? recurringMonthlyTotal + partnerRecurringMonthly : recurringMonthlyTotal;
+  const fixedMonthlyTotal      = displayEmiTotal + displayRecurringTotal;
+  const fixedPct               = combinedTotal > 0 ? Math.min(100, Math.round((fixedMonthlyTotal / combinedTotal) * 100)) : 0;
+
+  // Override stats cards when showing combined
+  const displayStats = showPartner
+    ? stats.map((s) => {
+        if (s.id === "this-month")      return { ...s, value: fmtINR(combinedTotal) };
+        if (s.id === "emis-due")        return { ...s, value: fmtINR(emiMonthlyTotal + partnerEmiMonthly) };
+        if (s.id === "recurring-total") return { ...s, value: fmtINR(recurringMonthlyTotal + partnerRecurringMonthly) };
+        return s;
+      })
+    : stats;
+
+  // Merged recent transactions (sorted by date desc, top 5)
+  const mergedRecent = showPartner
+    ? [...recentTransactions, ...partnerTxsThis]
+        .sort((a, b) => b.date.localeCompare(a.date) || new Date(b.created_at) - new Date(a.created_at))
+        .slice(0, 5)
+    : recentTransactions;
+
+  // Merged upcoming EMIs / recurring (partner active items merged, sorted by due date)
+  const mergedEmis = showPartner
+    ? [...upcomingEmis, ...partnerEmis.filter((e) => e.is_active)]
+        .sort((a, b) => (a.next_due_date || "9999").localeCompare(b.next_due_date || "9999"))
+        .slice(0, 5)
+    : upcomingEmis;
+  const mergedRecurring = showPartner
+    ? [...upcomingRecurring, ...partnerRecurring.filter((r) => r.is_active)]
+        .sort((a, b) => (a.next_due_date || "9999").localeCompare(b.next_due_date || "9999"))
+        .slice(0, 6)
+    : upcomingRecurring;
+
   const monthLabel = new Date(thisYear, thisMonth - 1, 1)
     .toLocaleDateString("en-IN", { month: "long", year: "numeric" });
 
-  const avg6m = monthlyComparison.filter((m) => m.amount > 0).length > 0
-    ? Math.round(monthlyComparison.reduce((s, m) => s + m.amount, 0) / monthlyComparison.filter((m) => m.amount > 0).length)
-    : 0;
+  // avg6m computed from mergedMonthlyComparison above
 
   return (
     <div className="max-w-[1280px] w-full mx-auto px-4 sm:px-6 py-6 pb-8">
@@ -96,13 +205,19 @@ const DashboardPage = () => {
             <Skel h="h-4" w="w-56" className="mt-2" />
           ) : (
             <p className="text-text-secondary text-sm mt-1">
-              Spent <span className="text-white font-semibold">{fmtINR(thisTotal)}</span> so far
-              {diffPct != null && (
+              {showPartner && (
+                <span className="mr-1 text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ background: "rgba(244,114,182,0.15)", color: "#F472B6" }}>Combined</span>
+              )}
+              Spent <span className="text-white font-semibold">{fmtINR(combinedTotal)}</span> so far
+              {diffPct != null && !showPartner && (
                 <>&nbsp;·&nbsp;
                   <span style={{ color: diffAmt > 0 ? "#F87171" : "#34D399" }}>
                     {diffAmt >= 0 ? "+" : ""}{fmtINR(Math.abs(diffAmt))} vs last month
                   </span>
                 </>
+              )}
+              {showPartner && partnerThisTotal > 0 && (
+                <>&nbsp;·&nbsp;<span style={{ color: "#F472B6" }}>{partnerName || "Partner"}: {fmtINR(partnerThisTotal)}</span></>
               )}
             </p>
           )}
@@ -126,7 +241,7 @@ const DashboardPage = () => {
                 <div className="rounded-2xl p-5 h-28 animate-pulse" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }} />
               </motion.div>
             ))
-          : stats.map((stat) => (
+          : displayStats.map((stat) => (
               <motion.div key={stat.id} variants={itemVariants}>
                 <StatsCard {...stat} />
               </motion.div>
@@ -134,19 +249,82 @@ const DashboardPage = () => {
         }
       </motion.div>
 
+      {/* ── Monthly Commitments ── */}
+      {!isLoading && (
+        <motion.div variants={containerVariants} initial="hidden" animate="show" className="mb-4">
+          <motion.div variants={itemVariants}>
+            <div className="rounded-2xl px-4 sm:px-6 py-4 flex flex-wrap items-center gap-4 sm:gap-6" style={glassStyle}>
+              {/* Total */}
+              <div className="flex items-center gap-3 min-w-[140px]">
+                <div className="p-2.5 rounded-xl shrink-0" style={{ background: "rgba(139,92,246,0.15)" }}>
+                  <span className="material-symbols-rounded" style={{ fontSize: "20px", color: "#A78BFA", fontVariationSettings: "'FILL' 1" }}>lock_clock</span>
+                </div>
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-text-secondary">Fixed Monthly</p>
+                  <p className="text-xl font-black text-white leading-tight">{fmtINR(fixedMonthlyTotal)}</p>
+                </div>
+              </div>
+
+              {/* Divider */}
+              <div className="hidden sm:block w-px h-10 self-center" style={{ background: "rgba(255,255,255,0.08)" }} />
+
+              {/* EMI */}
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl shrink-0" style={{ background: "rgba(168,85,247,0.12)" }}>
+                  <span className="material-symbols-rounded" style={{ fontSize: "16px", color: "#C084FC", fontVariationSettings: "'FILL' 1" }}>credit_card</span>
+                </div>
+                <div>
+                  <p className="text-[11px] text-text-secondary font-medium">EMIs</p>
+                  <p className="text-sm font-bold text-white">{fmtINR(displayEmiTotal)}</p>
+                </div>
+              </div>
+
+              <span className="text-text-secondary font-bold text-xs">+</span>
+
+              {/* Recurring */}
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl shrink-0" style={{ background: "rgba(16,185,129,0.12)" }}>
+                  <span className="material-symbols-rounded" style={{ fontSize: "16px", color: "#34D399", fontVariationSettings: "'FILL' 1" }}>replay</span>
+                </div>
+                <div>
+                  <p className="text-[11px] text-text-secondary font-medium">Recurring</p>
+                  <p className="text-sm font-bold text-white">{fmtINR(displayRecurringTotal)}</p>
+                </div>
+              </div>
+
+              {/* Progress */}
+              {combinedTotal > 0 && (
+                <>
+                  <div className="hidden sm:block w-px h-10 self-center" style={{ background: "rgba(255,255,255,0.08)" }} />
+                  <div className="flex-1 min-w-[160px]">
+                    <div className="flex justify-between items-center mb-1.5">
+                      <p className="text-[11px] text-text-secondary">of this month's spend</p>
+                      <p className="text-[11px] font-bold" style={{ color: fixedPct >= 80 ? "#F87171" : fixedPct >= 50 ? "#FBBF24" : "#A78BFA" }}>{fixedPct}%</p>
+                    </div>
+                    <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.07)" }}>
+                      <div className="h-full rounded-full transition-all duration-700" style={{ width: `${fixedPct}%`, background: fixedPct >= 80 ? "linear-gradient(90deg,#F87171,#EF4444)" : "linear-gradient(90deg,#8B5CF6,#34D399)" }} />
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+
       {/* ── Charts ── */}
       <motion.div variants={containerVariants} initial="hidden" animate="show"
         className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
         <motion.div variants={itemVariants} className="lg:col-span-2">
           {isLoading
             ? <div className="rounded-2xl p-5 h-64 animate-pulse" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }} />
-            : <SpendingTrendChart title="Daily Spending" subtitle={`${monthLabel} vs previous month`} data={spendingTrend} />
+            : <SpendingTrendChart title="Daily Spending" subtitle={`${monthLabel} vs previous month`} data={mergedSpendingTrend} />
           }
         </motion.div>
         <motion.div variants={itemVariants}>
           {isLoading
             ? <div className="rounded-2xl p-5 h-64 animate-pulse" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }} />
-            : <MonthlyComparisonChart title="Monthly Comparison" subtitle="Last 6 months" data={monthlyComparison} previousAvg={avg6m} />
+            : <MonthlyComparisonChart title="Monthly Comparison" subtitle="Last 6 months" data={mergedMonthlyComparison} previousAvg={avg6m} />
           }
         </motion.div>
       </motion.div>
@@ -157,7 +335,7 @@ const DashboardPage = () => {
         <motion.div variants={itemVariants} className="lg:col-span-2">
           {isLoading
             ? <div className="rounded-2xl p-5 h-64 animate-pulse" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }} />
-            : <SpendingByCategory categories={categoryBreakdown} />
+            : <SpendingByCategory categories={mergedCategoryBreakdown} />
           }
         </motion.div>
         <motion.div variants={itemVariants}>
@@ -168,17 +346,17 @@ const DashboardPage = () => {
             </div>
             {isLoading ? (
               <div className="flex flex-col gap-3">{Array.from({ length: 4 }).map((_, i) => <Skel key={i} h="h-10" />)}</div>
-            ) : recentTransactions.length === 0 ? (
+            ) : recentTransactions.length === 0 && partnerTxsThis.length === 0 ? (
               <p className="text-xs text-text-secondary py-6 text-center">No transactions yet this month</p>
             ) : (
               <>
                 <div className="flex flex-col">
-                  {recentTransactions.map((tx) => <RecentTxRow key={tx.id} tx={tx} />)}
+                  {mergedRecent.map((tx) => <RecentTxRow key={tx.id} tx={tx} isPartner={!!tx._isPartner} />)}
                 </div>
                 <div className="mt-auto pt-2 flex items-center justify-between text-xs">
-                  <span className="text-text-secondary">{recentTransactions.length} recent</span>
+                  <span className="text-text-secondary">{mergedRecent.length} recent</span>
                   <span className="font-bold" style={{ color: "#F87171" }}>
-                    -{fmtINR(recentTransactions.reduce((s, t) => s + Number(t.amount), 0))}
+                    -{fmtINR(mergedRecent.reduce((s, t) => s + Number(t.amount), 0))}
                   </span>
                 </div>
               </>
@@ -193,7 +371,7 @@ const DashboardPage = () => {
         <motion.div variants={itemVariants}>
           {isLoading
             ? <div className="rounded-2xl p-5 h-48 animate-pulse" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }} />
-            : <EMIList emis={upcomingEmis} />
+            : <EMIList emis={mergedEmis} total={fmtINR(displayEmiTotal)} />
           }
         </motion.div>
         <motion.div variants={itemVariants}>
@@ -201,8 +379,8 @@ const DashboardPage = () => {
             ? <div className="rounded-2xl p-5 h-48 animate-pulse" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }} />
             : <RecurringList
                 title="Recurring Payments"
-                total={fmtINR(upcomingRecurring.reduce((s, r) => s + Number(r.amount), 0))}
-                items={upcomingRecurring}
+                total={fmtINR(mergedRecurring.reduce((s, r) => s + Number(r.amount), 0))}
+                items={mergedRecurring}
               />
           }
         </motion.div>

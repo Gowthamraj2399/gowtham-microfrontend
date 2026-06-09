@@ -6,6 +6,8 @@ import {
   useDeleteRecurringPayment,
 } from "../../lib/recurring-query";
 import RecurringFormModal, { FREQUENCY_OPTIONS } from "../../components/recurring-payments/RecurringFormModal";
+import { usePartner } from "../../lib/PartnerContext";
+import { usePartnerRecurring } from "../../lib/partner-query";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 function getDueStatus(nextDueDateStr) {
@@ -57,7 +59,10 @@ const RecurringCard = ({ item, onEdit, onDelete, onToggle }) => {
         </div>
 
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-bold text-white truncate">{item.title}</p>
+          <div className="flex items-center gap-1.5">
+            <p className="text-sm font-bold text-white truncate">{item.title}</p>
+            {item._isPartner && <span className="text-[9px] font-bold px-1 py-0.5 rounded shrink-0" style={{ background: "rgba(244,114,182,0.15)", color: "#F472B6" }}>Partner</span>}
+          </div>
           <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
             {item.category && (
               <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md"
@@ -81,27 +86,40 @@ const RecurringCard = ({ item, onEdit, onDelete, onToggle }) => {
       </div>
 
       <div className="flex items-center gap-1.5 pt-0.5" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-        <button onClick={() => onToggle(item)}
-          className="flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg transition-all active:scale-95"
-          style={item.is_active
-            ? { background: "rgba(16,185,129,0.12)", color: "#34D399" }
-            : { background: "rgba(255,255,255,0.05)", color: "#7B8FA8" }}>
-          <span className="material-symbols-rounded" style={{ fontSize: "11px", fontVariationSettings: "'FILL' 1" }}>
-            {item.is_active ? "check_circle" : "pause_circle"}
+        {!item._isPartner && (
+          <button onClick={() => onToggle(item)}
+            className="flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg transition-all active:scale-95"
+            style={item.is_active
+              ? { background: "rgba(16,185,129,0.12)", color: "#34D399" }
+              : { background: "rgba(255,255,255,0.05)", color: "#7B8FA8" }}>
+            <span className="material-symbols-rounded" style={{ fontSize: "11px", fontVariationSettings: "'FILL' 1" }}>
+              {item.is_active ? "check_circle" : "pause_circle"}
+            </span>
+            {item.is_active ? "Active" : "Paused"}
+          </button>
+        )}
+        {item._isPartner && (
+          <span className="flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg"
+            style={{ background: "rgba(244,114,182,0.1)", color: "#F472B6" }}>
+            <span className="material-symbols-rounded" style={{ fontSize: "11px", fontVariationSettings: "'FILL' 1" }}>favorite</span>
+            Partner
           </span>
-          {item.is_active ? "Active" : "Paused"}
-        </button>
+        )}
         <div className="flex-1" />
-        <button onClick={() => onEdit(item)}
-          className="w-7 h-7 rounded-lg flex items-center justify-center transition-all active:scale-90"
-          style={{ background: "rgba(139,92,246,0.12)", color: "#A78BFA" }}>
-          <span className="material-symbols-rounded" style={{ fontSize: "14px" }}>edit</span>
-        </button>
-        <button onClick={() => onDelete(item)}
-          className="w-7 h-7 rounded-lg flex items-center justify-center transition-all active:scale-90"
-          style={{ background: "rgba(239,68,68,0.1)", color: "#F87171" }}>
-          <span className="material-symbols-rounded" style={{ fontSize: "14px" }}>delete</span>
-        </button>
+        {!item._isPartner && (
+          <>
+            <button onClick={() => onEdit(item)}
+              className="w-7 h-7 rounded-lg flex items-center justify-center transition-all active:scale-90"
+              style={{ background: "rgba(139,92,246,0.12)", color: "#A78BFA" }}>
+              <span className="material-symbols-rounded" style={{ fontSize: "14px" }}>edit</span>
+            </button>
+            <button onClick={() => onDelete(item)}
+              className="w-7 h-7 rounded-lg flex items-center justify-center transition-all active:scale-90"
+              style={{ background: "rgba(239,68,68,0.1)", color: "#F87171" }}>
+              <span className="material-symbols-rounded" style={{ fontSize: "14px" }}>delete</span>
+            </button>
+          </>
+        )}
       </div>
     </motion.div>
   );
@@ -143,18 +161,22 @@ const DeleteModal = ({ item, onConfirm, onCancel, isPending }) => (
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 const RecurringPaymentsPage = () => {
-  const { data: payments = [], isLoading } = useRecurringPayments();
+  const { data: payments = [], isLoading: isOwnLoading } = useRecurringPayments();
   const updatePayment = useUpdateRecurringPayment();
   const deletePayment = useDeleteRecurringPayment();
+  const { showPartner, partnerId, isPartnerConnLoading } = usePartner();
+  const { data: partnerPayments = [], isLoading: isPartnerLoading } = usePartnerRecurring(showPartner ? partnerId : null);
+  const isLoading = isOwnLoading || (showPartner && (isPartnerConnLoading || (!!partnerId && isPartnerLoading)));
 
   const [tab,        setTab]        = useState("active");
   const [modalOpen,  setModalOpen]  = useState(false);
   const [editItem,   setEditItem]   = useState(null);
   const [deleteItem, setDeleteItem] = useState(null);
 
-  const active   = payments.filter((p) => p.is_active);
-  const inactive = payments.filter((p) => !p.is_active);
-  const visible  = tab === "active" ? active : inactive;
+  const allPayments = showPartner ? [...payments, ...partnerPayments] : payments;
+  const active      = allPayments.filter((p) => p.is_active);
+  const inactive    = payments.filter((p) => !p.is_active); // only own paused
+  const visible     = tab === "active" ? active : inactive;
 
   const monthlyCost = active.reduce((sum, p) => sum + toMonthly(p.amount, p.frequency), 0);
   const nextDue     = active.length
@@ -190,7 +212,7 @@ const RecurringPaymentsPage = () => {
       </header>
 
       {/* Summary bar */}
-      {!isLoading && payments.length > 0 && (
+      {!isLoading && allPayments.length > 0 && (
         <div className="grid grid-cols-3 gap-2 mb-5 rounded-2xl p-3"
           style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
           {[
