@@ -122,6 +122,15 @@ const Navbar = (props) => {
             <li
               className="cursor-pointer mx-4 p-1 my-4 md:my-0"
               onClick={() => {
+                props.onAwardsClick();
+                Close();
+              }}
+            >
+              Awards
+            </li>
+            <li
+              className="cursor-pointer mx-4 p-1 my-4 md:my-0"
+              onClick={() => {
                 props.onProjectsClick();
                 Close();
               }}

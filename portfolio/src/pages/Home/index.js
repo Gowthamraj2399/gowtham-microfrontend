@@ -9,6 +9,7 @@ import Hero from "./Hero";
 import Projects from "./Projects";
 import Technologies from "./Technologies";
 import Experience from "./Experience";
+import Awards from "./Awards";
 import ToggleSwitch from "../../components/ToggleSwitch";
 
 const Home = () => {
@@ -19,6 +20,7 @@ const Home = () => {
   const testimonialsRef = useRef(null);
   const contactRef = useRef(null);
   const experienceRef = useRef(null);
+  const awardsRef = useRef(null);
 
   const [theme, setTheme] = useState("dark");
 
@@ -65,6 +67,7 @@ const Home = () => {
           onExperienceClick={() =>
             scrollToTargetAdjusted(experienceRef.current)
           }
+          onAwardsClick={() => scrollToTargetAdjusted(awardsRef.current)}
           onTestimonialsClick={() =>
             scrollToTargetAdjusted(testimonialsRef.current)
           }
@@ -81,6 +84,7 @@ const Home = () => {
         <About ref={aboutRef} theme={theme} />
         <Technologies ref={technologiesRef} theme={theme} />
         <Experience ref={experienceRef} theme={theme} />
+        <Awards ref={awardsRef} theme={theme} />
         <Projects ref={projectsRef} theme={theme} />
         <Contact ref={contactRef} theme={theme} />
         <Footer />

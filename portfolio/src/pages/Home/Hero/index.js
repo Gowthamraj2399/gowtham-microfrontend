@@ -56,10 +56,15 @@ const Hero = React.forwardRef((props, ref) => {
               </h1>
             </Reveal>
             <Reveal mode={props.theme}>
-              <h1 className="text-4xl font-bold my-2">Web/Mobile developer</h1>
+              <h1 className="text-4xl font-bold my-2">Senior Software Engineer</h1>
             </Reveal>
             <Reveal mode={props.theme}>
-              <p className="my-2">and this is my pitch to come work for you</p>
+              <p className="text-lg font-semibold text-secondary-blue dark:text-dark-primary my-1">
+                Full Stack &nbsp;·&nbsp; Java &nbsp;·&nbsp; React &nbsp;·&nbsp; AI/LLM
+              </p>
+            </Reveal>
+            <Reveal mode={props.theme}>
+              <p className="my-2 text-sm">building scalable full-stack and AI-powered products</p>
             </Reveal>
             <Reveal mode={props.theme}>
               <p className=" font-Cormorant text-lg font-semibold italic text-secondary-blue dark:text-white/40">

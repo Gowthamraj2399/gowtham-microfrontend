@@ -48,11 +48,13 @@ const About = React.forwardRef((props, ref) => {
           </SimpleTransition>
           <SimpleTransition>
             <p className="text-sm mb-2">
-              It was love at first sight. I dabbled into various technologies
-              available at the time - and one thing led to another. Cut to
-              today, I’m a proud Web/Mobile developer and I intend to hone my
-              craft by expanding my knowledge and abilities in the domain of
-              Computer Science.
+              What started as a love for building UIs with React grew into a
+              full-stack engineering journey. Over 5+ years, I've evolved from
+              crafting frontend experiences to designing scalable backend
+              systems with <strong>Java &amp; Spring Boot</strong>, architecting
+              <strong> micro-frontend</strong> platforms, and integrating
+              <strong> AI capabilities</strong> using LLMs, LangGraph, and MCP.
+              Today, I build end-to-end products that are fast, resilient, and intelligent.
             </p>
           </SimpleTransition>
           <p className=" font-Cormorant text-lg font-semibold italic text-secondary-blue dark:text-white/40">

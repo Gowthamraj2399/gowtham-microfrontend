@@ -37,10 +37,11 @@ const Projects = React.forwardRef((props, ref) => {
                     {"<p>"}
                   </p>
                   <p className="text-xs md:text-sm">
-                    Developed Ayevee’s mobile app - a lifestyle content based
-                    platform. The app features star performers and anchors
-                    ranging from topics from lifestyle, Beauty, Travel, Gender,
-                    Entertainment, Sports and more.
+                    Built a scalable cross-platform mobile application for
+                    Ayevee, a lifestyle content platform featuring star
+                    performers across topics like Beauty, Travel, Entertainment,
+                    and Sports. Architected a performant React Native codebase
+                    with Redux state management and video streaming via MUX.
                   </p>
                   <p className="font-Cormorant text-sm md:text-lg font-semibold italic text-primary-blue">
                     {"</p>"}
@@ -91,10 +92,11 @@ const Projects = React.forwardRef((props, ref) => {
                     {"<p>"}
                   </p>
                   <p className="text-xs md:text-sm">
-                    Key member in the development of IMS interpreter mobile.
-                    Powered by the award-winning Primaxis technology, IMS solves
-                    for scheduling interpreters in hospitals and clinics. The
-                    application is now in final stages of testing.
+                    Engineered an enterprise-grade cross-platform interpreter
+                    scheduling application for hospitals and clinics, built on
+                    the award-winning Primaxis technology. Delivered a seamless
+                    Ionic/Angular hybrid app that streamlined interpreter
+                    bookings and reduced manual scheduling overhead.
                   </p>
                   <p className="font-Cormorant text-lg font-semibold italic text-primary-blue">
                     {"</p>"}
@@ -138,10 +140,11 @@ const Projects = React.forwardRef((props, ref) => {
                     {"<p>"}
                   </p>
                   <p className="text-xs md:text-sm">
-                    Developed SCT Home and Admin’s Landing pages. In addition,
-                    developed a one-of-a-kind dynamic career’s page that helps
-                    admins and job recruits from the organisation manage
-                    applications with ease.
+                    Developed a dynamic React web platform for SCT, including
+                    a public landing page and a full-featured admin panel.
+                    Built a CMS-style dynamic careers page enabling admins to
+                    create, manage, and publish job listings — and applicants
+                    to browse and apply — without any code changes.
                   </p>
                   <p className="font-Cormorant text-sm md:text-lg font-semibold italic text-primary-blue">
                     {"</p>"}
