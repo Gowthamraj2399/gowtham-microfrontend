@@ -2,6 +2,7 @@ const path = require("path");
 const { merge } = require("webpack-merge");
 const ModuleFederationPlugin = require("webpack/lib/container/ModuleFederationPlugin");
 const packageJson = require("../package.json");
+const sharedDeps = require("./sharedDeps");
 const commonConfig = require("./webpack.common");
 
 const buildToFirebase = process.env.BUILD_TO_FIREBASE;
@@ -23,7 +24,7 @@ const prodConfig = {
         "./PortfolioApp": "./src/bootstrap",
       },
       shared: {
-        ...packageJson.dependencies,
+        ...sharedDeps,
         react: {
           singleton: true,
           requiredVersion: "19.0.0",
