@@ -25,6 +25,7 @@ const App = () => {
             />
             <Route path="/expense-tracker/*" element={<ExpenseTrackerLazy />} />
             <Route path="/" element={<PortfolioLazy />} />
+            <Route path="/v2/*" element={<PortfolioLazy />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>

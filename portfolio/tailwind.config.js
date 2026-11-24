@@ -15,6 +15,17 @@ module.exports = {
         "dark-text": "#BEBEBE",
         "dark-shadow": "#0A0A0A",
         "neon-green": "#39FF14",
+        // v2 "city" palette
+        city: {
+          night: "#0B0B1E",
+          ink: "#141430",
+          violet: "#6B2BD9",
+          pink: "#FF3D7F",
+          orange: "#FF8A3D",
+          sun: "#FFD23F",
+          teal: "#2EE6D6",
+          paper: "#FFF4E6",
+        },
       },
       fontFamily: {
         Montserrat: ["Montserrat", "sans-serif"],

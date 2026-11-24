@@ -1,0 +1,74 @@
+@import url("https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+
+/* v1's index.css sets `* { font-family: Montserrat }`, so v2 fonts are scoped
+   classes that come after it rather than Tailwind font utilities. */
+.v2-root,
+.v2-root * {
+  font-family: "Space Grotesk", system-ui, sans-serif;
+}
+.v2-root .f-display,
+.v2-root .f-display * {
+  font-family: "Anton", Impact, sans-serif;
+  letter-spacing: 0.01em;
+}
+.v2-root .f-mono,
+.v2-root .f-mono * {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+}
+
+.v2-root {
+  --sky-shift: 0;
+  color: #f5f3ff;
+  background: #0b0b1e;
+}
+
+/* Poster card: thick ink border, offset hard shadow, halftone overlay. */
+.poster {
+  position: relative;
+  border: 3px solid #0b0b1e;
+  box-shadow: 6px 6px 0 #0b0b1e;
+  overflow: hidden;
+}
+.poster::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(11, 11, 30, 0.16) 1px, transparent 1.3px);
+  background-size: 6px 6px;
+}
+
+/* No backdrop-filter anywhere in v2: in Firefox, a blur over the fixed sky
+   stops it caching the sky, so every scroll frame repainted the whole screen
+   (measured ~112ms/frame vs ~21ms without). Solid translucent panels instead. */
+.hud-glass {
+  background: rgba(11, 11, 30, 0.88);
+  border: 1px solid rgba(46, 230, 214, 0.35);
+}
+
+.card-glass {
+  background: rgba(14, 12, 38, 0.86);
+  border: 1px solid rgba(46, 230, 214, 0.3);
+}
+
+.neon-text {
+  text-shadow: 0 0 6px rgba(255, 61, 127, 0.8), 0 0 22px rgba(255, 61, 127, 0.45);
+}
+
+.duotone {
+  filter: grayscale(1) contrast(1.15);
+}
+
+@keyframes v2-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.8); opacity: 0.25; }
+}
+.v2-pulse { animation: v2-pulse 1.6s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+
+@keyframes v2-blink { 50% { opacity: 0.25; } }
+.v2-blink { animation: v2-blink 1.2s steps(2, start) infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .v2-pulse, .v2-blink { animation: none; }
+  .v2-root * { scroll-behavior: auto !important; }
+}
