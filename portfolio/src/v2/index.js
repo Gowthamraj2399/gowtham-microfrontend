@@ -3,6 +3,7 @@ import { AnimatePresence } from "framer-motion";
 import "./v2.css";
 import Hud from "./hud/Hud";
 import LoadingScreen from "./hud/LoadingScreen";
+import TitleScreen from "./hud/TitleScreen";
 import QuickView from "./quick/QuickView";
 import { useGameStore } from "./state/useGameStore";
 
@@ -32,6 +33,7 @@ export const pickMode = () => {
 
 const HomeV2 = () => {
   const mode = useGameStore((s) => s.mode);
+  const started = useGameStore((s) => s.started);
   const [loading, setLoading] = useState(() => {
     try {
       return !sessionStorage.getItem(LOADER_KEY);
@@ -64,6 +66,8 @@ const HomeV2 = () => {
         </Suspense>
       )}
       {mode && <Hud />}
+      {/* After the loader, so the key that skips it doesn't also start the tour. */}
+      <AnimatePresence>{mode === "world" && !started && !loading && <TitleScreen key="title" />}</AnimatePresence>
       <AnimatePresence>{loading && <LoadingScreen key="loader" onDone={finishLoading} />}</AnimatePresence>
     </div>
   );

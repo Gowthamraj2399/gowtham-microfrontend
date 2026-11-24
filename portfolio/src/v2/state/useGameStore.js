@@ -18,9 +18,22 @@ export const useGameStore = create((set, get) => ({
   jump: null, // { id, nonce }
   roam: false, // free-roam driving (3D world only)
   car: null, // { mx, my, heading } in map space, for the minimap while roaming
+  started: false, // 3D world: past the title screen (scrolled, pressed start or drive)
 
-  setMode: (mode) => set({ mode, menuOpen: false, sheet: null, roam: false, car: null }),
-  setRoam: (roam) => set({ roam, car: null, menuOpen: false, phoneOpen: false, sheet: null }),
+  start: () => set({ started: true }),
+
+  // Coming into the 3D city from the Quick view part-way down: skip the title.
+  setMode: (mode) =>
+    set((s) => ({
+      mode,
+      menuOpen: false,
+      sheet: null,
+      roam: false,
+      car: null,
+      started: s.started || s.active !== districts[0].id,
+    })),
+  setRoam: (roam) =>
+    set((s) => ({ roam, car: null, menuOpen: false, phoneOpen: false, sheet: null, started: s.started || roam })),
   setCar: (car) => set({ car }),
 
   setActive: (id) => {
@@ -34,7 +47,8 @@ export const useGameStore = create((set, get) => ({
     set({ active: id });
   },
 
-  requestJump: (id) => set({ jump: { id, nonce: Date.now() }, menuOpen: false, phoneOpen: false, sheet: null }),
+  requestJump: (id) =>
+    set({ jump: { id, nonce: Date.now() }, menuOpen: false, phoneOpen: false, sheet: null, started: true }),
 
   pushToast: (toast) => {
     const id = ++toastId;
