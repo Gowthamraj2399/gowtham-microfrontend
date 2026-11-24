@@ -1,8 +1,12 @@
 // Driving input, shared by the keyboard handler (Car.js) and the on-screen
 // touch pad (hud/RoamControls.js). Plain mutable object: read every frame.
-export const input = { up: false, down: false, left: false, right: false, brake: false, boost: false };
+// `steerAxis` is analog (-1 right … +1 left), set by the touch joystick.
+export const input = { up: false, down: false, left: false, right: false, brake: false, boost: false, steerAxis: 0 };
 
-export const resetInput = () => Object.keys(input).forEach((k) => (input[k] = false));
+export const resetInput = () =>
+  Object.keys(input).forEach((k) => {
+    input[k] = typeof input[k] === "number" ? 0 : false;
+  });
 
 const keyMap = {
   ArrowUp: "up",

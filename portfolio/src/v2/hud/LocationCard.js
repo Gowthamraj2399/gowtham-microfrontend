@@ -23,6 +23,7 @@ const LocationCard = () => {
   const active = useGameStore((s) => s.active);
   const openSheet = useGameStore((s) => s.openSheet);
   const setPhoneOpen = useGameStore((s) => s.setPhoneOpen);
+  const roam = useGameStore((s) => s.roam);
   const index = districts.findIndex((d) => d.id === active);
   const d = districts[index];
 
@@ -34,7 +35,12 @@ const LocationCard = () => {
       : { label: "View details", onClick: () => openSheet(active) };
 
   return (
-    <div className="fixed z-40 bottom-3 right-3 left-3 md:left-1/2 md:right-auto md:-translate-x-1/2 md:bottom-6 md:w-[480px] pointer-events-none">
+    <div
+      className={`fixed z-40 right-3 md:left-1/2 md:right-auto md:-translate-x-1/2 md:top-auto md:bottom-6 md:w-[480px] pointer-events-none ${
+        // Phones while driving: top row next to the minimap, clear of the pedals.
+        roam ? "top-[4.5rem] left-[8.5rem]" : "bottom-3 left-3"
+      }`}
+    >
       {/* Remount per district and fade in. No exit animation: with quick fast
           travel through several districts, a wait-for-exit could get stuck. */}
         <motion.div

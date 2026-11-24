@@ -19,7 +19,11 @@ const Minimap = () => {
   return (
     <nav
       aria-label="City map"
-      className={`fixed left-3 md:left-6 md:bottom-6 z-40 select-none ${mode === "world" ? "bottom-[6.5rem]" : "bottom-3"}`}
+      className={`fixed left-3 md:left-6 md:top-auto md:bottom-6 z-40 select-none ${
+        // Phones: above the location card in 3D; at the top while driving,
+        // so the bottom is free for the joystick and pedals.
+        roam ? "top-[4.5rem]" : mode === "world" ? "bottom-[6.5rem]" : "bottom-3"
+      }`}
     >
       <div className="hud-glass rounded-2xl p-1.5 w-28 md:w-44">
         <svg viewBox="0 0 100 100" className="w-full h-auto block rounded-xl" role="img" aria-label="Minimap">

@@ -18,6 +18,7 @@ const ACCEL = 20;
 const BRAKE = 38;
 const DRAG = 7;
 const free = drivable;
+const STEP = 1 / 60; // physics sub-step, seconds
 
 // Soft elliptical glow under the car (a slab of solid colour looked heavy).
 const underglow = canvasTexture(128, 128, (ctx, w, h) => {
@@ -70,43 +71,53 @@ const Car = () => {
   }, [jump]);
 
   useFrame((state, rawDt) => {
-    const dt = Math.min(rawDt, 0.05);
+    // Real elapsed time (capped at 0.25 s after a stall), simulated in small
+    // fixed steps: the car keeps true speed even on a slow phone, and
+    // collisions stay reliable because no single step jumps far.
+    const elapsed = Math.min(rawDt, 0.25);
+    const dt = elapsed; // camera / visuals (exponential easing is stable at any step)
     const s = sim.current;
     const { menuOpen, sheet, phoneOpen } = useGameStore.getState();
     const paused = menuOpen || sheet || phoneOpen;
 
     // --- driving ---------------------------------------------------------
     const throttle = paused ? 0 : (input.up ? 1 : 0) - (input.down ? 1 : 0);
-    const steer = paused ? 0 : (input.left ? 1 : 0) - (input.right ? 1 : 0);
-    if (throttle > 0) s.speed += (s.speed < 0 ? BRAKE : ACCEL) * dt;
-    else if (throttle < 0) s.speed -= (s.speed > 0 ? BRAKE : ACCEL * 0.6) * dt;
-    else s.speed -= Math.sign(s.speed) * Math.min(Math.abs(s.speed), DRAG * dt);
-    if (input.brake && !paused) s.speed -= Math.sign(s.speed) * Math.min(Math.abs(s.speed), BRAKE * 1.4 * dt);
+    // Keys give full lock; the touch joystick gives an analog amount (-1..1).
+    const keySteer = (input.left ? 1 : 0) - (input.right ? 1 : 0);
+    const steer = paused ? 0 : Math.max(-1, Math.min(1, keySteer + input.steerAxis));
     const top = input.boost ? MAX * 1.35 : MAX;
-    s.speed = Math.max(-MAX_REVERSE, Math.min(top, s.speed));
 
-    const grip = Math.min(1, Math.abs(s.speed) / 7) * Math.sign(s.speed || 1);
-    s.heading += steer * 2.1 * grip * dt;
+    for (let left = elapsed; left > 1e-4; left -= STEP) {
+      const h = Math.min(STEP, left);
+      if (throttle > 0) s.speed += (s.speed < 0 ? BRAKE : ACCEL) * h;
+      else if (throttle < 0) s.speed -= (s.speed > 0 ? BRAKE : ACCEL * 0.6) * h;
+      else s.speed -= Math.sign(s.speed) * Math.min(Math.abs(s.speed), DRAG * h);
+      if (input.brake && !paused) s.speed -= Math.sign(s.speed) * Math.min(Math.abs(s.speed), BRAKE * 1.4 * h);
+      s.speed = Math.max(-MAX_REVERSE, Math.min(top, s.speed));
 
-    const nx = s.x + Math.sin(s.heading) * s.speed * dt;
-    const nz = s.z + Math.cos(s.heading) * s.speed * dt;
-    if (free(nx, nz)) {
-      s.x = nx;
-      s.z = nz;
-    } else if (free(nx, s.z)) {
-      s.x = nx;
-      s.speed *= 0.8;
-    } else if (free(s.x, nz)) {
-      s.z = nz;
-      s.speed *= 0.8;
-    } else {
-      s.speed *= -0.25; // bump
+      const grip = Math.min(1, Math.abs(s.speed) / 7) * Math.sign(s.speed || 1);
+      s.heading += steer * 2.1 * grip * h;
+
+      const nx = s.x + Math.sin(s.heading) * s.speed * h;
+      const nz = s.z + Math.cos(s.heading) * s.speed * h;
+      if (free(nx, nz)) {
+        s.x = nx;
+        s.z = nz;
+      } else if (free(nx, s.z)) {
+        s.x = nx;
+        s.speed *= 0.8;
+      } else if (free(s.x, nz)) {
+        s.z = nz;
+        s.speed *= 0.8;
+      } else {
+        s.speed *= -0.25; // bump
+      }
+      s.spin += (s.speed * h) / 0.44;
     }
 
     // --- model -------------------------------------------------------------
     car.current.position.set(s.x, 0, s.z);
     car.current.rotation.y = s.heading;
-    s.spin += (s.speed * dt) / 0.44;
     wheels.forEach((w, i) => {
       if (!w.current) return;
       w.current.rotation.x = s.spin;

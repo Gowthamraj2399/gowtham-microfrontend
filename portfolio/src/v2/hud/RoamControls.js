@@ -1,33 +1,108 @@
-import React, { useEffect, useState } from "react";
-import { FaArrowDown, FaArrowLeft, FaArrowRight, FaArrowUp, FaTimes } from "react-icons/fa";
+import React, { useEffect, useRef, useState } from "react";
+import { FaTimes } from "react-icons/fa";
 import { useGameStore } from "../state/useGameStore";
 import { input, resetInput } from "../world/input";
 
 const isTouch = () => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches;
 
-// Hold-to-press pad button that writes into the shared driving input.
-const Pad = ({ k, label, children, className = "" }) => {
+// Keep receiving this finger's moves even if it slides off the control.
+const capture = (e) => {
+  try {
+    e.currentTarget.setPointerCapture(e.pointerId);
+  } catch {
+    /* pointer already gone */
+  }
+};
+
+const RADIUS = 52; // how far the joystick knob travels, in px
+
+// Left thumb: analog steering. Drag the knob sideways; the further you drag,
+// the harder the car turns. Lets go → centres.
+const Joystick = () => {
+  const base = useRef(null);
+  const [dx, setDx] = useState(0);
+  const pointer = useRef(null);
+
+  const move = (e) => {
+    if (pointer.current !== e.pointerId || !base.current) return;
+    const r = base.current.getBoundingClientRect();
+    const x = Math.max(-RADIUS, Math.min(RADIUS, e.clientX - (r.left + r.width / 2)));
+    // Small dead zone so a resting thumb doesn't drift.
+    const axis = Math.abs(x) < 6 ? 0 : x / RADIUS;
+    input.steerAxis = -axis; // + is left in the car's convention
+    setDx(x);
+  };
+  const end = (e) => {
+    if (pointer.current !== e.pointerId) return;
+    pointer.current = null;
+    input.steerAxis = 0;
+    setDx(0);
+  };
+
+  return (
+    <div
+      ref={base}
+      role="slider"
+      aria-label="Steering"
+      aria-valuemin={-1}
+      aria-valuemax={1}
+      aria-valuenow={Math.round((dx / RADIUS) * 100) / 100}
+      onPointerDown={(e) => {
+        e.preventDefault();
+        pointer.current = e.pointerId;
+        capture(e);
+        move(e);
+      }}
+      onPointerMove={move}
+      onPointerUp={end}
+      onPointerCancel={end}
+      onContextMenu={(e) => e.preventDefault()}
+      className="relative w-40 h-24 rounded-full hud-glass touch-none select-none flex items-center justify-center"
+    >
+      <span className="absolute left-4 f-mono text-xs text-white/40" aria-hidden="true">
+        ◀
+      </span>
+      <span className="absolute right-4 f-mono text-xs text-white/40" aria-hidden="true">
+        ▶
+      </span>
+      <span
+        className="w-14 h-14 rounded-full bg-city-teal/90 shadow-[0_0_20px_rgba(46,230,214,0.6)] border-2 border-white/70"
+        style={{ transform: `translateX(${dx}px)`, transition: pointer.current === null ? "transform 0.15s" : "none" }}
+        aria-hidden="true"
+      />
+    </div>
+  );
+};
+
+// Right thumb: hold-to-press pedal writing into the shared driving input.
+const Pedal = ({ k, label, className, children }) => {
+  const [down, setDown] = useState(false);
   const press = (v) => (e) => {
     e.preventDefault();
     input[k] = v;
+    setDown(v);
   };
   return (
     <button
       type="button"
       aria-label={label}
-      onPointerDown={press(true)}
+      onPointerDown={(e) => {
+        capture(e);
+        press(true)(e);
+      }}
       onPointerUp={press(false)}
-      onPointerLeave={press(false)}
       onPointerCancel={press(false)}
       onContextMenu={(e) => e.preventDefault()}
-      className={`hud-glass rounded-2xl w-16 h-16 grid place-items-center text-xl active:bg-city-pink active:text-city-night select-none touch-none ${className}`}
+      className={`rounded-2xl f-display uppercase tracking-wide select-none touch-none border-2 transition-transform ${
+        down ? "scale-95 brightness-125" : ""
+      } ${className}`}
     >
       {children}
     </button>
   );
 };
 
-// Free-roam HUD: exit button, key hints on desktop, a touch pad on phones.
+// Free-roam HUD: exit button and key hints on desktop; joystick + pedals on phones.
 const RoamControls = () => {
   const setRoam = useGameStore((s) => s.setRoam);
   const [touch] = useState(isTouch);
@@ -58,22 +133,21 @@ const RoamControls = () => {
       )}
 
       {touch && (
-        <div className="fixed z-40 right-3 bottom-[6.5rem] md:bottom-28 flex items-end gap-3 select-none">
-          <div className="flex gap-2">
-            <Pad k="left" label="Steer left">
-              <FaArrowLeft />
-            </Pad>
-            <Pad k="right" label="Steer right">
-              <FaArrowRight />
-            </Pad>
+        <div className="fixed z-40 inset-x-0 bottom-0 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] flex items-end justify-between pointer-events-none">
+          <div className="pointer-events-auto">
+            <Joystick />
           </div>
-          <div className="flex flex-col gap-2">
-            <Pad k="up" label="Accelerate" className="text-city-teal">
-              <FaArrowUp />
-            </Pad>
-            <Pad k="down" label="Brake / reverse">
-              <FaArrowDown />
-            </Pad>
+          <div className="pointer-events-auto flex items-end gap-3">
+            <Pedal k="down" label="Brake / reverse" className="w-20 h-20 bg-city-night/85 border-white/30 text-white text-base">
+              Brake
+            </Pedal>
+            <Pedal
+              k="up"
+              label="Accelerate"
+              className="w-20 h-32 bg-city-pink/90 border-white/60 text-city-night text-xl shadow-[0_0_24px_rgba(255,61,127,0.55)]"
+            >
+              Gas
+            </Pedal>
           </div>
         </div>
       )}
