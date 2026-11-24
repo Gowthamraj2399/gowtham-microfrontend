@@ -2,7 +2,7 @@ import React, { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { RoundedBox, useTexture } from "@react-three/drei";
 import { LatheGeometry, SRGBColorSpace, Vector2 } from "three";
-import { awards, contacts, missions, profile, projects, skillGroups, careerStart } from "../../data/content";
+import { awards, contacts, missions, profile, projects, skillGroups } from "../../data/content";
 import { formatDuration } from "../../utils/time";
 import { stopById } from "../layout";
 import { downtownTowers, pierRect } from "../cityData";
@@ -27,19 +27,38 @@ const useImages = (urls) => {
 const hero = { base: "#1f1848", top: "#3d2f80", lit: 0.25 };
 const accent = { base: "#2a1f62", top: "#5a45ad", lit: 0.28 };
 
-// 01 · Skyline — the name billboard you see first.
+// 01 · Skyline — a rooftop neon sign with the name, on a steel lattice.
+// (The full intro text lives on the title screen, as crisp page text.)
+const SIGN_W = 30;
 const Skyline = () => (
   <At id="hero">
     <Building size={[28, 7, 10]} style={hero} trim="#FF3D7F" />
-    <Billboard
-      position={[0, 7, 1.5]}
-      w={30}
-      legs={1.2}
-      color="#FF3D7F"
-      tag="Now playing"
-      title={profile.name}
-      lines={[profile.title, profile.tagline, `${formatDuration(careerStart, null)} in the game · ${profile.location}`]}
-    />
+    <group position={[0, 7, 1.5]}>
+      {/* lattice: posts and two rails behind the letters */}
+      {[-12, -4, 4, 12].map((x) => (
+        <mesh key={x} position={[x, 4.3, -0.5]} castShadow>
+          <boxGeometry args={[0.35, 8.6, 0.35]} />
+          <meshStandardMaterial color="#141230" metalness={0.6} roughness={0.5} />
+        </mesh>
+      ))}
+      {[2.6, 7.2].map((y) => (
+        <mesh key={y} position={[0, y, -0.5]}>
+          <boxGeometry args={[SIGN_W - 2, 0.3, 0.3]} />
+          <meshStandardMaterial color="#141230" metalness={0.6} roughness={0.5} />
+        </mesh>
+      ))}
+      {/* dark backing so the letters read against the lit towers behind */}
+      <mesh position={[0, 4.9, -0.25]}>
+        <planeGeometry args={[SIGN_W + 1, SIGN_W / 4 + 1]} />
+        <meshBasicMaterial color="#0b0b1e" transparent opacity={0.82} />
+      </mesh>
+      <NeonSign title={profile.name} sub={profile.title} color="#FF3D7F" width={SIGN_W} position={[0, 4.9, 0]} />
+      {/* glowing ledge underline */}
+      <mesh position={[0, 0.35, 0.2]}>
+        <boxGeometry args={[SIGN_W - 4, 0.18, 0.18]} />
+        <meshBasicMaterial color={glow("#2EE6D6", 3)} toneMapped={false} />
+      </mesh>
+    </group>
   </At>
 );
 

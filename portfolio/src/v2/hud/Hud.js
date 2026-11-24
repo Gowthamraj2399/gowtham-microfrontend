@@ -13,6 +13,9 @@ import { useGameStore } from "../state/useGameStore";
 const Hud = () => {
   const mode = useGameStore((s) => s.mode);
   const roam = useGameStore((s) => s.roam);
+  // 3D title screen: keep the frame clean until the player starts.
+  const started = useGameStore((s) => s.started);
+  const title = mode === "world" && !started;
 
   useEffect(() => {
     const onKey = (e) => {
@@ -28,9 +31,9 @@ const Hud = () => {
 
   return (
     <>
-      <StatusBar />
-      <Minimap />
-      {mode === "world" && <LocationCard />}
+      {!title && <StatusBar />}
+      {!title && <Minimap />}
+      {mode === "world" && !title && <LocationCard />}
       {mode === "world" && roam && <RoamControls />}
       <Toasts />
       {mode === "world" && <DetailSheet />}

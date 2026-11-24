@@ -5,7 +5,23 @@ import { Vector3 } from "three";
 import { useGameStore } from "../state/useGameStore";
 import { worldTime } from "./layout";
 
-const HOLD = 0.22; // share of each segment where the camera rests on a shot
+const HOLD = 0.22;
+
+// Title screen: a slow sweep around the whole island with the sunset behind
+// the city. The camera sits opposite the sun and swings ±~30°.
+const CENTER = new Vector3(5, 0, 5);
+const SUN_AZ = Math.atan2(-120, -700); // where Sky.js hangs the sun disc
+const orbit = (time, tall, pos, look) => {
+  const a = SUN_AZ + Math.PI + Math.sin(time * 0.05) * 0.4;
+  const r = tall ? 300 : 175;
+  pos.set(CENTER.x + Math.sin(a) * r, tall ? 90 : 42, CENTER.z + Math.cos(a) * r);
+  // Wide screens: aim left of centre so the city sits right of the title text.
+  // Phones: aim below it so the city sits above the text at the bottom.
+  const fx = (CENTER.x - pos.x) / r;
+  const fz = (CENTER.z - pos.z) / r;
+  const side = tall ? 0 : 42;
+  look.set(CENTER.x + fz * side, tall ? -30 : 10, CENTER.z - fx * side);
+}; // share of each segment where the camera rests on a shot
 
 // Ease within a segment with flat ends, so the camera lingers on each shot.
 const hold = (u) => {
@@ -26,6 +42,7 @@ const CameraRig = ({ scrollRef, tour }) => {
   const lastIndex = useRef(-1);
   const jump = useGameStore((s) => s.jump);
   const roam = useGameStore((s) => s.roam);
+  const started = useGameStore((s) => s.started);
 
   // First shot of a district, as a 0–1 scroll offset.
   const offsetFor = (id) => Math.max(0, shots.findIndex((s) => s.id === id)) / Math.max(1, n - 1);
@@ -56,6 +73,14 @@ const CameraRig = ({ scrollRef, tour }) => {
   useFrame((state, dt) => {
     if (roam) return; // the car's chase camera is in charge
     const el = scrollRef.current;
+    if (!started) {
+      // Scrolling past the title starts the tour from wherever it got to.
+      if (el && el.scrollTop > 4) useGameStore.getState().start();
+      orbit(state.clock.elapsedTime, tour.tall, state.camera.position, look.current);
+      state.camera.lookAt(look.current);
+      worldTime.night = 0;
+      return;
+    }
     const max = el ? el.scrollHeight - el.clientHeight : 0;
     const goal = max > 0 ? Math.min(1, Math.max(0, el.scrollTop / max)) : 0;
     easing.damp(offset, "current", goal, 0.18, dt);
