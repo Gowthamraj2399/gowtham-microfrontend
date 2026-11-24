@@ -16,6 +16,14 @@ const QuickView = () => {
   const setActive = useGameStore((s) => s.setActive);
   const jump = useGameStore((s) => s.jump);
 
+  // Coming from the 3D world: start at the district the player was in.
+  // Runs before the observer below, so it doesn't report "hero" first.
+  useEffect(() => {
+    const { active } = useGameStore.getState();
+    const el = document.getElementById(`district-${active}`);
+    if (el && active !== "hero") window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY);
+  }, []);
+
   useEffect(() => {
     const sections = rootRef.current.querySelectorAll("[data-district]");
     const observer = new IntersectionObserver(

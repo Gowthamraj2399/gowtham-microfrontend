@@ -59,6 +59,10 @@
   filter: grayscale(1) contrast(1.15);
 }
 
+/* 3D world scroll layer: invisible, it only carries the scroll position. */
+.v2-world-scroll { scrollbar-width: none; }
+.v2-world-scroll::-webkit-scrollbar { display: none; }
+
 @keyframes v2-pulse {
   0%, 100% { transform: scale(1); opacity: 1; }
   50% { transform: scale(1.8); opacity: 0.25; }

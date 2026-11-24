@@ -1,5 +1,5 @@
 import React from "react";
-import { FaBars, FaMobileAlt } from "react-icons/fa";
+import { FaBars, FaCarSide, FaMobileAlt } from "react-icons/fa";
 import { districts, profile, careerStart } from "../data/content";
 import { useGameStore } from "../state/useGameStore";
 import { yearsSince } from "../utils/time";
@@ -9,9 +9,31 @@ const StatusBar = () => {
   const setMenuOpen = useGameStore((s) => s.setMenuOpen);
   const setPhoneOpen = useGameStore((s) => s.setPhoneOpen);
   const phoneOpen = useGameStore((s) => s.phoneOpen);
+  const roam = useGameStore((s) => s.roam);
+
+  // From the Quick view this goes to the 3D city first, then starts driving.
+  const toggleRoam = () => {
+    const { mode, setMode, setRoam } = useGameStore.getState();
+    if (mode !== "world") {
+      setMode("world");
+      setTimeout(() => useGameStore.getState().setRoam(true), 0);
+    } else setRoam(!roam);
+  };
 
   return (
     <header className="fixed top-3 right-3 md:top-6 md:right-6 z-40 flex items-stretch gap-2">
+      <button
+        type="button"
+        onClick={toggleRoam}
+        aria-label={roam ? "Exit free roam" : "Free roam: drive around the city"}
+        aria-pressed={roam}
+        className={`hud-glass rounded-xl px-3 grid place-items-center transition-colors ${
+          roam ? "text-city-pink" : "hover:text-city-sun"
+        }`}
+      >
+        <FaCarSide size={20} />
+        <span className="f-mono text-[9px] text-white/50 hidden md:block">{roam ? "EXIT" : "DRIVE"}</span>
+      </button>
       <div className="hud-glass rounded-xl px-3 py-2 flex items-center gap-3">
         <div className="hidden sm:block leading-tight">
           <div className="f-display text-base md:text-lg uppercase">{profile.name}</div>

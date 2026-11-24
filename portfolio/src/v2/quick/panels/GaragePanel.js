@@ -1,12 +1,18 @@
 import React from "react";
 import Panel, { Reveal } from "../Panel";
-import { projects } from "../../data/content";
+import { profile, projects } from "../../data/content";
 
 const frames = ["bg-city-pink", "bg-city-teal", "bg-city-sun"];
 const tilts = ["-rotate-1", "rotate-1", "-rotate-[0.5deg]"];
 
 const GaragePanel = () => (
   <Panel id="garage" title="The Garage">
+    <Reveal className="-mt-4 md:-mt-8 mb-8 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+      <span className="f-display text-4xl md:text-5xl text-city-sun leading-none">{profile.projectsDelivered}</span>
+      <span className="text-white/80">
+        projects worked on. {projects.length} of them are on display here.
+      </span>
+    </Reveal>
     <div className="grid md:grid-cols-3 gap-6 md:gap-5">
       {projects.map((p, i) => (
         <Reveal key={p.name} delay={i * 0.1}>

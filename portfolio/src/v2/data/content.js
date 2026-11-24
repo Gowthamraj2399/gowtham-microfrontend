@@ -19,6 +19,7 @@ export const profile = {
   tagline: "Full Stack · Java · React · AI/LLM",
   pitch: "Building scalable full-stack and AI-powered products.",
   location: "India",
+  projectsDelivered: "50+", // total projects worked on; `projects` below are the featured few
   portrait: Portrait,
   resume: Resume,
   bio: [
@@ -34,7 +35,7 @@ export const districts = [
     id: "hero",
     name: "Skyline",
     section: "Start",
-    map: { x: 18, y: 78 },
+    map: { x: 24, y: 72 },
     toast: null,
   },
   {
@@ -63,14 +64,14 @@ export const districts = [
     name: "The Garage",
     section: "Projects",
     map: { x: 46, y: 26 },
-    toast: { kind: "district", title: "Garage discovered", subtitle: "Projects ready to inspect" },
+    toast: { kind: "district", title: "Garage discovered", subtitle: "50+ projects · 3 on display" },
   },
   {
     id: "awards",
     name: "Hall of Fame",
     section: "Awards",
     map: { x: 76, y: 18 },
-    toast: { kind: "achievement", title: "Achievement unlocked", subtitle: "GDNA Genius Award" },
+    toast: { kind: "achievement", title: "Achievement unlocked", subtitle: "2 awards on record" },
   },
   {
     id: "phone",
@@ -170,7 +171,15 @@ export const projects = [
   },
 ];
 
+// Newest first.
 export const awards = [
+  {
+    title: "Special Recognition",
+    awarder: "SymphonyAI",
+    year: "Q3 2025",
+    description:
+      "For designing and developing version history for pipeline grammars, along with side-by-side comparison of grammar versions.",
+  },
   {
     title: "GDNA Genius Award",
     awarder: "GDNA – Aditya Birla Group",

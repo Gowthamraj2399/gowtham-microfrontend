@@ -15,6 +15,10 @@ const PauseMenu = () => {
   const requestJump = useGameStore((s) => s.requestJump);
   const visited = useGameStore((s) => s.visited);
   const active = useGameStore((s) => s.active);
+  const mode = useGameStore((s) => s.mode);
+  const setMode = useGameStore((s) => s.setMode);
+  const roam = useGameStore((s) => s.roam);
+  const setRoam = useGameStore((s) => s.setRoam);
   const firstRef = useRef(null);
 
   useEffect(() => {
@@ -54,7 +58,23 @@ const PauseMenu = () => {
                   </button>
                 </li>
                 <li>
-                  <Link className={`${item} block`} to="/">
+                  <button
+                    type="button"
+                    className={item}
+                    onClick={() => setMode(mode === "world" ? "quick" : "world")}
+                  >
+                    {mode === "world" ? "Switch to quick view" : "Switch to 3D city"}
+                  </button>
+                </li>
+                {mode === "world" && (
+                  <li>
+                    <button type="button" className={item} onClick={() => setRoam(!roam)}>
+                      {roam ? "Exit free roam" : "Free roam · drive"}
+                    </button>
+                  </li>
+                )}
+                <li>
+                  <Link className={`${item} block`} to="/v1">
                     Classic site
                   </Link>
                 </li>

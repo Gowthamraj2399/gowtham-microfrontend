@@ -1,19 +1,27 @@
 import { create } from "zustand";
 import { districts } from "../data/content";
 
-// The seam between "drivers" (Quick view now, 3D camera later) and the HUD.
+// The seam between "drivers" (Quick view or 3D camera) and the HUD.
 // Drivers call setActive(); the HUD only reads. Minimap/menu call
 // requestJump(); the active driver listens for `jump` and moves there.
 
 let toastId = 0;
 
 export const useGameStore = create((set, get) => ({
+  mode: null, // "world" | "quick", chosen on mount by pickMode()
   active: districts[0].id,
   visited: [districts[0].id],
   toasts: [],
   menuOpen: false,
   phoneOpen: false,
+  sheet: null, // district id whose details are open (3D world)
   jump: null, // { id, nonce }
+  roam: false, // free-roam driving (3D world only)
+  car: null, // { mx, my, heading } in map space, for the minimap while roaming
+
+  setMode: (mode) => set({ mode, menuOpen: false, sheet: null, roam: false, car: null }),
+  setRoam: (roam) => set({ roam, car: null, menuOpen: false, phoneOpen: false, sheet: null }),
+  setCar: (car) => set({ car }),
 
   setActive: (id) => {
     const { active, visited } = get();
@@ -26,7 +34,7 @@ export const useGameStore = create((set, get) => ({
     set({ active: id });
   },
 
-  requestJump: (id) => set({ jump: { id, nonce: Date.now() }, menuOpen: false, phoneOpen: false }),
+  requestJump: (id) => set({ jump: { id, nonce: Date.now() }, menuOpen: false, phoneOpen: false, sheet: null }),
 
   pushToast: (toast) => {
     const id = ++toastId;
@@ -37,5 +45,7 @@ export const useGameStore = create((set, get) => ({
   dismissToast: (id) => set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) })),
 
   setMenuOpen: (menuOpen) => set({ menuOpen, phoneOpen: false }),
-  setPhoneOpen: (phoneOpen) => set({ phoneOpen, menuOpen: false }),
+  setPhoneOpen: (phoneOpen) => set({ phoneOpen, menuOpen: false, sheet: null }),
+  openSheet: (sheet) => set({ sheet, menuOpen: false, phoneOpen: false }),
+  closeSheet: () => set({ sheet: null }),
 }));

@@ -1,14 +1,14 @@
 import React from "react";
 import { FaDownload } from "react-icons/fa";
 import Panel, { Reveal } from "../Panel";
-import { profile, careerStart, missions, projects, awards } from "../../data/content";
+import { profile, careerStart, missions, awards } from "../../data/content";
 import { formatDuration } from "../../utils/time";
 
 const AboutPanel = () => {
   const stats = [
     { label: "Experience", value: formatDuration(careerStart, null) },
     { label: "Companies", value: missions.length },
-    { label: "Featured projects", value: projects.length },
+    { label: "Projects", value: profile.projectsDelivered },
     { label: "Awards", value: awards.length },
     { label: "Base", value: profile.location },
     { label: "Class", value: "Full stack" },
@@ -19,9 +19,10 @@ const AboutPanel = () => {
       <div className="grid md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] gap-8 items-start">
         <Reveal>
           <div className="poster bg-gradient-to-b from-city-sun to-city-pink -rotate-2 max-w-sm mx-auto">
-            <img src={profile.portrait} alt={profile.name} className="w-full h-auto object-cover" />
-            <div className="absolute left-0 right-0 bottom-0 bg-city-night/85 px-4 py-3">
-              <div className="f-display uppercase text-3xl">{profile.name}</div>
+            <img src={profile.portrait} alt={profile.name} className="w-full h-auto object-cover block" />
+            {/* Caption strip below the photo (not over it), so the name is always legible. */}
+            <div className="relative z-10 bg-city-night px-4 py-3 border-t-[3px] border-city-night">
+              <div className="f-display uppercase text-3xl text-white leading-tight">{profile.name}</div>
               <div className="f-mono text-[11px] uppercase text-city-teal">{profile.title}</div>
             </div>
           </div>

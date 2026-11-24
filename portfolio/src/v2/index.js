@@ -1,19 +1,37 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import "./v2.css";
 import Hud from "./hud/Hud";
 import LoadingScreen from "./hud/LoadingScreen";
 import QuickView from "./quick/QuickView";
+import { useGameStore } from "./state/useGameStore";
+
+// three.js lives in this chunk, so it only downloads in "world" mode.
+const World = lazy(() => import("./world/World"));
 
 const LOADER_KEY = "v2-loader-seen";
 
-// Decides which driver runs. Phase 1 only has the Quick view; phase 2 adds the
-// 3D World and returns "world" when WebGL is available, motion is allowed, the
-// device isn't low-end and the URL doesn't ask for ?mode=quick.
-export const pickMode = () => "quick";
+const hasWebGL = () => {
+  try {
+    const c = document.createElement("canvas");
+    return !!(c.getContext("webgl2") || c.getContext("webgl"));
+  } catch {
+    return false;
+  }
+};
+
+// Which "driver" runs: the 3D world, or the 2D Quick view as the fallback.
+export const pickMode = () => {
+  const forced = new URLSearchParams(window.location.search).get("mode");
+  if (forced === "quick" || forced === "world") return forced;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return "quick";
+  if (!hasWebGL()) return "quick";
+  if ((navigator.hardwareConcurrency || 8) < 4 || navigator.connection?.saveData) return "quick";
+  return "world";
+};
 
 const HomeV2 = () => {
-  const [mode] = useState(pickMode);
+  const mode = useGameStore((s) => s.mode);
   const [loading, setLoading] = useState(() => {
     try {
       return !sessionStorage.getItem(LOADER_KEY);
@@ -34,12 +52,18 @@ const HomeV2 = () => {
   useEffect(() => {
     document.title = "Gowtham Raj — Portfolio";
     window.scrollTo(0, 0);
+    useGameStore.getState().setMode(pickMode());
   }, []);
 
   return (
-    <div className="v2-root min-h-screen overflow-x-hidden" data-mode={mode}>
-      <QuickView />
-      <Hud />
+    <div className="v2-root min-h-screen overflow-x-hidden" data-mode={mode || ""}>
+      {mode === "quick" && <QuickView />}
+      {mode === "world" && (
+        <Suspense fallback={<div className="fixed inset-0 bg-city-night" />}>
+          <World />
+        </Suspense>
+      )}
+      {mode && <Hud />}
       <AnimatePresence>{loading && <LoadingScreen key="loader" onDone={finishLoading} />}</AnimatePresence>
     </div>
   );

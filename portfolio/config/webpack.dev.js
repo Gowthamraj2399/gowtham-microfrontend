@@ -3,6 +3,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ModuleFederationPlugin = require("webpack/lib/container/ModuleFederationPlugin");
 const commonConfig = require("./webpack.common");
 const packageJson = require("../package.json");
+const sharedDeps = require("./sharedDeps");
 
 const devConfig = {
   mode: "development",
@@ -23,7 +24,7 @@ const devConfig = {
         "./PortfolioApp": "./src/bootstrap",
       },
       shared: {
-        ...packageJson.dependencies,
+        ...sharedDeps,
         react: {
           singleton: true,
           requiredVersion: "19.0.0",

@@ -26,7 +26,7 @@ const PhonePanel = () => (
       <span>
         © {new Date().getFullYear()} {profile.name}
       </span>
-      <Link to="/" className="hover:text-city-teal">
+      <Link to="/v1" className="hover:text-city-teal">
         Switch to classic site →
       </Link>
     </footer>
