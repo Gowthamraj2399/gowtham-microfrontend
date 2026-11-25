@@ -8,6 +8,7 @@ import { useGameStore } from "../state/useGameStore";
 import CameraRig from "./CameraRig";
 import Car from "./Car";
 import City from "./City";
+import Pedestrians from "./Pedestrians";
 import Districts from "./districts";
 import Sky from "./Sky";
 import { buildTour } from "./tour";
@@ -133,6 +134,8 @@ const World = () => {
         <Reflections />
         <CameraRig scrollRef={scrollRef} tour={tour} />
         <City />
+        {/* Fewer walkers on the low-quality level and on phones. */}
+        <Pedestrians count={quality > 1 && !tour.tall ? 110 : 60} />
         <Suspense fallback={null}>{fontsReady && <Districts />}</Suspense>
         {roam && <Car />}
         <EffectComposer multisampling={quality > 1 ? 4 : 0}>

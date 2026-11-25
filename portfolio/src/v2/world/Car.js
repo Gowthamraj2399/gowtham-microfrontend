@@ -5,7 +5,7 @@ import { easing } from "maath";
 import { Vector3 } from "three";
 import { districts } from "../data/content";
 import { useGameStore } from "../state/useGameStore";
-import { SCALE, stops, worldTime } from "./layout";
+import { SCALE, carPos, stops, worldTime } from "./layout";
 import { drivable, plinth, spawnFor } from "./cityData";
 import { bindKeyboard, input } from "./input";
 import { glow } from "./parts";
@@ -62,6 +62,12 @@ const Car = () => {
   if (!sim.current) spawn(useGameStore.getState().active);
 
   useEffect(() => bindKeyboard(() => spawn(useGameStore.getState().active)), []);
+  useEffect(
+    () => () => {
+      carPos.on = false;
+    },
+    []
+  );
 
   // Minimap / menu fast travel teleports the car. Ignore a jump that was
   // already in the store before free roam started.
@@ -114,6 +120,12 @@ const Car = () => {
       }
       s.spin += (s.speed * h) / 0.44;
     }
+
+    carPos.on = true;
+    carPos.x = s.x;
+    carPos.z = s.z;
+    carPos.vx = Math.sin(s.heading) * s.speed;
+    carPos.vz = Math.cos(s.heading) * s.speed;
 
     // --- model -------------------------------------------------------------
     car.current.position.set(s.x, 0, s.z);
