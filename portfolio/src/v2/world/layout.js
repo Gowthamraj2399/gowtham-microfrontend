@@ -140,3 +140,8 @@ export const rng = (seed) => () => {
 // Shared, non-React state written by the camera rig every frame and read by
 // the sky: 0 = sunset (start), 1 = night (end of the route).
 export const worldTime = { night: 0 };
+
+// Free-roam car, written by Car.js every frame (position and velocity in
+// world units) so the pedestrians can get out of its way. `on` is false
+// when nobody is driving.
+export const carPos = { on: false, x: 0, z: 0, vx: 0, vz: 0 };
